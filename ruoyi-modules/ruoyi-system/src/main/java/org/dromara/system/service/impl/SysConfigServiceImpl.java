@@ -15,7 +15,6 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.redis.utils.CacheUtils;
-import org.dromara.common.tenant.helper.TenantHelper;
 import org.dromara.system.domain.SysConfig;
 import org.dromara.system.domain.bo.SysConfigBo;
 import org.dromara.system.domain.vo.SysConfigVo;
@@ -80,14 +79,12 @@ public class SysConfigServiceImpl implements ISysConfigService {
 
     /**
      * 获取注册开关
-     * @param tenantId 租户id
+     *
      * @return true开启，false关闭
      */
     @Override
-    public boolean selectRegisterEnabled(String tenantId) {
-        String configValue = TenantHelper.dynamic(tenantId, () ->
-            this.selectConfigByKey("sys.account.registerUser")
-        );
+    public boolean selectRegisterEnabled() {
+        String configValue = this.selectConfigByKey("sys.account.registerUser");
         return Convert.toBool(configValue);
     }
 

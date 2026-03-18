@@ -19,7 +19,6 @@ import org.dromara.common.core.utils.ValidatorUtils;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.redis.utils.RedisUtils;
 import org.dromara.common.satoken.utils.LoginHelper;
-import org.dromara.common.tenant.helper.TenantHelper;
 import org.dromara.system.api.RemoteUserService;
 import org.dromara.system.api.domain.vo.RemoteClientVo;
 import org.dromara.system.api.model.LoginUser;
@@ -44,14 +43,10 @@ public class EmailAuthStrategy implements IAuthStrategy {
     public LoginVo login(String body, RemoteClientVo client) {
         EmailLoginBody loginBody = JsonUtils.parseObject(body, EmailLoginBody.class);
         ValidatorUtils.validate(loginBody);
-        String tenantId = loginBody.getTenantId();
         String email = loginBody.getEmail();
         String emailCode = loginBody.getEmailCode();
-        LoginUser loginUser = TenantHelper.dynamic(tenantId, () -> {
-            LoginUser user = remoteUserService.getUserInfoByEmail(email, tenantId);
-            loginService.checkLogin(LoginType.EMAIL, tenantId, user.getUsername(), () -> !validateEmailCode(tenantId, email, emailCode));
-            return user;
-        });
+        LoginUser loginUser = remoteUserService.getUserInfoByEmail(email);
+        loginService.checkLogin(LoginType.EMAIL, loginUser.getUsername(), () -> !validateEmailCode(email, emailCode));
         loginUser.setClientKey(client.getClientKey());
         loginUser.setDeviceType(client.getDeviceType());
         SaLoginParameter model = new SaLoginParameter();
@@ -74,10 +69,10 @@ public class EmailAuthStrategy implements IAuthStrategy {
     /**
      * 校验邮箱验证码
      */
-    private boolean validateEmailCode(String tenantId, String email, String emailCode) {
+    private boolean validateEmailCode(String email, String emailCode) {
         String code = RedisUtils.getCacheObject(GlobalConstants.CAPTCHA_CODE_KEY + email);
         if (StringUtils.isBlank(code)) {
-            loginService.recordLogininfor(tenantId, email, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire"));
+            loginService.recordLogininfor(email, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire"));
             throw new CaptchaExpireException();
         }
         return code.equals(emailCode);

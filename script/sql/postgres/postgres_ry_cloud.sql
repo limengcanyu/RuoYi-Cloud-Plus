@@ -67,99 +67,6 @@ comment on column  sys_social.update_time       is '更新时间';
 comment on column  sys_social.del_flag          is '删除标志（0代表存在 1代表删除）';
 
 -- ----------------------------
--- 租户表
--- ----------------------------
-create table if not exists sys_tenant
-(
-    id                int8,
-    tenant_id         varchar(20)   not null,
-    contact_user_name varchar(20)   default null::varchar,
-    contact_phone     varchar(20)   default null::varchar,
-    company_name      varchar(30)   default null::varchar,
-    license_number    varchar(30)   default null::varchar,
-    address           varchar(200)  default null::varchar,
-    intro             varchar(200)  default null::varchar,
-    domain            varchar(200)  default null::varchar,
-    remark            varchar(200)  default null::varchar,
-    package_id        int8,
-    expire_time       timestamp,
-    account_count     int4          default -1,
-    status            char          default '0'::bpchar,
-    del_flag          char          default '0'::bpchar,
-    create_dept       int8,
-    create_by         int8,
-    create_time       timestamp,
-    update_by         int8,
-    update_time       timestamp,
-    constraint "pk_sys_tenant" primary key (id)
-);
-
-
-comment on table   sys_tenant                    is '租户表';
-comment on column  sys_tenant.tenant_id          is '租户编号';
-comment on column  sys_tenant.contact_phone      is '联系电话';
-comment on column  sys_tenant.company_name       is '企业名称';
-comment on column  sys_tenant.company_name       is '联系人';
-comment on column  sys_tenant.license_number     is '统一社会信用代码';
-comment on column  sys_tenant.address            is '地址';
-comment on column  sys_tenant.intro              is '企业简介';
-comment on column  sys_tenant.domain             is '域名';
-comment on column  sys_tenant.remark             is '备注';
-comment on column  sys_tenant.package_id         is '租户套餐编号';
-comment on column  sys_tenant.expire_time        is '过期时间';
-comment on column  sys_tenant.account_count      is '用户数量（-1不限制）';
-comment on column  sys_tenant.status             is '租户状态（0正常 1停用）';
-comment on column  sys_tenant.del_flag           is '删除标志（0代表存在 1代表删除）';
-comment on column  sys_tenant.create_dept        is '创建部门';
-comment on column  sys_tenant.create_by          is '创建者';
-comment on column  sys_tenant.create_time        is '创建时间';
-comment on column  sys_tenant.update_by          is '更新者';
-comment on column  sys_tenant.update_time        is '更新时间';
-
-
--- ----------------------------
--- 初始化-租户表数据
--- ----------------------------
-
-insert into sys_tenant values(1, '000000', '管理组', '15888888888', 'XXX有限公司', null, null, '多租户通用后台管理管理系统', null, null, null, null, -1, '0', '0', 103, 1, now(), null, null);
-
-
--- ----------------------------
--- 租户套餐表
--- ----------------------------
-create table if not exists sys_tenant_package
-(
-    package_id          int8,
-    package_name        varchar(20)     default ''::varchar,
-    menu_ids            varchar(3000)   default ''::varchar,
-    remark              varchar(200)    default ''::varchar,
-    menu_check_strictly bool            default true,
-    status              char            default '0'::bpchar,
-    del_flag            char            default '0'::bpchar,
-    create_dept         int8,
-    create_by           int8,
-    create_time         timestamp,
-    update_by           int8,
-    update_time         timestamp,
-    constraint "pk_sys_tenant_package" primary key (package_id)
-);
-
-
-comment on table   sys_tenant_package                    is '租户套餐表';
-comment on column  sys_tenant_package.package_id         is '租户套餐id';
-comment on column  sys_tenant_package.package_name       is '套餐名称';
-comment on column  sys_tenant_package.menu_ids           is '关联菜单id';
-comment on column  sys_tenant_package.remark             is '备注';
-comment on column  sys_tenant_package.status             is '状态（0正常 1停用）';
-comment on column  sys_tenant_package.del_flag           is '删除标志（0代表存在 1代表删除）';
-comment on column  sys_tenant_package.create_dept        is '创建部门';
-comment on column  sys_tenant_package.create_by          is '创建者';
-comment on column  sys_tenant_package.create_time        is '创建时间';
-comment on column  sys_tenant_package.update_by          is '更新者';
-comment on column  sys_tenant_package.update_time        is '更新时间';
-
-
--- ----------------------------
 -- 1、部门表
 -- ----------------------------
 create table if not exists sys_dept
@@ -429,7 +336,6 @@ comment on column sys_menu.remark       is '备注';
 -- ----------------------------
 -- 一级菜单
 insert into sys_menu values('1', '系统管理', '0', '1', 'system',           null, '', '1', '0', 'M', '0', '0', '', 'system',   103, 1, now(), null, null, '系统管理目录');
-insert into sys_menu values('6', '租户管理', '0', '2', 'tenant',           null, '', '1', '0', 'M', '0', '0', '', 'chart',    103, 1, now(), null, null, '租户管理目录');
 insert into sys_menu values('2', '系统监控', '0', '3', 'monitor',          null, '', '1', '0', 'M', '0', '0', '', 'monitor',  103, 1, now(), null, null, '系统监控目录');
 insert into sys_menu values('3', '系统工具', '0', '4', 'tool',             null, '', '1', '0', 'M', '0', '0', '', 'tool',     103, 1, now(), null, null, '系统工具目录');
 insert into sys_menu values('4', 'PLUS官网', '0', '5', 'https://gitee.com/dromara/RuoYi-Cloud-Plus', null, '', '0', '0', 'M', '0', '0', '', 'guide',    103, 1, now(), null, null, 'RuoYi-Cloud-Plus官网地址');
@@ -450,8 +356,6 @@ insert into sys_menu values('110',  'SnailJob控制台', '2', '2', 'http://local
 insert into sys_menu values('112',  'Nacos控制台',  '2',   '4', 'http://localhost:8848/nacos',  '',                 '', '0', '0', 'C', '0', '0', 'monitor:nacos:list',          'nacos',         103, 1, now(), null, null, '服务治理菜单');
 insert into sys_menu values('113',  'Admin控制台',  '2',   '5', 'http://localhost:9100/login',  '',                 '', '0', '0', 'C', '0', '0', 'monitor:server:list',         'server',        103, 1, now(), null, null, '服务监控菜单');
 insert into sys_menu values('115',  '代码生成',     '3',   '2', 'gen',              'tool/gen/index',               '', '1', '0', 'C', '0', '0', 'tool:gen:list',               'code',          103, 1, now(), null, null, '代码生成菜单');
-insert into sys_menu values('121',  '租户管理',     '6',   '1', 'tenant',           'system/tenant/index',          '', '1', '0', 'C', '0', '0', 'system:tenant:list',          'list',          103, 1, now(), null, null, '租户管理菜单');
-insert into sys_menu values('122',  '租户套餐管理',  '6',   '2', 'tenantPackage',    'system/tenantPackage/index',   '', '1', '0', 'C', '0', '0', 'system:tenantPackage:list',   'form',          103, 1, now(), null, null, '租户套餐管理菜单');
 insert into sys_menu values('123',  '客户端管理',   '1',   '11', 'client',           'system/client/index',          '', '1', '0', 'C', '0', '0', 'system:client:list',          'international', 103, 1, now(), null, null, '客户端管理菜单');
 insert into sys_menu values('116', '修改生成配置',  '3',   '2', 'gen-edit/index/:tableId', 'tool/gen/editTable', '', '1', '1', 'C', '1', '0', 'tool:gen:edit',           '#',               103, 1, now(), null, null, '/tool/gen');
 insert into sys_menu values('130', '分配用户',     '1',   '2', 'role-auth/user/:roleId', 'system/role/authUser', '', '1', '1', 'C', '1', '0', 'system:role:edit',      '#',               103, 1, now(), null, null, '/system/role');
@@ -540,18 +444,6 @@ insert into sys_menu values('1620', '配置列表', '118', '5', '#', '', '', '1'
 insert into sys_menu values('1621', '配置添加', '118', '6', '#', '', '', '1', '0', 'F', '0', '0', 'system:ossConfig:add',    '#', 103, 1, now(), null, null, '');
 insert into sys_menu values('1622', '配置编辑', '118', '6', '#', '', '', '1', '0', 'F', '0', '0', 'system:ossConfig:edit',   '#', 103, 1, now(), null, null, '');
 insert into sys_menu values('1623', '配置删除', '118', '6', '#', '', '', '1', '0', 'F', '0', '0', 'system:ossConfig:remove', '#', 103, 1, now(), null, null, '');
--- 租户管理相关按钮
-insert into sys_menu values('1606', '租户查询', '121', '1', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenant:query',   '#', 103, 1, now(), null, null, '');
-insert into sys_menu values('1607', '租户新增', '121', '2', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenant:add',     '#', 103, 1, now(), null, null, '');
-insert into sys_menu values('1608', '租户修改', '121', '3', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenant:edit',    '#', 103, 1, now(), null, null, '');
-insert into sys_menu values('1609', '租户删除', '121', '4', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenant:remove',  '#', 103, 1, now(), null, null, '');
-insert into sys_menu values('1610', '租户导出', '121', '5', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenant:export',  '#', 103, 1, now(), null, null, '');
--- 租户套餐管理相关按钮
-insert into sys_menu values('1611', '租户套餐查询', '122', '1', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenantPackage:query',   '#', 103, 1, now(), null, null, '');
-insert into sys_menu values('1612', '租户套餐新增', '122', '2', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenantPackage:add',     '#', 103, 1, now(), null, null, '');
-insert into sys_menu values('1613', '租户套餐修改', '122', '3', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenantPackage:edit',    '#', 103, 1, now(), null, null, '');
-insert into sys_menu values('1614', '租户套餐删除', '122', '4', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenantPackage:remove',  '#', 103, 1, now(), null, null, '');
-insert into sys_menu values('1615', '租户套餐导出', '122', '5', '#', '', '', '1', '0', 'F', '0', '0', 'system:tenantPackage:export',  '#', 103, 1, now(), null, null, '');
 -- 客户端管理按钮
 insert into sys_menu values('1061', '客户端管理查询', '123', '1',  '#', '', '', '1', '0', 'F', '0', '0', 'system:client:query',        '#', 103, 1, now(), null, null, '');
 insert into sys_menu values('1062', '客户端管理新增', '123', '2',  '#', '', '', '1', '0', 'F', '0', '0', 'system:client:add',          '#', 103, 1, now(), null, null, '');

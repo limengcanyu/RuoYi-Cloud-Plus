@@ -26,8 +26,8 @@ public class RemoteConfigServiceImpl implements RemoteConfigService {
      * 获取注册开关
      */
     @Override
-    public boolean selectRegisterEnabled(String tenantId) {
-        return configService.selectRegisterEnabled(tenantId);
+    public boolean selectRegisterEnabled() {
+        return configService.selectRegisterEnabled();
     }
 
     @Override

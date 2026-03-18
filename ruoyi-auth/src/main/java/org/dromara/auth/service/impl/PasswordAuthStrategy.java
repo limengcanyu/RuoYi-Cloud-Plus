@@ -22,7 +22,6 @@ import org.dromara.common.core.utils.ValidatorUtils;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.redis.utils.RedisUtils;
 import org.dromara.common.satoken.utils.LoginHelper;
-import org.dromara.common.tenant.helper.TenantHelper;
 import org.dromara.system.api.RemoteUserService;
 import org.dromara.system.api.domain.vo.RemoteClientVo;
 import org.dromara.system.api.model.LoginUser;
@@ -49,7 +48,6 @@ public class PasswordAuthStrategy implements IAuthStrategy {
     public LoginVo login(String body, RemoteClientVo client) {
         PasswordLoginBody loginBody = JsonUtils.parseObject(body, PasswordLoginBody.class);
         ValidatorUtils.validate(loginBody);
-        String tenantId = loginBody.getTenantId();
         String username = loginBody.getUsername();
         String password = loginBody.getPassword();
         String code = loginBody.getCode();
@@ -57,13 +55,10 @@ public class PasswordAuthStrategy implements IAuthStrategy {
 
         // 验证码开关
         if (captchaProperties.getEnabled()) {
-            validateCaptcha(tenantId, username, code, uuid);
+            validateCaptcha(username, code, uuid);
         }
-        LoginUser loginUser = TenantHelper.dynamic(tenantId, () -> {
-            LoginUser user = remoteUserService.getUserInfo(username, tenantId);
-            loginService.checkLogin(LoginType.PASSWORD, tenantId, username, () -> !BCrypt.checkpw(password, user.getPassword()));
-            return user;
-        });
+        LoginUser loginUser = remoteUserService.getUserInfo(username);
+        loginService.checkLogin(LoginType.PASSWORD, username, () -> !BCrypt.checkpw(password, loginUser.getPassword()));
         loginUser.setClientKey(client.getClientKey());
         loginUser.setDeviceType(client.getDeviceType());
         SaLoginParameter model = new SaLoginParameter();
@@ -90,16 +85,16 @@ public class PasswordAuthStrategy implements IAuthStrategy {
      * @param code     验证码
      * @param uuid     唯一标识
      */
-    private void validateCaptcha(String tenantId, String username, String code, String uuid) {
+    private void validateCaptcha(String username, String code, String uuid) {
         String verifyKey = GlobalConstants.CAPTCHA_CODE_KEY + StringUtils.blankToDefault(uuid, "");
         String captcha = RedisUtils.getCacheObject(verifyKey);
         RedisUtils.deleteObject(verifyKey);
         if (captcha == null) {
-            loginService.recordLogininfor(tenantId, username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire"));
+            loginService.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire"));
             throw new CaptchaExpireException();
         }
         if (!StringUtils.equalsIgnoreCase(code, captcha)) {
-            loginService.recordLogininfor(tenantId, username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error"));
+            loginService.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error"));
             throw new CaptchaException();
         }
     }

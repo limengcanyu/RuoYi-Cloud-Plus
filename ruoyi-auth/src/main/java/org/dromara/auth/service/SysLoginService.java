@@ -27,21 +27,16 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.log.event.LogininforEvent;
 import org.dromara.common.redis.utils.RedisUtils;
 import org.dromara.common.satoken.utils.LoginHelper;
-import org.dromara.common.tenant.exception.TenantException;
-import org.dromara.common.tenant.helper.TenantHelper;
 import org.dromara.system.api.RemoteSocialService;
-import org.dromara.system.api.RemoteTenantService;
 import org.dromara.system.api.RemoteUserService;
 import org.dromara.system.api.domain.bo.RemoteSocialBo;
 import org.dromara.system.api.domain.bo.RemoteUserBo;
 import org.dromara.system.api.domain.vo.RemoteSocialVo;
-import org.dromara.system.api.domain.vo.RemoteTenantVo;
 import org.dromara.system.api.model.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -57,8 +52,6 @@ public class SysLoginService {
 
     @DubboReference
     private RemoteUserService remoteUserService;
-    @DubboReference
-    private RemoteTenantService remoteTenantService;
     @DubboReference
     private RemoteSocialService remoteSocialService;
 
@@ -114,11 +107,7 @@ public class SysLoginService {
             if (ObjectUtil.isNull(loginUser)) {
                 return;
             }
-            if (TenantHelper.isEnable() && LoginHelper.isSuperAdmin()) {
-                // 超级管理员 登出清除动态租户
-                TenantHelper.clearDynamic();
-            }
-            recordLogininfor(loginUser.getTenantId(), loginUser.getUsername(), Constants.LOGOUT, MessageUtils.message("user.logout.success"));
+            recordLogininfor(loginUser.getUsername(), Constants.LOGOUT, MessageUtils.message("user.logout.success"));
         } catch (NotLoginException ignored) {
         } finally {
             try {
@@ -132,7 +121,6 @@ public class SysLoginService {
      * 注册
      */
     public void register(RegisterBody registerBody) {
-        String tenantId = registerBody.getTenantId();
         String username = registerBody.getUsername();
         String password = registerBody.getPassword();
         // 校验用户类型是否存在
@@ -141,12 +129,11 @@ public class SysLoginService {
         boolean captchaEnabled = captchaProperties.getEnabled();
         // 验证码开关
         if (captchaEnabled) {
-            validateCaptcha(tenantId, username, registerBody.getCode(), registerBody.getUuid());
+            validateCaptcha(username, registerBody.getCode(), registerBody.getUuid());
         }
 
         // 注册用户信息
         RemoteUserBo remoteUserBo = new RemoteUserBo();
-        remoteUserBo.setTenantId(tenantId);
         remoteUserBo.setUserName(username);
         remoteUserBo.setNickName(username);
         remoteUserBo.setPassword(BCrypt.hashpw(password));
@@ -156,7 +143,7 @@ public class SysLoginService {
         if (!regFlag) {
             throw new UserException("user.register.error");
         }
-        recordLogininfor(tenantId, username, Constants.REGISTER, MessageUtils.message("user.register.success"));
+        recordLogininfor(username, Constants.REGISTER, MessageUtils.message("user.register.success"));
     }
 
     /**
@@ -166,16 +153,16 @@ public class SysLoginService {
      * @param code     验证码
      * @param uuid     唯一标识
      */
-    public void validateCaptcha(String tenantId, String username, String code, String uuid) {
+    public void validateCaptcha(String username, String code, String uuid) {
         String verifyKey = GlobalConstants.CAPTCHA_CODE_KEY + StringUtils.blankToDefault(uuid, "");
         String captcha = RedisUtils.getCacheObject(verifyKey);
         RedisUtils.deleteObject(verifyKey);
         if (captcha == null) {
-            recordLogininfor(tenantId, username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire"));
+            recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire"));
             throw new CaptchaExpireException();
         }
         if (!StringUtils.equalsIgnoreCase(code, captcha)) {
-            recordLogininfor(tenantId, username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error"));
+            recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error"));
             throw new CaptchaException();
         }
     }
@@ -188,10 +175,9 @@ public class SysLoginService {
      * @param message  消息内容
      * @return
      */
-    public void recordLogininfor(String tenantId, String username, String status, String message) {
+    public void recordLogininfor(String username, String status, String message) {
         // 封装对象
         LogininforEvent logininforEvent = new LogininforEvent();
-        logininforEvent.setTenantId(tenantId);
         logininforEvent.setUsername(username);
         logininforEvent.setStatus(status);
         logininforEvent.setMessage(message);
@@ -201,7 +187,7 @@ public class SysLoginService {
     /**
      * 登录校验
      */
-    public void checkLogin(LoginType loginType, String tenantId, String username, Supplier<Boolean> supplier) {
+    public void checkLogin(LoginType loginType, String username, Supplier<Boolean> supplier) {
         String errorKey = CacheConstants.PWD_ERR_CNT_KEY + username;
         String loginFail = Constants.LOGIN_FAIL;
         Integer maxRetryCount = userPasswordProperties.getMaxRetryCount();
@@ -211,7 +197,7 @@ public class SysLoginService {
         int errorNumber = ObjectUtil.defaultIfNull(RedisUtils.getCacheObject(errorKey), 0);
         // 锁定时间内登录 则踢出
         if (errorNumber >= maxRetryCount) {
-            recordLogininfor(tenantId, username, loginFail, MessageUtils.message(loginType.getRetryLimitExceed(), maxRetryCount, lockTime));
+            recordLogininfor(username, loginFail, MessageUtils.message(loginType.getRetryLimitExceed(), maxRetryCount, lockTime));
             throw new UserException(loginType.getRetryLimitExceed(), maxRetryCount, lockTime);
         }
 
@@ -221,45 +207,16 @@ public class SysLoginService {
             RedisUtils.setCacheObject(errorKey, errorNumber, Duration.ofMinutes(lockTime));
             // 达到规定错误次数 则锁定登录
             if (errorNumber >= maxRetryCount) {
-                recordLogininfor(tenantId, username, loginFail, MessageUtils.message(loginType.getRetryLimitExceed(), maxRetryCount, lockTime));
+                recordLogininfor(username, loginFail, MessageUtils.message(loginType.getRetryLimitExceed(), maxRetryCount, lockTime));
                 throw new UserException(loginType.getRetryLimitExceed(), maxRetryCount, lockTime);
             } else {
                 // 未达到规定错误次数
-                recordLogininfor(tenantId, username, loginFail, MessageUtils.message(loginType.getRetryLimitCount(), errorNumber));
+                recordLogininfor(username, loginFail, MessageUtils.message(loginType.getRetryLimitCount(), errorNumber));
                 throw new UserException(loginType.getRetryLimitCount(), errorNumber);
             }
         }
 
         // 登录成功 清空错误次数
         RedisUtils.deleteObject(errorKey);
-    }
-
-    /**
-     * 校验租户
-     *
-     * @param tenantId 租户ID
-     */
-    public void checkTenant(String tenantId) {
-        if (!TenantHelper.isEnable()) {
-            return;
-        }
-        if (StringUtils.isBlank(tenantId)) {
-            throw new TenantException("tenant.number.not.blank");
-        }
-        if (TenantConstants.DEFAULT_TENANT_ID.equals(tenantId)) {
-            return;
-        }
-        RemoteTenantVo tenant = remoteTenantService.queryByTenantId(tenantId);
-        if (ObjectUtil.isNull(tenant)) {
-            log.info("登录租户：{} 不存在.", tenantId);
-            throw new TenantException("tenant.not.exists");
-        } else if (SystemConstants.DISABLE.equals(tenant.getStatus())) {
-            log.info("登录租户：{} 已被停用.", tenantId);
-            throw new TenantException("tenant.blocked");
-        } else if (ObjectUtil.isNotNull(tenant.getExpireTime())
-            && new Date().after(tenant.getExpireTime())) {
-            log.info("登录租户：{} 已超过有效期.", tenantId);
-            throw new TenantException("tenant.expired");
-        }
     }
 }

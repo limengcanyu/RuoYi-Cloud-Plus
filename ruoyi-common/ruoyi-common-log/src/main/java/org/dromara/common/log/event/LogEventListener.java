@@ -73,7 +73,6 @@ public class LogEventListener {
         String browser = userAgent.getBrowser().getName();
         // 封装对象
         RemoteLogininforBo logininfor = new RemoteLogininforBo();
-        logininfor.setTenantId(logininforEvent.getTenantId());
         logininfor.setUserName(logininforEvent.getUsername());
         if (ObjectUtil.isNotNull(clientVo)) {
             logininfor.setClientKey(clientVo.getClientKey());

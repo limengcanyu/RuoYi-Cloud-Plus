@@ -36,62 +36,6 @@ create table sys_social
 ) engine=innodb comment = '社会化关系表';
 
 -- ----------------------------
--- 租户表
--- ----------------------------
-create table sys_tenant
-(
-    id                bigint(20)    not null        comment 'id',
-    tenant_id         varchar(20)   not null        comment '租户编号',
-    contact_user_name varchar(20)                   comment '联系人',
-    contact_phone     varchar(20)                   comment '联系电话',
-    company_name      varchar(30)                   comment '企业名称',
-    license_number    varchar(30)                   comment '统一社会信用代码',
-    address           varchar(200)                  comment '地址',
-    intro             varchar(200)                  comment '企业简介',
-    domain            varchar(200)                  comment '域名',
-    remark            varchar(200)                  comment '备注',
-    package_id        bigint(20)                    comment '租户套餐编号',
-    expire_time       datetime                      comment '过期时间',
-    account_count     int           default -1      comment '用户数量（-1不限制）',
-    status            char(1)       default '0'     comment '租户状态（0正常 1停用）',
-    del_flag          char(1)       default '0'     comment '删除标志（0代表存在 1代表删除）',
-    create_dept       bigint(20)                    comment '创建部门',
-    create_by         bigint(20)                    comment '创建者',
-    create_time       datetime                      comment '创建时间',
-    update_by         bigint(20)                    comment '更新者',
-    update_time       datetime                      comment '更新时间',
-    primary key (id)
-) engine=innodb comment = '租户表';
-
-
--- ----------------------------
--- 初始化-租户表数据
--- ----------------------------
-
-insert into sys_tenant values(1, '000000', '管理组', '15888888888', 'XXX有限公司', NULL, NULL, '多租户通用后台管理管理系统', NULL, NULL, NULL, NULL, -1, '0', '0', 103, 1, sysdate(), NULL, NULL);
-
-
--- ----------------------------
--- 租户套餐表
--- ----------------------------
-create table sys_tenant_package (
-    package_id              bigint(20)     not null    comment '租户套餐id',
-    package_name            varchar(20)                comment '套餐名称',
-    menu_ids                varchar(3000)              comment '关联菜单id',
-    remark                  varchar(200)               comment '备注',
-    menu_check_strictly     tinyint(1)     default 1   comment '菜单树选择项是否关联显示',
-    status                  char(1)        default '0' comment '状态（0正常 1停用）',
-    del_flag                char(1)        default '0' comment '删除标志（0代表存在 1代表删除）',
-    create_dept             bigint(20)                 comment '创建部门',
-    create_by               bigint(20)                 comment '创建者',
-    create_time             datetime                   comment '创建时间',
-    update_by               bigint(20)                 comment '更新者',
-    update_time             datetime                   comment '更新时间',
-    primary key (package_id)
-) engine=innodb comment = '租户套餐表';
-
-
--- ----------------------------
 -- 1、部门表
 -- ----------------------------
 create table sys_dept (
@@ -262,7 +206,6 @@ create table sys_menu (
 -- ----------------------------
 -- 一级菜单
 insert into sys_menu values('1', '系统管理', '0', '1', 'system',           null, '', 1, 0, 'M', '0', '0', '', 'system',   103, 1, sysdate(), null, null, '系统管理目录');
-insert into sys_menu values('6', '租户管理', '0', '2', 'tenant',           null, '', 1, 0, 'M', '0', '0', '', 'chart',    103, 1, sysdate(), null, null, '租户管理目录');
 insert into sys_menu values('2', '系统监控', '0', '3', 'monitor',          null, '', 1, 0, 'M', '0', '0', '', 'monitor',  103, 1, sysdate(), null, null, '系统监控目录');
 insert into sys_menu values('3', '系统工具', '0', '4', 'tool',             null, '', 1, 0, 'M', '0', '0', '', 'tool',     103, 1, sysdate(), null, null, '系统工具目录');
 insert into sys_menu values('4', 'PLUS官网', '0', '5', 'https://gitee.com/dromara/RuoYi-Cloud-Plus', null, '', 0, 0, 'M', '0', '0', '', 'guide',    103, 1, sysdate(), null, null, 'RuoYi-Cloud-Plus官网地址');
@@ -284,8 +227,6 @@ insert into sys_menu values('110',  'SnailJob控制台', '2', '2', 'http://local
 insert into sys_menu values('112',  'Nacos控制台',  '2',   '4', 'http://localhost:8848/nacos',  '',                '', 0, 0, 'C', '0', '0', 'monitor:nacos:list',           'nacos',         103, 1, sysdate(), null, null, '服务治理菜单');
 insert into sys_menu values('113',  'Admin控制台',  '2',   '5', 'http://localhost:9100/login',  '',                '', 0, 0, 'C', '0', '0', 'monitor:server:list',          'server',        103, 1, sysdate(), null, null, '服务监控菜单');
 insert into sys_menu values('115',  '代码生成',     '3',   '2', 'gen',              'tool/gen/index',               '', 1, 0, 'C', '0', '0', 'tool:gen:list',               'code',          103, 1, sysdate(), null, null, '代码生成菜单');
-insert into sys_menu values('121', '租户管理',      '6',   '1', 'tenant',           'system/tenant/index',          '', 1, 0, 'C', '0', '0', 'system:tenant:list',          'list',          103, 1, sysdate(), null, null, '租户管理菜单');
-insert into sys_menu values('122', '租户套餐管理',  '6',   '2', 'tenantPackage',    'system/tenantPackage/index',   '', 1, 0, 'C', '0', '0', 'system:tenantPackage:list',   'form',          103, 1, sysdate(), null, null, '租户套餐管理菜单');
 insert into sys_menu values('123',  '客户端管理',   '1',   '11', 'client',           'system/client/index',         '', 1, 0, 'C', '0', '0', 'system:client:list',          'international', 103, 1, sysdate(), null, null, '客户端管理菜单');
 insert into sys_menu values('116', '修改生成配置',  '3',   '2', 'gen-edit/index/:tableId', 'tool/gen/editTable', '', 1, 1, 'C', '1', '0', 'tool:gen:edit',           '#',               103, 1, sysdate(), null, null, '/tool/gen');
 insert into sys_menu values('130', '分配用户',     '1',   '2', 'role-auth/user/:roleId', 'system/role/authUser', '', 1, 1, 'C', '1', '0', 'system:role:edit',      '#',               103, 1, sysdate(), null, null, '/system/role');
@@ -374,18 +315,6 @@ insert into sys_menu values('1620', '配置列表', '118', '5', '#', '', '', 1, 
 insert into sys_menu values('1621', '配置添加', '118', '6', '#', '', '', 1, 0, 'F', '0', '0', 'system:ossConfig:add',         '#', 103, 1, sysdate(), null, null, '');
 insert into sys_menu values('1622', '配置编辑', '118', '6', '#', '', '', 1, 0, 'F', '0', '0', 'system:ossConfig:edit',        '#', 103, 1, sysdate(), null, null, '');
 insert into sys_menu values('1623', '配置删除', '118', '6', '#', '', '', 1, 0, 'F', '0', '0', 'system:ossConfig:remove',      '#', 103, 1, sysdate(), null, null, '');
--- 租户管理相关按钮
-insert into sys_menu values ('1606', '租户查询', '121', '1', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenant:query',   '#', 103, 1, sysdate(), null, null, '');
-insert into sys_menu values ('1607', '租户新增', '121', '2', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenant:add',     '#', 103, 1, sysdate(), null, null, '');
-insert into sys_menu values ('1608', '租户修改', '121', '3', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenant:edit',    '#', 103, 1, sysdate(), null, null, '');
-insert into sys_menu values ('1609', '租户删除', '121', '4', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenant:remove',  '#', 103, 1, sysdate(), null, null, '');
-insert into sys_menu values ('1610', '租户导出', '121', '5', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenant:export',  '#', 103, 1, sysdate(), null, null, '');
--- 租户套餐管理相关按钮
-insert into sys_menu values ('1611', '租户套餐查询', '122', '1', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenantPackage:query',   '#', 103, 1, sysdate(), null, null, '');
-insert into sys_menu values ('1612', '租户套餐新增', '122', '2', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenantPackage:add',     '#', 103, 1, sysdate(), null, null, '');
-insert into sys_menu values ('1613', '租户套餐修改', '122', '3', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenantPackage:edit',    '#', 103, 1, sysdate(), null, null, '');
-insert into sys_menu values ('1614', '租户套餐删除', '122', '4', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenantPackage:remove',  '#', 103, 1, sysdate(), null, null, '');
-insert into sys_menu values ('1615', '租户套餐导出', '122', '5', '#', '', '', 1, 0, 'F', '0', '0', 'system:tenantPackage:export',  '#', 103, 1, sysdate(), null, null, '');
 -- 客户端管理按钮
 insert into sys_menu values('1061', '客户端管理查询', '123', '1',  '#', '', '', 1, 0, 'F', '0', '0', 'system:client:query',        '#', 103, 1, sysdate(), null, null, '');
 insert into sys_menu values('1062', '客户端管理新增', '123', '2',  '#', '', '', 1, 0, 'F', '0', '0', 'system:client:add',          '#', 103, 1, sysdate(), null, null, '');

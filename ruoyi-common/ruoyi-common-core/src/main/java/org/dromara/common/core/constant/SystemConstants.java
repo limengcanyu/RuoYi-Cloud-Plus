@@ -68,6 +68,11 @@ public interface SystemConstants {
     Long SUPER_ADMIN_ID = 1L;
 
     /**
+     * 超级管理员角色标识
+     */
+    String SUPER_ADMIN_ROLE_KEY = "superadmin";
+
+    /**
      * 根部门祖级列表
      */
     String ROOT_DEPT_ANCESTORS = "0";

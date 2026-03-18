@@ -27,11 +27,6 @@ public class RemoteSocialVo implements Serializable {
     private Long userId;
 
     /**
-     * 租户ID
-     */
-    private String tenantId;
-
-    /**
      * 认证唯一ID
      */
     private String authId;
