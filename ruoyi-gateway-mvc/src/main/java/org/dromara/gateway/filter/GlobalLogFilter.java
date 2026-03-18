@@ -3,10 +3,6 @@ package org.dromara.gateway.filter;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +22,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -116,8 +116,8 @@ public class GlobalLogFilter extends OncePerRequestFilter {
 
     private String removeSensitiveFields(String jsonParam) {
         try {
-            ObjectMapper objectMapper = JsonUtils.getObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(jsonParam);
+            JsonMapper jsonMapper = JsonUtils.getJsonMapper();
+            JsonNode rootNode = jsonMapper.readTree(jsonParam);
             removeSensitiveFields(rootNode, SystemConstants.EXCLUDE_PROPERTIES);
             return rootNode.toString();
         } catch (Exception ex) {
@@ -132,13 +132,13 @@ public class GlobalLogFilter extends OncePerRequestFilter {
         if (node.isObject()) {
             ObjectNode objectNode = (ObjectNode) node;
             Set<String> fieldsToRemove = new HashSet<>();
-            objectNode.fieldNames().forEachRemaining(fieldName -> {
+            objectNode.propertyNames().forEach(fieldName -> {
                 if (ArrayUtil.contains(excludeProperties, fieldName)) {
                     fieldsToRemove.add(fieldName);
                 }
             });
             fieldsToRemove.forEach(objectNode::remove);
-            objectNode.elements().forEachRemaining(child -> removeSensitiveFields(child, excludeProperties));
+            objectNode.values().forEach(child -> removeSensitiveFields(child, excludeProperties));
         } else if (node.isArray()) {
             ArrayNode arrayNode = (ArrayNode) node;
             for (JsonNode child : arrayNode) {

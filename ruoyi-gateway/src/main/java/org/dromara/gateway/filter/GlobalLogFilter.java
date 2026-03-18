@@ -3,10 +3,6 @@ package org.dromara.gateway.filter;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.SystemConstants;
@@ -25,6 +21,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -65,8 +65,8 @@ public class GlobalLogFilter implements GlobalFilter, Ordered {
             } else {
                 String jsonParam = WebFluxUtils.resolveBodyFromCacheRequest(exchange);
                 if (StringUtils.isNotBlank(jsonParam)) {
-                    ObjectMapper objectMapper = JsonUtils.getObjectMapper();
-                    JsonNode rootNode = objectMapper.readTree(jsonParam);
+                    JsonMapper jsonMapper = JsonUtils.getJsonMapper();
+                    JsonNode rootNode = jsonMapper.readTree(jsonParam);
                     removeSensitiveFields(rootNode, SystemConstants.EXCLUDE_PROPERTIES);
                     jsonParam = rootNode.toString();
                 }
@@ -102,14 +102,14 @@ public class GlobalLogFilter implements GlobalFilter, Ordered {
             ObjectNode objectNode = (ObjectNode) node;
             // 收集要删除的字段名（避免 ConcurrentModification）
             Set<String> fieldsToRemove = new HashSet<>();
-            objectNode.fieldNames().forEachRemaining(fieldName -> {
+            objectNode.propertyNames().forEach(fieldName -> {
                 if (ArrayUtil.contains(excludeProperties, fieldName)) {
                     fieldsToRemove.add(fieldName);
                 }
             });
             fieldsToRemove.forEach(objectNode::remove);
             // 递归处理子节点
-            objectNode.elements().forEachRemaining(child -> removeSensitiveFields(child, excludeProperties));
+            objectNode.values().forEach(child -> removeSensitiveFields(child, excludeProperties));
         } else if (node.isArray()) {
             ArrayNode arrayNode = (ArrayNode) node;
             for (JsonNode child : arrayNode) {

@@ -33,10 +33,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- web 容器使用 undertow 性能更强 -->
+        <!-- Boot 4 下使用 jetty 替代 undertow -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
 
         <!-- SpringBoot Actuator -->

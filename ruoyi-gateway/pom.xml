@@ -60,6 +60,11 @@
             <artifactId>ruoyi-common-satoken</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.dromara</groupId>
+            <artifactId>ruoyi-common-json</artifactId>
+        </dependency>
+
         <!-- RuoYi Common Redis-->
         <dependency>
             <groupId>org.dromara</groupId>

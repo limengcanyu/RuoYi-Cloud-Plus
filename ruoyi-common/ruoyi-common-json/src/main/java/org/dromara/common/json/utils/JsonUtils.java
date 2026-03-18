@@ -3,17 +3,14 @@ package org.dromara.common.json.utils;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.dromara.common.core.utils.SpringUtils;
 import org.dromara.common.core.utils.StringUtils;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +22,14 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JsonUtils {
 
-    private static final ObjectMapper OBJECT_MAPPER = SpringUtils.getBean(ObjectMapper.class);
+    private static final JsonMapper JSON_MAPPER = SpringUtils.getBean(JsonMapper.class);
 
-    public static ObjectMapper getObjectMapper() {
-        return OBJECT_MAPPER;
+    public static JsonMapper getJsonMapper() {
+        return JSON_MAPPER;
+    }
+
+    public static JsonMapper getObjectMapper() {
+        return JSON_MAPPER;
     }
 
     /**
@@ -42,11 +43,7 @@ public class JsonUtils {
         if (ObjectUtil.isNull(object)) {
             return null;
         }
-        try {
-            return OBJECT_MAPPER.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return JSON_MAPPER.writeValueAsString(object);
     }
 
     /**
@@ -62,11 +59,7 @@ public class JsonUtils {
         if (StringUtils.isEmpty(text)) {
             return null;
         }
-        try {
-            return OBJECT_MAPPER.readValue(text, clazz);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return JSON_MAPPER.readValue(text, clazz);
     }
 
     /**
@@ -82,11 +75,7 @@ public class JsonUtils {
         if (ArrayUtil.isEmpty(bytes)) {
             return null;
         }
-        try {
-            return OBJECT_MAPPER.readValue(bytes, clazz);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return JSON_MAPPER.readValue(bytes, clazz);
     }
 
     /**
@@ -102,11 +91,7 @@ public class JsonUtils {
         if (StringUtils.isBlank(text)) {
             return null;
         }
-        try {
-            return OBJECT_MAPPER.readValue(text, typeReference);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return JSON_MAPPER.readValue(text, typeReference);
     }
 
     /**
@@ -120,14 +105,7 @@ public class JsonUtils {
         if (StringUtils.isBlank(text)) {
             return null;
         }
-        try {
-            return OBJECT_MAPPER.readValue(text, OBJECT_MAPPER.getTypeFactory().constructType(Dict.class));
-        } catch (MismatchedInputException e) {
-            // 类型不匹配说明不是json
-            return null;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return JSON_MAPPER.readValue(text, JSON_MAPPER.getTypeFactory().constructType(Dict.class));
     }
 
     /**
@@ -141,11 +119,7 @@ public class JsonUtils {
         if (StringUtils.isBlank(text)) {
             return null;
         }
-        try {
-            return OBJECT_MAPPER.readValue(text, OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, Dict.class));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return JSON_MAPPER.readValue(text, JSON_MAPPER.getTypeFactory().constructCollectionType(List.class, Dict.class));
     }
 
     /**
@@ -161,11 +135,7 @@ public class JsonUtils {
         if (StringUtils.isEmpty(text)) {
             return new ArrayList<>();
         }
-        try {
-            return OBJECT_MAPPER.readValue(text, OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, clazz));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return JSON_MAPPER.readValue(text, JSON_MAPPER.getTypeFactory().constructCollectionType(List.class, clazz));
     }
 
     /**
@@ -179,7 +149,7 @@ public class JsonUtils {
             return false;
         }
         try {
-            OBJECT_MAPPER.readTree(str);
+            JSON_MAPPER.readTree(str);
             return true;
         } catch (Exception e) {
             return false;
@@ -197,7 +167,7 @@ public class JsonUtils {
             return false;
         }
         try {
-            JsonNode node = OBJECT_MAPPER.readTree(str);
+            JsonNode node = JSON_MAPPER.readTree(str);
             return node.isObject();
         } catch (Exception e) {
             return false;
@@ -215,7 +185,7 @@ public class JsonUtils {
             return false;
         }
         try {
-            JsonNode node = OBJECT_MAPPER.readTree(str);
+            JsonNode node = JSON_MAPPER.readTree(str);
             return node.isArray();
         } catch (Exception e) {
             return false;

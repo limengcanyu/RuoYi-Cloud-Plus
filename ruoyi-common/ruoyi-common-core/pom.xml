@@ -36,7 +36,8 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
 
         <!--常用工具类 -->

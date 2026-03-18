@@ -25,8 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 import org.springframework.context.annotation.Bean;
 
 import java.util.*;
@@ -99,17 +99,20 @@ public class SpringDocAutoConfiguration {
      */
     @Bean
     public OpenApiCustomizer openApiCustomizer() {
+        String contextPath = serverProperties.getServlet().getContextPath();
+        String finalContextPath = StringUtils.isBlank(contextPath) || "/".equals(contextPath) ? "" : contextPath;
         // 对所有路径增加前置上下文路径
         return openApi -> {
             HttpServletRequest request = ServletUtils.getRequest();
             // 从请求头获取gateway转发的服务前缀
-            String prefix = StringUtils.blankToDefault(request.getHeader("X-Forwarded-Prefix"), "");
+            String prefix = request == null ? "" : StringUtils.blankToDefault(request.getHeader("X-Forwarded-Prefix"), "");
             Paths oldPaths = openApi.getPaths();
             if (oldPaths instanceof PlusPaths) {
                 return;
             }
             PlusPaths newPaths = new PlusPaths();
-            oldPaths.forEach((k, v) -> newPaths.addPathItem(prefix + k, v));
+            String pathPrefix = StringUtils.isNotBlank(prefix) ? prefix : finalContextPath;
+            oldPaths.forEach((k, v) -> newPaths.addPathItem(pathPrefix + k, v));
             openApi.setPaths(newPaths);
         };
     }
