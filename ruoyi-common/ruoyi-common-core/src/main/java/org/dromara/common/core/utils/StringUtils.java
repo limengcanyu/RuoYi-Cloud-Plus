@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+import org.apache.commons.lang3.Strings;
 import org.springframework.util.AntPathMatcher;
 
 import java.nio.charset.Charset;
@@ -333,7 +334,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     public static boolean startWithAnyIgnoreCase(CharSequence str, CharSequence... prefixs) {
         // 判断是否是以指定字符串开头
         for (CharSequence prefix : prefixs) {
-            if (StringUtils.startsWithIgnoreCase(str, prefix)) {
+            if (Strings.CI.startsWith(str, prefix)) {
                 return true;
             }
         }
@@ -361,7 +362,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
             return input;
         }
     }
-
     /**
      * 将可迭代对象中的元素使用逗号拼接成字符串
      *
@@ -380,6 +380,171 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      */
     public static String joinComma(Object[] array) {
         return StringUtils.join(array, SEPARATOR);
+    }
+
+    /**
+     * 判断两个字符串是否相等
+     *
+     * @param cs1 字符串1
+     * @param cs2 字符串2
+     * @return 是否相等
+     */
+    public static boolean equals(final CharSequence cs1, final CharSequence cs2) {
+        return Strings.CS.equals(cs1, cs2);
+    }
+
+    /**
+     * 判断字符串是否在指定的字符串列表中
+     *
+     * @param string       字符串
+     * @param searchStrings 字符串列表
+     * @return 是否在列表中
+     */
+    public static boolean equalsAny(final CharSequence string, final CharSequence... searchStrings) {
+        return Strings.CS.equalsAny(string, searchStrings);
+    }
+
+    /**
+     * 忽略大小写判断字符串是否在指定的字符串列表中
+     *
+     * @param string       字符串
+     * @param searchStrings 字符串列表
+     * @return 是否在列表中
+     */
+    public static boolean equalsAnyIgnoreCase(final CharSequence string, final CharSequence... searchStrings) {
+        return Strings.CI.equalsAny(string, searchStrings);
+    }
+
+    /**
+     * 忽略大小写判断两个字符串是否相等
+     *
+     * @param cs1 字符串1
+     * @param cs2 字符串2
+     * @return 是否相等
+     */
+    public static boolean equalsIgnoreCase(final CharSequence cs1, final CharSequence cs2) {
+        return Strings.CI.equals(cs1, cs2);
+    }
+
+    /**
+     * 检查指定的字符序列中是否包含另一个字符序列。
+     *
+     * @param seq       要检查的字符序列，不能为null
+     * @param searchSeq 要搜索的字符序列，不能为null
+     * @return 如果seq中包含searchSeq，则返回true；否则返回false
+     */
+    public static boolean contains(final CharSequence seq, final CharSequence searchSeq) {
+        return Strings.CS.contains(seq, searchSeq);
+    }
+
+    /**
+     * 忽略大小写检查指定字符序列中是否包含另一个字符序列。
+     *
+     * @param seq       要检查的字符序列
+     * @param searchSeq 要搜索的字符序列
+     * @return 如果包含则返回 true，否则返回 false
+     */
+    public static boolean containsIgnoreCase(final CharSequence seq, final CharSequence searchSeq) {
+        return Strings.CI.contains(seq, searchSeq);
+    }
+
+    /**
+     * 检查 CharSequence 是否以指定前缀开头。
+     *
+     * @param str    要检查的字符序列
+     * @param prefix 要查找的前缀
+     * @return 如果以指定前缀开头则返回 true，否则返回 false
+     */
+    public static boolean startsWith(final CharSequence str, final CharSequence prefix) {
+        return Strings.CS.startsWith(str, prefix);
+    }
+
+    /**
+     * 忽略大小写检查 CharSequence 是否以指定前缀开头。
+     *
+     * @param str    要检查的字符序列
+     * @param prefix 要查找的前缀
+     * @return 如果以指定前缀开头则返回 true，否则返回 false
+     */
+    public static boolean startsWithIgnoreCase(final CharSequence str, final CharSequence prefix) {
+        return Strings.CI.startsWith(str, prefix);
+    }
+
+    /**
+     * 忽略大小写检查 CharSequence 是否以指定后缀结尾。
+     *
+     * @param str    要检查的字符序列
+     * @param suffix 要查找的后缀
+     * @return 如果以指定后缀结尾则返回 true，否则返回 false
+     */
+    public static boolean endsWithIgnoreCase(final CharSequence str, final CharSequence suffix) {
+        return Strings.CI.endsWith(str, suffix);
+    }
+
+    /**
+     * 返回指定字符序列首次出现的位置。
+     *
+     * @param seq       源字符序列
+     * @param searchSeq 待查找字符序列
+     * @return 首次出现的位置，不存在时返回 -1
+     */
+    public static int indexOf(final CharSequence seq, final CharSequence searchSeq) {
+        if (seq == null || searchSeq == null) {
+            return -1;
+        }
+        return seq.toString().indexOf(searchSeq.toString());
+    }
+
+    /**
+     * 移除字符串中的指定字符序列。
+     *
+     * @param str       要处理的字符串，不能为null
+     * @param remove    要移除的字符序列，不能为null
+     * @return 处理后的字符串
+     */
+    public static String remove(final String str, final String remove) {
+        return Strings.CS.remove(str, remove);
+    }
+
+    /**
+     * 如果字符串以指定前缀开头，则移除该前缀。
+     *
+     * @param str    要处理的字符串
+     * @param remove 要移除的前缀
+     * @return 处理后的字符串
+     */
+    public static String removeStart(final String str, final String remove) {
+        if (isEmpty(str) || isEmpty(remove)) {
+            return str;
+        }
+        return startsWith(str, remove) ? str.substring(remove.length()) : str;
+    }
+
+    /**
+     * 替换字符串中的目标子串。
+     *
+     * @param text         原始字符串
+     * @param searchString 需要替换的子串
+     * @param replacement  替换后的子串
+     * @return 替换后的字符串
+     */
+    public static String replace(final String text, final String searchString, final String replacement) {
+        if (text == null || isEmpty(searchString) || replacement == null) {
+            return text;
+        }
+        return text.replace(searchString, replacement);
+    }
+
+
+    /**
+     * 检查字符串是否包含任意一个指定的字符序列
+     *
+     * @param cs                  要检查的字符串
+     * @param searchCharSequences 需要查找的字符序列数组
+     * @return 如果包含任意一个字符序列返回 true，否则返回 false
+     */
+    public static boolean containsAny(final CharSequence cs, final CharSequence... searchCharSequences) {
+        return Strings.CS.containsAny(cs, searchCharSequences);
     }
 
 }

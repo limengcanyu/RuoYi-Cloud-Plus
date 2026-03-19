@@ -124,20 +124,6 @@
                 <version>${revision}</version>
             </dependency>
 
-            <!-- 限流功能 -->
-            <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-common-ratelimiter</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <!-- 幂等功能 -->
-            <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-common-idempotent</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
             <!-- 邮件模块 -->
             <dependency>
                 <groupId>org.dromara</groupId>

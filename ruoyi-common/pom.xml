@@ -26,8 +26,6 @@
         <module>ruoyi-common-seata</module>
         <module>ruoyi-common-loadbalancer</module>
         <module>ruoyi-common-oss</module>
-        <module>ruoyi-common-ratelimiter</module>
-        <module>ruoyi-common-idempotent</module>
         <module>ruoyi-common-mail</module>
         <module>ruoyi-common-sms</module>
         <module>ruoyi-common-logstash</module>

@@ -1,2 +1,4 @@
 org.dromara.common.redis.config.RedisConfiguration
 org.dromara.common.redis.config.CacheConfiguration
+org.dromara.common.redis.config.IdempotentAutoConfiguration
+org.dromara.common.redis.config.RateLimiterConfig

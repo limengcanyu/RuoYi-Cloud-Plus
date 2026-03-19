@@ -9,7 +9,7 @@ import org.dromara.common.core.constant.GlobalConstants;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.SpringUtils;
-import org.dromara.common.ratelimiter.annotation.RateLimiter;
+import org.dromara.common.redis.annotation.RateLimiter;
 import org.dromara.common.web.core.BaseController;
 import org.dromara.common.mail.config.properties.MailProperties;
 import org.dromara.common.mail.utils.MailUtils;
