@@ -22,6 +22,7 @@
         <spring-boot-admin.version>4.0.2</spring-boot-admin.version>
         <mybatis.version>3.5.19</mybatis.version>
         <mybatis-plus.version>3.5.16</mybatis-plus.version>
+        <mybatis-plus-join.version>1.5.6</mybatis-plus-join.version>
         <p6spy.version>3.9.1</p6spy.version>
         <dynamic-ds.version>4.5.0</dynamic-ds.version>
         <velocity.version>2.3</velocity.version>
@@ -189,6 +190,12 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-annotation</artifactId>
                 <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.yulichang</groupId>
+                <artifactId>mybatis-plus-join-boot-starter</artifactId>
+                <version>${mybatis-plus-join.version}</version>
             </dependency>
             <!-- sql性能分析插件 -->
             <dependency>
