@@ -33,7 +33,7 @@
         <redisson.version>4.3.0</redisson.version>
         <lock4j.version>2.2.7</lock4j.version>
         <snailjob.version>1.9.0</snailjob.version>
-        <satoken.version>1.44.0</satoken.version>
+        <satoken.version>1.45.0</satoken.version>
         <lombok.version>1.18.42</lombok.version>
         <logstash.version>7.4</logstash.version>
         <easy-es.version>3.0.1</easy-es.version>
@@ -44,15 +44,15 @@
         <mapstruct-plus.lombok.version>0.2.0</mapstruct-plus.lombok.version>
         <justauth.version>1.16.7</justauth.version>
         <!-- 离线IP地址定位库 -->
-        <ip2region.version>3.3.4</ip2region.version>
+        <ip2region.version>3.3.6</ip2region.version>
         <!-- 临时修复 fastjson 漏洞 -->
         <fastjson.version>1.2.83</fastjson.version>
         <!-- OSS 配置 -->
-        <aws.sdk.version>2.28.22</aws.sdk.version>
+        <aws.sdk.version>2.42.9</aws.sdk.version>
         <!-- SMS 配置 -->
         <sms4j.version>3.3.4</sms4j.version>
         <!-- 面向运行时的D-ORM依赖 -->
-        <anyline.version>8.7.3-20251210</anyline.version>
+        <anyline.version>8.7.3-20260306</anyline.version>
         <!-- 工作流配置 -->
         <warm-flow.version>1.8.4</warm-flow.version>
         <!-- mqtt客户端 -->
@@ -62,7 +62,7 @@
 
         <!-- 插件版本 -->
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <flatten-maven-plugin.version>1.3.0</flatten-maven-plugin.version>
         <!-- 打包默认跳过测试 -->
         <skipTests>true</skipTests>
@@ -140,6 +140,15 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- sa-token 的依赖配置-->
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-bom</artifactId>
+                <version>${satoken.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- common 的依赖配置-->
             <dependency>
                 <groupId>org.dromara</groupId>
@@ -156,18 +165,6 @@
                 <version>${revision}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-core</artifactId>
-                <version>${satoken.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-spring-boot3-starter</artifactId>
-                <version>${satoken.version}</version>
             </dependency>
 
             <dependency>

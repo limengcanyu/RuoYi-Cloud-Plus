@@ -60,7 +60,6 @@
         <dependency>
             <groupId>cn.dev33</groupId>
             <artifactId>sa-token-dubbo3</artifactId>
-            <version>${satoken.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.dubbo</groupId>

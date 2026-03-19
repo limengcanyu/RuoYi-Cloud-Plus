@@ -1,11 +1,11 @@
 package org.dromara.demo.domain.vo;
 
-import cn.idev.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.apache.fesod.sheet.annotation.ExcelProperty;
 import org.dromara.demo.domain.TestDemo;
 
 /**
