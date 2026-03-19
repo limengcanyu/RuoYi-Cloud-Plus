@@ -3,11 +3,6 @@ package org.dromara.common.redis.config;
 import cn.hutool.core.util.ObjectUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.utils.SpringUtils;
 import org.dromara.common.redis.config.properties.RedissonProperties;
@@ -15,13 +10,19 @@ import org.dromara.common.redis.handler.KeyPrefixHandler;
 import org.dromara.common.redis.handler.RedisExceptionHandler;
 import org.redisson.client.codec.StringCodec;
 import org.redisson.codec.CompositeCodec;
-import org.redisson.codec.TypedJsonJacksonCodec;
+import org.redisson.codec.TypedJsonJackson3Codec;
 import org.redisson.spring.starter.RedissonAutoConfigurationCustomizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
+import tools.jackson.databind.DefaultTyping;
+import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateTimeSerializer;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import tools.jackson.databind.module.SimpleModule;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,27 +44,33 @@ public class RedisConfiguration {
     @Bean
     public RedissonAutoConfigurationCustomizer redissonCustomizer() {
         return config -> {
-            JavaTimeModule javaTimeModule = new JavaTimeModule();
+            SimpleModule simpleModule = new SimpleModule();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
-            javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
-            ObjectMapper om = new ObjectMapper();
-            om.registerModule(javaTimeModule);
-            om.setTimeZone(TimeZone.getDefault());
-            om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-            // 指定序列化输入的类型，类必须是非final修饰的。序列化时将对象全类名一起保存下来
-            om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
+            simpleModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
+            simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
+            JsonMapper jsonMapper = JsonMapper.builder()
+                .addModules(simpleModule)
+                .defaultTimeZone(TimeZone.getDefault())
+                .changeDefaultVisibility(visibilityChecker -> visibilityChecker.withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY))
+                // 指定序列化输入的类型，类必须是非final修饰的。序列化时将对象全类名一起保存下来
+                // 因为安全策略，LaissezFaireSubTypeValidator 在 Jackson 3.X 中被禁止外部引用，在反序列化的数据来源不可信时，需要配置反序列化验证器来防止反序列化漏洞攻击，使用者需要自行执行哪些包或类是可以放行的
+                // 此处使用 BasicPolymorphicTypeValidator + 自定义类型匹配起替代，默认放行所有类型，此行为配置与 Jackson 2.X 中 LaissezFaireSubTypeValidator 的行为基本一致
+                // 一般而言，更加建议使用包名白名单的方式去进行匹配，以确保放行通过安全认可的类，如：BasicPolymorphicTypeValidator.builder().allowIfBaseType("org.dromara").allowIfSubType("org.dromara").build()
+                .activateDefaultTyping(BasicPolymorphicTypeValidator.builder().allowIfSubType((ctxt, clazz) -> true).build(), DefaultTyping.NON_FINAL)
+                .build();
             // org.apache.fory.logging.LoggerFactory 包别引入错了
             // LoggerFactory.useSlf4jLogging(true);
             // ForyCodec foryCodec = new ForyCodec();
             // CompositeCodec codec = new CompositeCodec(StringCodec.INSTANCE, foryCodec, foryCodec);
-            TypedJsonJacksonCodec jsonCodec = new TypedJsonJacksonCodec(Object.class, om);
+            TypedJsonJackson3Codec jsonCodec = new TypedJsonJackson3Codec(Object.class, jsonMapper);
             // 组合序列化 key 使用 String 内容使用通用 json 格式
             CompositeCodec codec = new CompositeCodec(StringCodec.INSTANCE, jsonCodec, jsonCodec);
             config.setThreads(redissonProperties.getThreads())
                 .setNettyThreads(redissonProperties.getNettyThreads())
                 // 缓存 Lua 脚本 减少网络传输(redisson 大部分的功能都是基于 Lua 脚本实现)
                 .setUseScriptCache(true)
+                //设置redis key前缀
+                .setNameMapper(new KeyPrefixHandler(redissonProperties.getKeyPrefix()))
                 .setCodec(codec);
             if (SpringUtils.isVirtual()) {
                 config.setNettyExecutor(new VirtualThreadTaskExecutor("redisson-"));
@@ -72,8 +79,6 @@ public class RedisConfiguration {
             if (ObjectUtil.isNotNull(singleServerConfig)) {
                 // 使用单机模式
                 config.useSingleServer()
-                    //设置redis key前缀
-                    .setNameMapper(new KeyPrefixHandler(redissonProperties.getKeyPrefix()))
                     .setTimeout(singleServerConfig.getTimeout())
                     .setClientName(singleServerConfig.getClientName())
                     .setIdleConnectionTimeout(singleServerConfig.getIdleConnectionTimeout())
@@ -85,8 +90,6 @@ public class RedisConfiguration {
             RedissonProperties.ClusterServersConfig clusterServersConfig = redissonProperties.getClusterServersConfig();
             if (ObjectUtil.isNotNull(clusterServersConfig)) {
                 config.useClusterServers()
-                    //设置redis key前缀
-                    .setNameMapper(new KeyPrefixHandler(redissonProperties.getKeyPrefix()))
                     .setTimeout(clusterServersConfig.getTimeout())
                     .setClientName(clusterServersConfig.getClientName())
                     .setIdleConnectionTimeout(clusterServersConfig.getIdleConnectionTimeout())
