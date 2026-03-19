@@ -7,10 +7,6 @@ import org.dromara.common.core.constant.HttpStatus;
 import java.io.Serial;
 import java.io.Serializable;
 
-import static org.dromara.common.core.constant.HttpStatus.*;
-import static org.dromara.common.core.constant.HttpStatus.ERROR;
-import static org.dromara.common.core.constant.HttpStatus.SUCCESS;
-
 /**
  * 响应信息主体
  *
@@ -22,6 +18,16 @@ public class R<T> implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 兼容旧代码的成功常量
+     */
+    public static final int SUCCESS = HttpStatus.SUCCESS;
+
+    /**
+     * 兼容旧代码的失败常量
+     */
+    public static final int FAIL = HttpStatus.ERROR;
 
     /**
      * 消息状态码
@@ -39,35 +45,35 @@ public class R<T> implements Serializable {
     private T data;
 
     public static <T> R<T> ok() {
-        return restResult(null, SUCCESS, "操作成功");
+        return restResult(null, HttpStatus.SUCCESS, "操作成功");
     }
 
     public static <T> R<T> ok(T data) {
-        return restResult(data, SUCCESS, "操作成功");
+        return restResult(data, HttpStatus.SUCCESS, "操作成功");
     }
 
     public static <T> R<T> ok(String msg) {
-        return restResult(null, SUCCESS, msg);
+        return restResult(null, HttpStatus.SUCCESS, msg);
     }
 
     public static <T> R<T> ok(String msg, T data) {
-        return restResult(data, SUCCESS, msg);
+        return restResult(data, HttpStatus.SUCCESS, msg);
     }
 
     public static <T> R<T> fail() {
-        return restResult(null, ERROR, "操作失败");
+        return restResult(null, HttpStatus.ERROR, "操作失败");
     }
 
     public static <T> R<T> fail(String msg) {
-        return restResult(null, ERROR, msg);
+        return restResult(null, HttpStatus.ERROR, msg);
     }
 
     public static <T> R<T> fail(T data) {
-        return restResult(data, ERROR, "操作失败");
+        return restResult(data, HttpStatus.ERROR, "操作失败");
     }
 
     public static <T> R<T> fail(String msg, T data) {
-        return restResult(data, ERROR, msg);
+        return restResult(data, HttpStatus.ERROR, msg);
     }
 
     public static <T> R<T> fail(int code, String msg) {
@@ -81,7 +87,7 @@ public class R<T> implements Serializable {
      * @return 警告消息
      */
     public static <T> R<T> warn(String msg) {
-        return restResult(null, WARN, msg);
+        return restResult(null, HttpStatus.WARN, msg);
     }
 
     /**
@@ -92,7 +98,7 @@ public class R<T> implements Serializable {
      * @return 警告消息
      */
     public static <T> R<T> warn(String msg, T data) {
-        return restResult(data, WARN, msg);
+        return restResult(data, HttpStatus.WARN, msg);
     }
 
     private static <T> R<T> restResult(T data, int code, String msg) {
@@ -108,7 +114,7 @@ public class R<T> implements Serializable {
     }
 
     public static <T> Boolean isSuccess(R<T> ret) {
-        return SUCCESS == ret.getCode();
+        return HttpStatus.SUCCESS == ret.getCode();
     }
 
 }
