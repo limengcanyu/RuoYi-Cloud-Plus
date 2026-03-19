@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.core.domain.PageResult;
 import org.dromara.system.api.RemoteTaskAssigneeService;
 import org.dromara.system.api.domain.bo.RemoteTaskAssigneeBo;
 import org.dromara.system.api.domain.vo.RemoteTaskAssigneeVo;
@@ -58,7 +58,7 @@ public class RemoteTaskAssigneeServiceImpl implements RemoteTaskAssigneeService 
         Map<String, Object> params = bo.getParams();
         params.put("beginTime", taskQuery.getBeginTime());
         params.put("endTime", taskQuery.getEndTime());
-        TableDataInfo<SysRoleVo> page = roleService.selectPageRoleList(bo, pageQuery);
+        PageResult<SysRoleVo> page = roleService.selectPageRoleList(bo, pageQuery);
         // 使用封装的字段映射方法进行转换
         List<RemoteTaskAssigneeVo.TaskHandler> handlers = RemoteTaskAssigneeVo.convertToHandlerList(page.getRows(),
             item -> Convert.toStr(item.getRoleId()), SysRoleVo::getRoleKey, SysRoleVo::getRoleName, item -> "", SysRoleVo::getCreateTime);
@@ -82,7 +82,7 @@ public class RemoteTaskAssigneeServiceImpl implements RemoteTaskAssigneeService 
         params.put("beginTime", taskQuery.getBeginTime());
         params.put("endTime", taskQuery.getEndTime());
         bo.setBelongDeptId(Convert.toLong(taskQuery.getGroupId()));
-        TableDataInfo<SysPostVo> page = postService.selectPagePostList(bo, pageQuery);
+        PageResult<SysPostVo> page = postService.selectPagePostList(bo, pageQuery);
         // 使用封装的字段映射方法进行转换
         List<RemoteTaskAssigneeVo.TaskHandler> handlers = RemoteTaskAssigneeVo.convertToHandlerList(page.getRows(),
             item -> Convert.toStr(item.getPostId()), SysPostVo::getPostCategory, SysPostVo::getPostName, item -> Convert.toStr(item.getDeptId()), SysPostVo::getCreateTime);
@@ -106,7 +106,7 @@ public class RemoteTaskAssigneeServiceImpl implements RemoteTaskAssigneeService 
         params.put("beginTime", taskQuery.getBeginTime());
         params.put("endTime", taskQuery.getEndTime());
         bo.setBelongDeptId(Convert.toLong(taskQuery.getGroupId()));
-        TableDataInfo<SysDeptVo> page = deptService.selectPageDeptList(bo, pageQuery);
+        PageResult<SysDeptVo> page = deptService.selectPageDeptList(bo, pageQuery);
         // 使用封装的字段映射方法进行转换
         List<RemoteTaskAssigneeVo.TaskHandler> handlers = RemoteTaskAssigneeVo.convertToHandlerList(page.getRows(),
             item -> Convert.toStr(item.getDeptId()), SysDeptVo::getDeptCategory, SysDeptVo::getDeptName, item -> Convert.toStr(item.getParentId()), SysDeptVo::getCreateTime);
@@ -130,7 +130,7 @@ public class RemoteTaskAssigneeServiceImpl implements RemoteTaskAssigneeService 
         params.put("beginTime", taskQuery.getBeginTime());
         params.put("endTime", taskQuery.getEndTime());
         bo.setDeptId(Convert.toLong(taskQuery.getGroupId()));
-        TableDataInfo<SysUserVo> page = userService.selectPageUserList(bo, pageQuery);
+        PageResult<SysUserVo> page = userService.selectPageUserList(bo, pageQuery);
         // 使用封装的字段映射方法进行转换
         List<RemoteTaskAssigneeVo.TaskHandler> handlers = RemoteTaskAssigneeVo.convertToHandlerList(page.getRows(),
             item -> Convert.toStr(item.getUserId()), SysUserVo::getUserName, SysUserVo::getNickName, item -> Convert.toStr(item.getDeptId()), SysUserVo::getCreateTime);

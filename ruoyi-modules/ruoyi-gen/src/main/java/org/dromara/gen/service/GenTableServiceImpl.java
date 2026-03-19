@@ -26,7 +26,7 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.core.utils.file.FileUtils;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.core.domain.PageResult;
 import org.dromara.common.mybatis.utils.IdGeneratorUtil;
 import org.dromara.gen.constant.GenConstants;
 import org.dromara.gen.domain.GenTable;
@@ -90,9 +90,9 @@ public class GenTableServiceImpl implements IGenTableService {
     }
 
     @Override
-    public TableDataInfo<GenTable> selectPageGenTableList(GenTable genTable, PageQuery pageQuery) {
+    public PageResult<GenTable> selectPageGenTableList(GenTable genTable, PageQuery pageQuery) {
         Page<GenTable> page = baseMapper.selectPage(pageQuery.build(), this.buildGenTableQueryWrapper(genTable));
-        return TableDataInfo.build(page);
+        return PageResult.build(page.getRecords(), page.getTotal());
     }
 
     private QueryWrapper<GenTable> buildGenTableQueryWrapper(GenTable genTable) {
@@ -113,18 +113,18 @@ public class GenTableServiceImpl implements IGenTableService {
      *
      * @param genTable  包含查询条件的GenTable对象
      * @param pageQuery 包含分页信息的PageQuery对象
-     * @return 包含分页结果的TableDataInfo对象
+     * @return 包含分页结果的 PageResult 对象
      */
     @DS("#genTable.dataName")
     @Override
-    public TableDataInfo<GenTable> selectPageDbTableList(GenTable genTable, PageQuery pageQuery) {
+    public PageResult<GenTable> selectPageDbTableList(GenTable genTable, PageQuery pageQuery) {
         // 获取查询条件
         String tableName = genTable.getTableName();
         String tableComment = genTable.getTableComment();
 
         LinkedHashMap<String, Table<?>> tablesMap = ServiceProxy.metadata().tables();
         if (CollUtil.isEmpty(tablesMap)) {
-            return TableDataInfo.build();
+            return PageResult.build();
         }
         List<String> tableNames = baseMapper.selectTableNameList(genTable.getDataName());
         String[] tableArrays;
@@ -166,7 +166,9 @@ public class GenTableServiceImpl implements IGenTableService {
                 return gen;
             }).sorted(Comparator.comparing(GenTable::getCreateTime).reversed())
             .toList();
-        return TableDataInfo.build(tables, pageQuery.build());
+        Page<Object> page = pageQuery.build();
+        List<GenTable> pageList = CollUtil.page((int) page.getCurrent() - 1, (int) page.getSize(), tables);
+        return PageResult.build(pageList, tables.size());
     }
 
     /**

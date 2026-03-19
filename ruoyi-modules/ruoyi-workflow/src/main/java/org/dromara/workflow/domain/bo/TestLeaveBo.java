@@ -5,14 +5,16 @@ import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.dromara.common.core.validate.AddGroup;
 import org.dromara.common.core.validate.EditGroup;
-import org.dromara.common.mybatis.core.domain.BaseEntity;
 import org.dromara.workflow.domain.TestLeave;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 请假业务对象 test_leave
@@ -21,9 +23,11 @@ import java.util.Date;
  * @date 2023-07-21
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @AutoMapper(target = TestLeave.class, reverseConvertGenerate = false)
-public class TestLeaveBo extends BaseEntity {
+public class TestLeaveBo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 主键
@@ -87,6 +91,11 @@ public class TestLeaveBo extends BaseEntity {
      * 状态
      */
     private String status;
+
+    /**
+     * 请求参数
+     */
+    private Map<String, Object> params = new HashMap<>();
 
 
 }

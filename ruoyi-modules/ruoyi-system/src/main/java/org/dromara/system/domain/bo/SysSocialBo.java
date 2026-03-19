@@ -4,12 +4,15 @@ import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.dromara.common.core.validate.AddGroup;
 import org.dromara.common.core.validate.EditGroup;
-import org.dromara.common.mybatis.core.domain.BaseEntity;
 import org.dromara.system.domain.SysSocial;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 社会化关系业务对象 sys_social
@@ -18,9 +21,11 @@ import org.dromara.system.domain.SysSocial;
  */
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @AutoMapper(target = SysSocial.class, reverseConvertGenerate = false)
-public class SysSocialBo extends BaseEntity {
+public class SysSocialBo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 主键
@@ -136,6 +141,11 @@ public class SysSocialBo extends BaseEntity {
      * Twitter平台用户的附带属性，部分平台可能没有
      */
     private String oauthTokenSecret;
+
+    /**
+     * 请求参数
+     */
+    private Map<String, Object> params = new HashMap<>();
 
 
 

@@ -4,10 +4,13 @@ import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.dromara.common.core.xss.Xss;
-import org.dromara.common.mybatis.core.domain.BaseEntity;
 import org.dromara.system.domain.SysNotice;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 通知公告业务对象 sys_notice
@@ -16,9 +19,11 @@ import org.dromara.system.domain.SysNotice;
  */
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @AutoMapper(target = SysNotice.class, reverseConvertGenerate = false)
-public class SysNoticeBo extends BaseEntity {
+public class SysNoticeBo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 公告ID
@@ -57,5 +62,10 @@ public class SysNoticeBo extends BaseEntity {
      * 创建人名称
      */
     private String createByName;
+
+    /**
+     * 请求参数
+     */
+    private Map<String, Object> params = new HashMap<>();
 
 }

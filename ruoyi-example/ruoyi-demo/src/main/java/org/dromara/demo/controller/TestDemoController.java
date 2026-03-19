@@ -14,7 +14,7 @@ import org.dromara.common.redis.annotation.RepeatSubmit;
 import org.dromara.common.log.annotation.Log;
 import org.dromara.common.log.enums.BusinessType;
 import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.core.domain.PageResult;
 import org.dromara.demo.domain.TestDemo;
 import org.dromara.demo.domain.bo.TestDemoBo;
 import org.dromara.demo.domain.vo.TestDemoImportVo;
@@ -52,8 +52,8 @@ public class TestDemoController extends BaseController {
      */
     @SaCheckPermission("demo:demo:list")
     @GetMapping("/list")
-    public TableDataInfo<TestDemoVo> list(TestDemoBo bo, PageQuery pageQuery) {
-        return iTestDemoService.queryPageList(bo, pageQuery);
+    public R<PageResult<TestDemoVo>> list(TestDemoBo bo, PageQuery pageQuery) {
+        return R.ok(iTestDemoService.queryPageList(bo, pageQuery));
     }
 
     /**
@@ -61,8 +61,8 @@ public class TestDemoController extends BaseController {
      */
     @SaCheckPermission("demo:demo:list")
     @GetMapping("/page")
-    public TableDataInfo<TestDemoVo> page(@Validated(QueryGroup.class) TestDemoBo bo, PageQuery pageQuery) {
-        return iTestDemoService.customPageList(bo, pageQuery);
+    public R<PageResult<TestDemoVo>> page(@Validated(QueryGroup.class) TestDemoBo bo, PageQuery pageQuery) {
+        return R.ok(iTestDemoService.customPageList(bo, pageQuery));
     }
 
     /**

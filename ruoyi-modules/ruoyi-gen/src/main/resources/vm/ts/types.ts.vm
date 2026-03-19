@@ -59,6 +59,3 @@ export interface ${BusinessName}Query #if(!${treeCode})extends PageQuery #end{
    */
   params?: any;
 }
-
-
-

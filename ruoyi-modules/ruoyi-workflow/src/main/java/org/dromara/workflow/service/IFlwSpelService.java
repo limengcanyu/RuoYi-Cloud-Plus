@@ -1,7 +1,7 @@
 package org.dromara.workflow.service;
 
 import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.core.domain.PageResult;
 import org.dromara.system.api.domain.bo.RemoteTaskAssigneeBo;
 import org.dromara.system.api.domain.vo.RemoteTaskAssigneeVo;
 import org.dromara.workflow.domain.bo.FlowSpelBo;
@@ -34,7 +34,7 @@ public interface IFlwSpelService {
      * @param pageQuery 分页参数
      * @return 流程spel表达式定义分页列表
      */
-    TableDataInfo<FlowSpelVo> queryPageList(FlowSpelBo bo, PageQuery pageQuery);
+    PageResult<FlowSpelVo> queryPageList(FlowSpelBo bo, PageQuery pageQuery);
 
     /**
      * 查询符合条件的流程spel表达式定义列表

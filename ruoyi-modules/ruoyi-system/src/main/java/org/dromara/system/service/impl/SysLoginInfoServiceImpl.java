@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.core.domain.PageResult;
 import org.dromara.system.domain.SysLoginInfo;
 import org.dromara.system.domain.bo.SysLoginInfoBo;
 import org.dromara.system.domain.vo.SysLoginInfoVo;
@@ -40,7 +40,7 @@ public class SysLoginInfoServiceImpl implements ISysLoginInfoService {
      * @return 登录日志分页列表
      */
     @Override
-    public TableDataInfo<SysLoginInfoVo> selectPageLoginInfoList(SysLoginInfoBo loginInfo, PageQuery pageQuery) {
+    public PageResult<SysLoginInfoVo> selectPageLoginInfoList(SysLoginInfoBo loginInfo, PageQuery pageQuery) {
         Map<String, Object> params = loginInfo.getParams();
         LambdaQueryWrapper<SysLoginInfo> lqw = new LambdaQueryWrapper<SysLoginInfo>()
             .like(StringUtils.isNotBlank(loginInfo.getIpaddr()), SysLoginInfo::getIpaddr, loginInfo.getIpaddr())
@@ -52,7 +52,7 @@ public class SysLoginInfoServiceImpl implements ISysLoginInfoService {
             lqw.orderByDesc(SysLoginInfo::getInfoId);
         }
         Page<SysLoginInfoVo> page = baseMapper.selectVoPage(pageQuery.build(), lqw);
-        return TableDataInfo.build(page);
+        return PageResult.build(page.getRecords(), page.getTotal());
     }
 
     /**

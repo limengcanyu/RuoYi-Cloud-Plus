@@ -4,11 +4,14 @@ import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.dromara.common.core.validate.AddGroup;
 import org.dromara.common.core.validate.EditGroup;
-import org.dromara.common.mybatis.core.domain.BaseEntity;
 import org.dromara.demo.domain.TestDemo;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 测试单表业务对象 test_demo
@@ -18,9 +21,11 @@ import org.dromara.demo.domain.TestDemo;
  */
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @AutoMapper(target = TestDemo.class, reverseConvertGenerate = false)
-public class TestDemoBo extends BaseEntity {
+public class TestDemoBo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 主键
@@ -62,5 +67,10 @@ public class TestDemoBo extends BaseEntity {
      * 版本
      */
     private Long version;
+
+    /**
+     * 请求参数
+     */
+    private Map<String, Object> params = new HashMap<>();
 
 }

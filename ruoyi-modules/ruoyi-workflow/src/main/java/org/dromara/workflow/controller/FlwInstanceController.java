@@ -8,7 +8,7 @@ import org.dromara.common.redis.annotation.RepeatSubmit;
 import org.dromara.common.log.annotation.Log;
 import org.dromara.common.log.enums.BusinessType;
 import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.core.domain.PageResult;
 import org.dromara.common.web.core.BaseController;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.workflow.common.ConditionalOnEnable;
@@ -46,8 +46,8 @@ public class FlwInstanceController extends BaseController {
      * @param pageQuery      分页
      */
     @GetMapping("/pageByRunning")
-    public TableDataInfo<FlowInstanceVo> selectRunningInstanceList(FlowInstanceBo flowInstanceBo, PageQuery pageQuery) {
-        return flwInstanceService.selectRunningInstanceList(flowInstanceBo, pageQuery);
+    public R<PageResult<FlowInstanceVo>> selectRunningInstanceList(FlowInstanceBo flowInstanceBo, PageQuery pageQuery) {
+        return R.ok(flwInstanceService.selectRunningInstanceList(flowInstanceBo, pageQuery));
     }
 
     /**
@@ -57,8 +57,8 @@ public class FlwInstanceController extends BaseController {
      * @param pageQuery      分页
      */
     @GetMapping("/pageByFinish")
-    public TableDataInfo<FlowInstanceVo> selectFinishInstanceList(FlowInstanceBo flowInstanceBo, PageQuery pageQuery) {
-        return flwInstanceService.selectFinishInstanceList(flowInstanceBo, pageQuery);
+    public R<PageResult<FlowInstanceVo>> selectFinishInstanceList(FlowInstanceBo flowInstanceBo, PageQuery pageQuery) {
+        return R.ok(flwInstanceService.selectFinishInstanceList(flowInstanceBo, pageQuery));
     }
 
     /**
@@ -136,8 +136,8 @@ public class FlwInstanceController extends BaseController {
      * @param pageQuery      分页
      */
     @GetMapping("/pageByCurrent")
-    public TableDataInfo<FlowInstanceVo> selectCurrentInstanceList(FlowInstanceBo flowInstanceBo, PageQuery pageQuery) {
-        return flwInstanceService.selectCurrentInstanceList(flowInstanceBo, pageQuery);
+    public R<PageResult<FlowInstanceVo>> selectCurrentInstanceList(FlowInstanceBo flowInstanceBo, PageQuery pageQuery) {
+        return R.ok(flwInstanceService.selectCurrentInstanceList(flowInstanceBo, pageQuery));
     }
 
     /**

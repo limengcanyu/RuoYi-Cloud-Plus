@@ -7,12 +7,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.dromara.common.core.constant.RegexConstants;
 import org.dromara.common.json.validate.JsonPattern;
 import org.dromara.common.json.validate.JsonType;
-import org.dromara.common.mybatis.core.domain.BaseEntity;
 import org.dromara.system.domain.SysMenu;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 菜单权限业务对象 sys_menu
@@ -21,9 +24,11 @@ import org.dromara.system.domain.SysMenu;
  */
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @AutoMapper(target = SysMenu.class, reverseConvertGenerate = false)
-public class SysMenuBo extends BaseEntity {
+public class SysMenuBo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 菜单ID
@@ -109,6 +114,11 @@ public class SysMenuBo extends BaseEntity {
      * 备注
      */
     private String remark;
+
+    /**
+     * 请求参数
+     */
+    private Map<String, Object> params = new HashMap<>();
 
 
 }

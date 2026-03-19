@@ -1,7 +1,7 @@
 package org.dromara.system.service;
 
 import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.core.domain.PageResult;
 import org.dromara.system.domain.bo.SysUserBo;
 import org.dromara.system.domain.vo.SysUserExportVo;
 import org.dromara.system.domain.vo.SysUserVo;
@@ -22,7 +22,7 @@ public interface ISysUserService {
      * @param pageQuery 发呢也
      * @return 用户信息
      */
-    TableDataInfo<SysUserVo> selectPageUserList(SysUserBo user, PageQuery pageQuery);
+    PageResult<SysUserVo> selectPageUserList(SysUserBo user, PageQuery pageQuery);
 
     /**
      * 导出用户列表
@@ -38,7 +38,7 @@ public interface ISysUserService {
      * @param user 用户信息
      * @return 用户信息集合信息
      */
-    TableDataInfo<SysUserVo> selectAllocatedList(SysUserBo user, PageQuery pageQuery);
+    PageResult<SysUserVo> selectAllocatedList(SysUserBo user, PageQuery pageQuery);
 
     /**
      * 根据条件分页查询未分配用户角色列表
@@ -46,7 +46,7 @@ public interface ISysUserService {
      * @param user 用户信息
      * @return 用户信息集合信息
      */
-    TableDataInfo<SysUserVo> selectUnallocatedList(SysUserBo user, PageQuery pageQuery);
+    PageResult<SysUserVo> selectUnallocatedList(SysUserBo user, PageQuery pageQuery);
 
     /**
      * 通过用户名查询用户
