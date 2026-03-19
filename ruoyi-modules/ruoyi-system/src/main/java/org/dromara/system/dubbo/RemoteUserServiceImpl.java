@@ -11,10 +11,7 @@ import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.core.enums.UserStatus;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.exception.user.UserException;
-import org.dromara.common.core.utils.DateUtils;
-import org.dromara.common.core.utils.MapstructUtils;
-import org.dromara.common.core.utils.StreamUtils;
-import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.core.utils.*;
 import org.dromara.common.mybatis.helper.DataPermissionHelper;
 import org.dromara.system.api.RemoteUserService;
 import org.dromara.system.api.domain.bo.RemoteUserBo;
@@ -252,17 +249,22 @@ public class RemoteUserServiceImpl implements RemoteUserService {
         loginUser.setNickname(userVo.getNickName());
         loginUser.setPassword(userVo.getPassword());
         loginUser.setUserType(userVo.getUserType());
-        loginUser.setMenuPermission(permissionService.getMenuPermission(userId));
-        loginUser.setRolePermission(permissionService.getRolePermission(userId));
         if (ObjectUtil.isNotNull(userVo.getDeptId())) {
             Opt<SysDeptVo> deptOpt = Opt.of(userVo.getDeptId()).map(deptService::selectDeptById);
             loginUser.setDeptName(deptOpt.map(SysDeptVo::getDeptName).orElse(StringUtils.EMPTY));
             loginUser.setDeptCategory(deptOpt.map(SysDeptVo::getDeptCategory).orElse(StringUtils.EMPTY));
         }
-        List<SysRoleVo> roles = roleService.selectRolesByUserId(userId);
-        List<SysPostVo> posts = postService.selectPostsByUserId(userId);
-        loginUser.setRoles(BeanUtil.copyToList(roles, RoleDTO.class));
-        loginUser.setPosts(BeanUtil.copyToList(posts, PostDTO.class));
+        ThreadUtils.virtualSubmit(() -> {
+            loginUser.setMenuPermission(permissionService.getMenuPermission(userId));
+        }, () -> {
+            loginUser.setRolePermission(permissionService.getRolePermission(userId));
+        }, () -> {
+            List<SysRoleVo> roles = roleService.selectRolesByUserId(userId);
+            loginUser.setRoles(BeanUtil.copyToList(roles, RoleDTO.class));
+        }, () -> {
+            List<SysPostVo> posts = postService.selectPostsByUserId(userId);
+            loginUser.setPosts(BeanUtil.copyToList(posts, PostDTO.class));
+        });
         return loginUser;
     }
 
