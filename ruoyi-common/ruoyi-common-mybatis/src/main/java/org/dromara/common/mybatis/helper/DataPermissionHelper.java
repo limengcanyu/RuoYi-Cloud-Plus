@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.dromara.common.core.utils.reflect.ReflectUtils;
 import org.dromara.common.mybatis.annotation.DataPermission;
+import org.dromara.common.mybatis.core.domain.DataPermissionAccess;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.function.Supplier;
 public class DataPermissionHelper {
 
     public static final String DATA_PERMISSION_KEY = "data:permission";
+    private static final String ACCESS_KEY = "data:permission:access";
 
     private static final ThreadLocal<Stack<Integer>> REENTRANT_IGNORE = ThreadLocal.withInitial(Stack::new);
 
@@ -78,6 +80,14 @@ public class DataPermissionHelper {
     public static void setVariable(String key, Object value) {
         Map<String, Object> context = getContext();
         context.put(key, value);
+    }
+
+    public static DataPermissionAccess getAccess() {
+        return getVariable(ACCESS_KEY);
+    }
+
+    public static void setAccess(DataPermissionAccess access) {
+        setVariable(ACCESS_KEY, access);
     }
 
     /**

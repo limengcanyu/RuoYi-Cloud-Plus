@@ -1,15 +1,17 @@
 package org.dromara.system.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.constant.SystemConstants;
+import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.system.api.model.RoleDTO;
 import org.dromara.system.service.ISysMenuService;
 import org.dromara.system.service.ISysPermissionService;
 import org.dromara.system.service.ISysRoleService;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 用户权限处理
@@ -57,5 +59,20 @@ public class SysPermissionServiceImpl implements ISysPermissionService {
             perms.addAll(menuService.selectMenuPermsByUserId(userId));
         }
         return perms;
+    }
+
+    @Override
+    public Map<String, List<RoleDTO>> getDataScopeRoleMap(List<RoleDTO> roles) {
+        if (CollUtil.isEmpty(roles)) {
+            return Map.of();
+        }
+        Map<Long, RoleDTO> roleMap = StreamUtils.toIdentityMap(roles, RoleDTO::getRoleId);
+        List<Long> roleIds = StreamUtils.toList(roles, RoleDTO::getRoleId);
+        Map<Long, Set<String>> permsRoleIds = menuService.selectMenuPermsByRoleIds(roleIds);
+        Map<String, List<RoleDTO>> rolePermsMap = new LinkedHashMap<>();
+        permsRoleIds.forEach((roleId, perms) -> {
+            perms.forEach(perm -> rolePermsMap.computeIfAbsent(perm, k -> new ArrayList<>()).add(roleMap.get(roleId)));
+        });
+        return rolePermsMap;
     }
 }

@@ -103,6 +103,17 @@ public class SysMenuServiceImpl implements ISysMenuService {
     }
 
     /**
+     * 根据角色ID列表批量查询权限
+     *
+     * @param roleIds 角色ID列表
+     * @return 角色权限映射
+     */
+    @Override
+    public Map<Long, Set<String>> selectMenuPermsByRoleIds(List<Long> roleIds) {
+        return baseMapper.selectMenuPermsByRoleIds(roleIds);
+    }
+
+    /**
      * 根据用户ID查询菜单
      *
      * @param userId 用户ID
