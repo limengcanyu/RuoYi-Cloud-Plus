@@ -28,7 +28,7 @@
         <swagger.core.version>2.2.41</swagger.core.version>
         <springdoc.version>3.0.2</springdoc.version>
         <therapi-javadoc.version>0.15.0</therapi-javadoc.version>
-        <fastexcel.version>1.3.0</fastexcel.version>
+        <fesod.version>2.0.1-incubating</fesod.version>
         <hutool.version>5.8.43</hutool.version>
         <redisson.version>4.3.0</redisson.version>
         <lock4j.version>2.2.7</lock4j.version>
@@ -225,9 +225,9 @@
             </dependency>
 
             <dependency>
-                <groupId>cn.idev.excel</groupId>
-                <artifactId>fastexcel</artifactId>
-                <version>${fastexcel.version}</version>
+                <groupId>org.apache.fesod</groupId>
+                <artifactId>fesod-sheet</artifactId>
+                <version>${fesod.version}</version>
             </dependency>
 
             <!-- 代码生成使用模板 -->
