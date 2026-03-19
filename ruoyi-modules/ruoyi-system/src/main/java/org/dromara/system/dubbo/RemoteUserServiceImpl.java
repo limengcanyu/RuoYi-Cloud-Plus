@@ -294,9 +294,9 @@ public class RemoteUserServiceImpl implements RemoteUserService {
      * @see org.dromara.system.domain.convert.SysUserVoConvert
      */
     @Override
-    public List<RemoteUserVo> selectListByIds(List<Long> userIds) {
+    public List<RemoteUserVo> selectListByIds(Collection<Long> userIds) {
         if (CollUtil.isEmpty(userIds)) {
-            return new ArrayList<>();
+            return List.of();
         }
         List<SysUserVo> list = userMapper.selectVoList(new LambdaQueryWrapper<SysUser>()
             .select(SysUser::getUserId, SysUser::getDeptId, SysUser::getUserName,
@@ -315,9 +315,9 @@ public class RemoteUserServiceImpl implements RemoteUserService {
      * @return 用户ids
      */
     @Override
-    public List<Long> selectUserIdsByRoleIds(List<Long> roleIds) {
+    public List<Long> selectUserIdsByRoleIds(Collection<Long> roleIds) {
         if (CollUtil.isEmpty(roleIds)) {
-            return new ArrayList<>();
+            return List.of();
         }
         return userService.selectUserIdsByRoleIds(roleIds);
     }
@@ -329,7 +329,7 @@ public class RemoteUserServiceImpl implements RemoteUserService {
      * @return 用户
      */
     @Override
-    public List<RemoteUserVo> selectUsersByRoleIds(List<Long> roleIds) {
+    public List<RemoteUserVo> selectUsersByRoleIds(Collection<Long> roleIds) {
         if (CollUtil.isEmpty(roleIds)) {
             return List.of();
         }
@@ -351,7 +351,7 @@ public class RemoteUserServiceImpl implements RemoteUserService {
      * @return 用户
      */
     @Override
-    public List<RemoteUserVo> selectUsersByDeptIds(List<Long> deptIds) {
+    public List<RemoteUserVo> selectUsersByDeptIds(Collection<Long> deptIds) {
         if (CollUtil.isEmpty(deptIds)) {
             return List.of();
         }
@@ -369,7 +369,7 @@ public class RemoteUserServiceImpl implements RemoteUserService {
      * @return 用户
      */
     @Override
-    public List<RemoteUserVo> selectUsersByPostIds(List<Long> postIds) {
+    public List<RemoteUserVo> selectUsersByPostIds(Collection<Long> postIds) {
         if (CollUtil.isEmpty(postIds)) {
             return List.of();
         }
@@ -390,9 +390,9 @@ public class RemoteUserServiceImpl implements RemoteUserService {
      * @param userIds 用户 ID 列表
      * @return Map，其中 key 为用户 ID，value 为对应的用户昵称
      */
-    public Map<Long, String> selectUserNicksByIds(List<Long> userIds) {
+    public Map<Long, String> selectUserNicksByIds(Collection<Long> userIds) {
         if (CollUtil.isEmpty(userIds)) {
-            return Collections.emptyMap();
+            return List.of();
         }
         List<SysUser> list = userMapper.selectList(
             new LambdaQueryWrapper<SysUser>()

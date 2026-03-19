@@ -7,6 +7,7 @@ import org.dromara.system.api.domain.vo.RemoteUserVo;
 import org.dromara.system.api.model.LoginUser;
 import org.dromara.system.api.model.XcxLoginUser;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -119,7 +120,7 @@ public interface RemoteUserService {
      * @param userIds 用户ids
      * @return 用户列表
      */
-    List<RemoteUserVo> selectListByIds(List<Long> userIds);
+    List<RemoteUserVo> selectListByIds(Collection<Long> userIds);
 
     /**
      * 通过角色ID查询用户ID
@@ -127,7 +128,7 @@ public interface RemoteUserService {
      * @param roleIds 角色ids
      * @return 用户ids
      */
-    List<Long> selectUserIdsByRoleIds(List<Long> roleIds);
+    List<Long> selectUserIdsByRoleIds(Collection<Long> roleIds);
 
     /**
      * 通过角色ID查询用户
@@ -135,7 +136,7 @@ public interface RemoteUserService {
      * @param roleIds 角色ids
      * @return 用户
      */
-    List<RemoteUserVo> selectUsersByRoleIds(List<Long> roleIds);
+    List<RemoteUserVo> selectUsersByRoleIds(Collection<Long> roleIds);
 
     /**
      * 通过部门ID查询用户
@@ -143,7 +144,7 @@ public interface RemoteUserService {
      * @param deptIds 部门ids
      * @return 用户
      */
-    List<RemoteUserVo> selectUsersByDeptIds(List<Long> deptIds);
+    List<RemoteUserVo> selectUsersByDeptIds(Collection<Long> deptIds);
 
     /**
      * 通过岗位ID查询用户
@@ -151,7 +152,7 @@ public interface RemoteUserService {
      * @param postIds 岗位ids
      * @return 用户
      */
-    List<RemoteUserVo> selectUsersByPostIds(List<Long> postIds);
+    List<RemoteUserVo> selectUsersByPostIds(Collection<Long> postIds);
 
     /**
      * 根据用户 ID 列表查询用户昵称映射关系
@@ -159,6 +160,6 @@ public interface RemoteUserService {
      * @param userIds 用户 ID 列表
      * @return Map，其中 key 为用户 ID，value 为对应的用户昵称
      */
-    Map<Long, String> selectUserNicksByIds(List<Long> userIds);
+    Map<Long, String> selectUserNicksByIds(Collection<Long> userIds);
 
 }

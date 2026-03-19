@@ -15,6 +15,7 @@ import org.dromara.system.mapper.SysDeptMapper;
 import org.dromara.system.service.ISysDeptService;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class RemoteDeptServiceImpl implements RemoteDeptService {
      * @return Map，其中 key 为部门 ID，value 为对应的部门名称
      */
     @Override
-    public Map<Long, String> selectDeptNamesByIds(List<Long> deptIds) {
+    public Map<Long, String> selectDeptNamesByIds(Collection<Long> deptIds) {
         if (CollUtil.isEmpty(deptIds)) {
             return Collections.emptyMap();
         }

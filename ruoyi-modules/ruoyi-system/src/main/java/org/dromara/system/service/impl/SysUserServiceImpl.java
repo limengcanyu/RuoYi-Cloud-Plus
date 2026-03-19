@@ -33,10 +33,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 用户 业务层处理
@@ -557,7 +554,7 @@ public class SysUserServiceImpl implements ISysUserService {
     }
 
     @Override
-    public List<Long> selectUserIdsByRoleIds(List<Long> roleIds) {
+    public List<Long> selectUserIdsByRoleIds(Collection<Long> roleIds) {
         List<SysUserRole> userRoles = userRoleMapper.selectList(
             new LambdaQueryWrapper<SysUserRole>().in(SysUserRole::getRoleId, roleIds));
         return StreamUtils.toList(userRoles, SysUserRole::getUserId);

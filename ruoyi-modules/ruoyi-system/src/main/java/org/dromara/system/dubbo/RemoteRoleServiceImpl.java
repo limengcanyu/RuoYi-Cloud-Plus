@@ -10,6 +10,7 @@ import org.dromara.system.domain.SysRole;
 import org.dromara.system.mapper.SysRoleMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class RemoteRoleServiceImpl implements RemoteRoleService {
      * @return Map，其中 key 为角色 ID，value 为对应的角色名称
      */
     @Override
-    public Map<Long, String> selectRoleNamesByIds(List<Long> roleIds) {
+    public Map<Long, String> selectRoleNamesByIds(Collection<Long> roleIds) {
         if (CollUtil.isEmpty(roleIds)) {
             return Collections.emptyMap();
         }

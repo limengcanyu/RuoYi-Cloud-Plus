@@ -6,6 +6,7 @@ import org.dromara.system.domain.bo.SysUserBo;
 import org.dromara.system.domain.vo.SysUserExportVo;
 import org.dromara.system.domain.vo.SysUserVo;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -272,6 +273,6 @@ public interface ISysUserService {
      * @param roleIds 角色ids
      * @return 用户ids
      */
-    List<Long> selectUserIdsByRoleIds(List<Long> roleIds);
+    List<Long> selectUserIdsByRoleIds(Collection<Long> roleIds);
 
 }

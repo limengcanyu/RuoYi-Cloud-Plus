@@ -10,6 +10,7 @@ import org.dromara.system.domain.SysPost;
 import org.dromara.system.mapper.SysPostMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class RemotePostServiceImpl implements RemotePostService {
      * @return Map，其中 key 为岗位 ID，value 为对应的岗位名称
      */
     @Override
-    public Map<Long, String> selectPostNamesByIds(List<Long> postIds) {
+    public Map<Long, String> selectPostNamesByIds(Collection<Long> postIds) {
         if (CollUtil.isEmpty(postIds)) {
             return Collections.emptyMap();
         }
