@@ -1,8 +1,8 @@
 package org.dromara.system.domain.convert;
 
 import io.github.linpeilie.BaseMapper;
-import org.dromara.system.api.domain.bo.RemoteLogininforBo;
-import org.dromara.system.domain.bo.SysLogininforBo;
+import org.dromara.system.api.domain.bo.RemoteLoginInfoBo;
+import org.dromara.system.domain.bo.SysLoginInfoBo;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
@@ -12,6 +12,6 @@ import org.mapstruct.ReportingPolicy;
  * @author zhujie
  */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface SysLogininforBoConvert extends BaseMapper<RemoteLogininforBo, SysLogininforBo> {
+public interface SysLoginInfoBoConvert extends BaseMapper<RemoteLoginInfoBo, SysLoginInfoBo> {
 
 }

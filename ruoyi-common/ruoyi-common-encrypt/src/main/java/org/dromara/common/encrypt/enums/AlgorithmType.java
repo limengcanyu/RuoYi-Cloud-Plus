@@ -1,4 +1,4 @@
-package org.dromara.common.encrypt.enumd;
+package org.dromara.common.encrypt.enums;
 
 import org.dromara.common.encrypt.core.encryptor.*;
 import lombok.AllArgsConstructor;

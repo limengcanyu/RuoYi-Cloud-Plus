@@ -1,22 +1,25 @@
-package org.dromara.system.domain.bo;
+package org.dromara.system.api.domain.bo;
 
-import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
-import org.dromara.system.domain.SysLogininfor;
+import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 系统访问记录业务对象 sys_logininfor
+ * 系统访问记录表 sys_login_info
  *
- * @author Michelle.Chung
+ * @author Lion Li
  */
-
 @Data
-@AutoMapper(target = SysLogininfor.class, reverseConvertGenerate = false)
-public class SysLogininforBo {
+@NoArgsConstructor
+public class RemoteLoginInfoBo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 访问ID
@@ -77,6 +80,5 @@ public class SysLogininforBo {
      * 请求参数
      */
     private Map<String, Object> params = new HashMap<>();
-
 
 }

@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 import org.dromara.common.core.utils.reflect.ReflectUtils;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,6 +29,23 @@ public class TreeBuildUtils extends TreeUtil {
      * 根据前端定制差异化字段
      */
     public static final TreeNodeConfig DEFAULT_CONFIG = TreeNodeConfig.DEFAULT_CONFIG.setNameKey("label");
+
+    /**
+     * 使用动态规划构建树形结构
+     *
+     * @param items      节点列表项
+     * @param parentId   父节点ID
+     * @param classifier 动态规划表分类函数
+     * @param action     回溯动作
+     * @param <K>        节点ID的类型
+     * @param <T>        输入节点的类型
+     * @return 构建好的树形结构列表
+     */
+    public static <K, T> List<T> build(List<T> items, K parentId, Function<T, K> classifier, BiConsumer<T, Map<K, List<T>>> action) {
+        Map<K, List<T>> nodeTreeMaps = items.stream().collect(Collectors.groupingBy(classifier));
+        items.forEach(item -> action.accept(item, nodeTreeMaps));
+        return nodeTreeMaps.get(parentId);
+    }
 
     /**
      * 构建树形结构
@@ -79,17 +97,8 @@ public class TreeBuildUtils extends TreeUtil {
             return CollUtil.newArrayList();
         }
 
-        // 提取所有节点 ID，用于后续判断哪些节点为根节点（即 parentId 不在其中）
-        Set<K> allIds = StreamUtils.toSet(list, getId);
-
-        // 筛选出所有 parentId 不在 allIds 中的节点，这些节点的 parentId 可认为是根节点
-        Set<K> rootParentIds = list.stream()
-            .map(getParentId)
-            .filter(Objects::nonNull)
-            .filter(pid -> !allIds.contains(pid))
-            .collect(Collectors.toSet());
-
-        // 使用流处理，遍历每个顶级 parentId，构建对应树，并合并为一个列表返回
+        Set<K> rootParentIds = StreamUtils.toSet(list, getParentId);
+        rootParentIds.removeAll(StreamUtils.toSet(list, getId));
         return rootParentIds.stream()
             .flatMap(rootParentId -> TreeUtil.build(list, rootParentId, parser).stream())
             .collect(Collectors.toList());

@@ -3,7 +3,7 @@ package org.dromara.resource.dubbo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.dromara.common.sse.dto.SseMessageDto;
+import org.dromara.common.sse.dto.SseMessageDTO;
 import org.dromara.common.sse.utils.SseMessageUtils;
 import org.dromara.resource.api.RemoteMessageService;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class RemoteMessageServiceImpl implements RemoteMessageService {
      */
     @Override
     public void publishMessage(List<Long> sessionKey, String message) {
-        SseMessageDto dto = new SseMessageDto();
+        SseMessageDTO dto = new SseMessageDTO();
         dto.setMessage(message);
         dto.setUserIds(sessionKey);
         SseMessageUtils.publishMessage(dto);

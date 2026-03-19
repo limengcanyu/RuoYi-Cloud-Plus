@@ -1,29 +1,30 @@
-package org.dromara.system.api.domain.bo;
+package org.dromara.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * 系统访问记录表 sys_logininfor
+ * 系统访问记录表 sys_login_info
  *
  * @author Lion Li
  */
+
 @Data
-@NoArgsConstructor
-public class RemoteLogininforBo implements Serializable {
+@TableName("sys_login_info")
+public class SysLoginInfo implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * 访问ID
+     * ID
      */
+    @TableId(value = "info_id")
     private Long infoId;
 
     /**
@@ -40,6 +41,11 @@ public class RemoteLogininforBo implements Serializable {
      * 设备类型
      */
     private String deviceType;
+
+    /**
+     * 登录状态 0成功 1失败
+     */
+    private String status;
 
     /**
      * 登录IP地址
@@ -62,11 +68,6 @@ public class RemoteLogininforBo implements Serializable {
     private String os;
 
     /**
-     * 登录状态（0成功 1失败）
-     */
-    private String status;
-
-    /**
      * 提示消息
      */
     private String msg;
@@ -75,10 +76,5 @@ public class RemoteLogininforBo implements Serializable {
      * 访问时间
      */
     private Date loginTime;
-
-    /**
-     * 请求参数
-     */
-    private Map<String, Object> params = new HashMap<>();
 
 }

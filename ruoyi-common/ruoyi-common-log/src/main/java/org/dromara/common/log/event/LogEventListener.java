@@ -14,7 +14,7 @@ import org.dromara.common.core.utils.ip.AddressUtils;
 import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.system.api.RemoteClientService;
 import org.dromara.system.api.RemoteLogService;
-import org.dromara.system.api.domain.bo.RemoteLogininforBo;
+import org.dromara.system.api.domain.bo.RemoteLoginInfoBo;
 import org.dromara.system.api.domain.bo.RemoteOperLogBo;
 import org.dromara.system.api.domain.vo.RemoteClientVo;
 import org.springframework.context.event.EventListener;
@@ -47,7 +47,7 @@ public class LogEventListener {
      * 保存系统访问记录
      */
     @EventListener
-    public void saveLogininfor(LogininforEvent logininforEvent) {
+    public void saveLoginInfo(LoginInfoEvent loginInfoEvent) {
         HttpServletRequest request = ServletUtils.getRequest();
         final UserAgent userAgent = UserAgentUtil.parse(request.getHeader("User-Agent"));
         final String ip = ServletUtils.getClientIP(request);
@@ -62,34 +62,34 @@ public class LogEventListener {
         StringBuilder s = new StringBuilder();
         s.append(getBlock(ip));
         s.append(address);
-        s.append(getBlock(logininforEvent.getUsername()));
-        s.append(getBlock(logininforEvent.getStatus()));
-        s.append(getBlock(logininforEvent.getMessage()));
+        s.append(getBlock(loginInfoEvent.getUsername()));
+        s.append(getBlock(loginInfoEvent.getStatus()));
+        s.append(getBlock(loginInfoEvent.getMessage()));
         // 打印信息到日志
-        log.info(s.toString(), logininforEvent.getArgs());
+        log.info(s.toString(), loginInfoEvent.getArgs());
         // 获取客户端操作系统
         String os = userAgent.getOs().getName();
         // 获取客户端浏览器
         String browser = userAgent.getBrowser().getName();
         // 封装对象
-        RemoteLogininforBo logininfor = new RemoteLogininforBo();
-        logininfor.setUserName(logininforEvent.getUsername());
+        RemoteLoginInfoBo loginInfo = new RemoteLoginInfoBo();
+        loginInfo.setUserName(loginInfoEvent.getUsername());
         if (ObjectUtil.isNotNull(clientVo)) {
-            logininfor.setClientKey(clientVo.getClientKey());
-            logininfor.setDeviceType(clientVo.getDeviceType());
+            loginInfo.setClientKey(clientVo.getClientKey());
+            loginInfo.setDeviceType(clientVo.getDeviceType());
         }
-        logininfor.setIpaddr(ip);
-        logininfor.setLoginLocation(address);
-        logininfor.setBrowser(browser);
-        logininfor.setOs(os);
-        logininfor.setMsg(logininforEvent.getMessage());
+        loginInfo.setIpaddr(ip);
+        loginInfo.setLoginLocation(address);
+        loginInfo.setBrowser(browser);
+        loginInfo.setOs(os);
+        loginInfo.setMsg(loginInfoEvent.getMessage());
         // 日志状态
-        if (StringUtils.equalsAny(logininforEvent.getStatus(), Constants.LOGIN_SUCCESS, Constants.LOGOUT, Constants.REGISTER)) {
-            logininfor.setStatus(Constants.SUCCESS);
-        } else if (Constants.LOGIN_FAIL.equals(logininforEvent.getStatus())) {
-            logininfor.setStatus(Constants.FAIL);
+        if (StringUtils.equalsAny(loginInfoEvent.getStatus(), Constants.LOGIN_SUCCESS, Constants.LOGOUT, Constants.REGISTER)) {
+            loginInfo.setStatus(Constants.SUCCESS);
+        } else if (Constants.LOGIN_FAIL.equals(loginInfoEvent.getStatus())) {
+            loginInfo.setStatus(Constants.FAIL);
         }
-        remoteLogService.saveLogininfor(logininfor);
+        remoteLogService.saveLoginInfo(loginInfo);
     }
 
     private String getBlock(Object msg) {

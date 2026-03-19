@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.Constants;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.core.utils.MapstructUtils;
-import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.core.utils.TreeBuildUtils;
 import org.dromara.common.satoken.utils.LoginHelper;
@@ -133,7 +132,11 @@ public class SysMenuServiceImpl implements ISysMenuService {
                     .orderByAsc(SysMenu::getParentId)
                     .orderByAsc(SysMenu::getOrderNum));
         }
-        return getChildPerms(menus, Constants.TOP_PARENT_ID);
+        return TreeBuildUtils.build(menus, Constants.TOP_PARENT_ID, SysMenu::getParentId, (menu, nodeTreeMaps) -> {
+            Long menuParentId = menu.getMenuId();
+            List<SysMenu> childMenus = nodeTreeMaps.getOrDefault(menuParentId, Collections.emptyList());
+            menu.setChildren(childMenus);
+        });
     }
 
     /**
@@ -376,40 +379,6 @@ public class SysMenuServiceImpl implements ISysMenuService {
             }
         }
         return true;
-    }
-
-    /**
-     * 根据父节点的ID获取所有子节点
-     *
-     * @param list     分类表
-     * @param parentId 传入的父节点ID
-     * @return String
-     */
-    private List<SysMenu> getChildPerms(List<SysMenu> list, Long parentId) {
-        List<SysMenu> returnList = new ArrayList<>();
-        for (SysMenu t : list) {
-            // 一、根据传入的某个父节点ID,遍历该父节点的所有子节点
-            if (t.getParentId().equals(parentId)) {
-                recursionFn(list, t);
-                returnList.add(t);
-            }
-        }
-        return returnList;
-    }
-
-    /**
-     * 递归列表
-     */
-    private void recursionFn(List<SysMenu> list, SysMenu t) {
-        // 得到子节点列表
-        List<SysMenu> childList = StreamUtils.filter(list, n -> n.getParentId().equals(t.getMenuId()));
-        t.setChildren(childList);
-        for (SysMenu tChild : childList) {
-            // 判断是否有子节点
-            if (list.stream().anyMatch(n -> n.getParentId().equals(tChild.getMenuId()))) {
-                recursionFn(list, tChild);
-            }
-        }
     }
 
 }
