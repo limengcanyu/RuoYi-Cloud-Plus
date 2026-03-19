@@ -392,7 +392,7 @@ public class RemoteUserServiceImpl implements RemoteUserService {
      */
     public Map<Long, String> selectUserNicksByIds(Collection<Long> userIds) {
         if (CollUtil.isEmpty(userIds)) {
-            return List.of();
+            return Map.of();
         }
         List<SysUser> list = userMapper.selectList(
             new LambdaQueryWrapper<SysUser>()
