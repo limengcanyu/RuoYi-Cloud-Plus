@@ -4,7 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.lock.annotation.Lock4j;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.dromara.common.core.constant.CacheConstants;
+import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.excel.utils.ExcelUtil;
 import org.dromara.common.redis.annotation.RepeatSubmit;
@@ -83,7 +83,7 @@ public class SysLoginInfoController extends BaseController {
     @RepeatSubmit()
     @GetMapping("/unlock/{userName}")
     public R<Void> unlock(@PathVariable("userName") String userName) {
-        String loginName = CacheConstants.PWD_ERR_CNT_KEY + userName;
+        String loginName = CacheNames.PWD_ERR_CNT_KEY + userName;
         if (RedisUtils.hasKey(loginName)) {
             RedisUtils.deleteObject(loginName);
         }

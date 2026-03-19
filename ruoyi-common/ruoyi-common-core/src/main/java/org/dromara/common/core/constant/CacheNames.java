@@ -81,4 +81,14 @@ public interface CacheNames {
      */
     String ONLINE_TOKEN = "online_tokens";
 
+    /**
+     * 在线用户 redis key
+     */
+    String ONLINE_TOKEN_KEY = "online_tokens:";
+
+    /**
+     * 登录账户密码错误次数 redis key
+     */
+    String PWD_ERR_CNT_KEY = "pwd_err_cnt:";
+
 }

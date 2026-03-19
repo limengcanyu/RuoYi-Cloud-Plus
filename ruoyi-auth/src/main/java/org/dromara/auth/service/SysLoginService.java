@@ -188,7 +188,7 @@ public class SysLoginService {
      * 登录校验
      */
     public void checkLogin(LoginType loginType, String username, Supplier<Boolean> supplier) {
-        String errorKey = CacheConstants.PWD_ERR_CNT_KEY + username;
+        String errorKey = CacheNames.PWD_ERR_CNT_KEY + username;
         String loginFail = Constants.LOGIN_FAIL;
         Integer maxRetryCount = userPasswordProperties.getMaxRetryCount();
         Integer lockTime = userPasswordProperties.getLockTime();

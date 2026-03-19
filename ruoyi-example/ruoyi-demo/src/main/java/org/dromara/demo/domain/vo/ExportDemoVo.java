@@ -51,7 +51,7 @@ public class ExportDemoVo {
      * 使用ExcelDictFormat注解需要进行下拉选的部分
      */
     @ExcelProperty(value = "性别", index = 2, converter = ExcelDictConvert.class)
-    @ExcelDictFormat(dictType = "sys_user_sex")
+    @ExcelDictFormat(dictType = "sys_user_gender")
     @NotEmpty(message = "性别不能为空", groups = AddGroup.class)
     private String gender;
 

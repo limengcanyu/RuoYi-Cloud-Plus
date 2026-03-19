@@ -23,14 +23,19 @@ public interface SystemConstants {
     String YES = "Y";
 
     /**
+     * 是否为系统默认（否）
+     */
+    String NO = "N";
+
+    /**
      * 是否菜单外链（是）
      */
-    String YES_FRAME = "0";
+    String YES_FRAME = YES;
 
     /**
      * 是否菜单外链（否）
      */
-    String NO_FRAME = "1";
+    String NO_FRAME = NO;
 
     /**
      * 菜单类型（目录）

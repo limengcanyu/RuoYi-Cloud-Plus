@@ -7,6 +7,10 @@ import org.dromara.common.core.constant.HttpStatus;
 import java.io.Serial;
 import java.io.Serializable;
 
+import static org.dromara.common.core.constant.HttpStatus.*;
+import static org.dromara.common.core.constant.HttpStatus.ERROR;
+import static org.dromara.common.core.constant.HttpStatus.SUCCESS;
+
 /**
  * 响应信息主体
  *
@@ -18,16 +22,6 @@ public class R<T> implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 成功
-     */
-    public static final int SUCCESS = 200;
-
-    /**
-     * 失败
-     */
-    public static final int FAIL = 500;
 
     /**
      * 消息状态码
@@ -61,19 +55,19 @@ public class R<T> implements Serializable {
     }
 
     public static <T> R<T> fail() {
-        return restResult(null, FAIL, "操作失败");
+        return restResult(null, ERROR, "操作失败");
     }
 
     public static <T> R<T> fail(String msg) {
-        return restResult(null, FAIL, msg);
+        return restResult(null, ERROR, msg);
     }
 
     public static <T> R<T> fail(T data) {
-        return restResult(data, FAIL, "操作失败");
+        return restResult(data, ERROR, "操作失败");
     }
 
     public static <T> R<T> fail(String msg, T data) {
-        return restResult(data, FAIL, msg);
+        return restResult(data, ERROR, msg);
     }
 
     public static <T> R<T> fail(int code, String msg) {
@@ -87,7 +81,7 @@ public class R<T> implements Serializable {
      * @return 警告消息
      */
     public static <T> R<T> warn(String msg) {
-        return restResult(null, HttpStatus.WARN, msg);
+        return restResult(null, WARN, msg);
     }
 
     /**
@@ -98,7 +92,7 @@ public class R<T> implements Serializable {
      * @return 警告消息
      */
     public static <T> R<T> warn(String msg, T data) {
-        return restResult(data, HttpStatus.WARN, msg);
+        return restResult(data, WARN, msg);
     }
 
     private static <T> R<T> restResult(T data, int code, String msg) {
@@ -114,7 +108,7 @@ public class R<T> implements Serializable {
     }
 
     public static <T> Boolean isSuccess(R<T> ret) {
-        return R.SUCCESS == ret.getCode();
+        return SUCCESS == ret.getCode();
     }
 
 }

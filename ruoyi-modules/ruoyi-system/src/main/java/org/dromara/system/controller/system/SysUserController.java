@@ -8,6 +8,7 @@ import cn.hutool.core.util.ObjectUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.core.utils.StreamUtils;
@@ -16,6 +17,7 @@ import org.dromara.common.encrypt.annotation.ApiEncrypt;
 import org.dromara.common.excel.core.ExcelResult;
 import org.dromara.common.excel.utils.ExcelUtil;
 import org.dromara.common.redis.annotation.RepeatSubmit;
+import org.dromara.common.redis.utils.RedisUtils;
 import org.dromara.common.log.annotation.Log;
 import org.dromara.common.log.enums.BusinessType;
 import org.dromara.common.mybatis.core.page.PageQuery;
@@ -157,7 +159,7 @@ public class SysUserController extends BaseController {
         deptService.checkDeptDataScope(user.getDeptId());
         if (!userService.checkUserNameUnique(user)) {
             return R.fail("新增用户'" + user.getUserName() + "'失败，登录账号已存在");
-        } else if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(user)) {
+        } else if (StringUtils.isNotEmpty(user.getPhoneNumber()) && !userService.checkPhoneUnique(user)) {
             return R.fail("新增用户'" + user.getUserName() + "'失败，手机号码已存在");
         } else if (StringUtils.isNotEmpty(user.getEmail()) && !userService.checkEmailUnique(user)) {
             return R.fail("新增用户'" + user.getUserName() + "'失败，邮箱账号已存在");
@@ -179,7 +181,7 @@ public class SysUserController extends BaseController {
         deptService.checkDeptDataScope(user.getDeptId());
         if (!userService.checkUserNameUnique(user)) {
             return R.fail("修改用户'" + user.getUserName() + "'失败，登录账号已存在");
-        } else if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(user)) {
+        } else if (StringUtils.isNotEmpty(user.getPhoneNumber()) && !userService.checkPhoneUnique(user)) {
             return R.fail("修改用户'" + user.getUserName() + "'失败，手机号码已存在");
         } else if (StringUtils.isNotEmpty(user.getEmail()) && !userService.checkEmailUnique(user)) {
             return R.fail("修改用户'" + user.getUserName() + "'失败，邮箱账号已存在");
@@ -241,6 +243,27 @@ public class SysUserController extends BaseController {
         userService.checkUserAllowed(user.getUserId());
         userService.checkUserDataScope(user.getUserId());
         return toAjax(userService.updateUserStatus(user.getUserId(), user.getStatus()));
+    }
+
+    /**
+     * 解锁用户
+     */
+    @SaCheckPermission("system:user:edit")
+    @Log(title = "用户解锁", businessType = BusinessType.OTHER)
+    @RepeatSubmit()
+    @GetMapping("/unlock/{userId}")
+    public R<Void> unlock(@PathVariable Long userId) {
+        userService.checkUserAllowed(userId);
+        userService.checkUserDataScope(userId);
+        SysUserVo user = userService.selectUserById(userId);
+        if (ObjectUtil.isNull(user)) {
+            return R.fail("用户不存在");
+        }
+        String loginName = CacheNames.PWD_ERR_CNT_KEY + user.getUserName();
+        if (RedisUtils.hasKey(loginName)) {
+            RedisUtils.deleteObject(loginName);
+        }
+        return R.ok();
     }
 
     /**

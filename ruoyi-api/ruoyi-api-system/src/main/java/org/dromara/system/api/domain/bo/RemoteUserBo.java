@@ -66,12 +66,12 @@ public class RemoteUserBo implements Serializable {
     /**
      * 手机号码
      */
-    private String phonenumber;
+    private String phoneNumber;
 
     /**
      * 用户性别（0男 1女 2未知）
      */
-    private String sex;
+    private String gender;
 
     /**
      * 头像地址

@@ -48,12 +48,12 @@ public class SysUserProfileBo implements Serializable {
      */
     @Sensitive(strategy = SensitiveStrategy.PHONE)
     @Pattern(regexp = RegexConstants.MOBILE, message = "手机号格式不正确")
-    private String phonenumber;
+    private String phoneNumber;
 
     /**
      * 用户性别（0男 1女 2未知）
      */
-    private String sex;
+    private String gender;
 
     /**
      * 请求参数

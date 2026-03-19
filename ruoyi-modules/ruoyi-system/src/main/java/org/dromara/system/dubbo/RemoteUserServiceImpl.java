@@ -102,7 +102,7 @@ public class RemoteUserServiceImpl implements RemoteUserService {
      */
     @Override
     public LoginUser getUserInfoByPhonenumber(String phonenumber) throws UserException {
-        SysUserVo sysUser = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhonenumber, phonenumber));
+        SysUserVo sysUser = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhoneNumber, phonenumber));
         if (ObjectUtil.isNull(sysUser)) {
             throw new UserException("user.not.exists", phonenumber);
         }
@@ -301,7 +301,7 @@ public class RemoteUserServiceImpl implements RemoteUserService {
         List<SysUserVo> list = userMapper.selectVoList(new LambdaQueryWrapper<SysUser>()
             .select(SysUser::getUserId, SysUser::getDeptId, SysUser::getUserName,
                 SysUser::getNickName, SysUser::getUserType, SysUser::getEmail,
-                SysUser::getPhonenumber, SysUser::getSex, SysUser::getStatus,
+                SysUser::getPhoneNumber, SysUser::getGender, SysUser::getStatus,
                 SysUser::getCreateTime)
             .eq(SysUser::getStatus, SystemConstants.NORMAL)
             .in(SysUser::getUserId, userIds));
@@ -356,7 +356,7 @@ public class RemoteUserServiceImpl implements RemoteUserService {
             return List.of();
         }
         List<SysUserVo> list = userMapper.selectVoList(new LambdaQueryWrapper<SysUser>()
-            .select(SysUser::getUserId, SysUser::getUserName, SysUser::getNickName, SysUser::getEmail, SysUser::getPhonenumber)
+            .select(SysUser::getUserId, SysUser::getUserName, SysUser::getNickName, SysUser::getEmail, SysUser::getPhoneNumber)
             .eq(SysUser::getStatus, SystemConstants.NORMAL)
             .in(SysUser::getDeptId, deptIds));
         return BeanUtil.copyToList(list, RemoteUserVo.class);

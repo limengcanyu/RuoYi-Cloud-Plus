@@ -3,7 +3,7 @@ package org.dromara.common.core.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.dromara.common.core.constant.CacheConstants;
+import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.service.DictService;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
@@ -41,7 +41,7 @@ public class DictServiceImpl implements DictService {
     @Override
     public String getDictLabel(String dictType, String dictValue, String separator) {
         // 优先从本地缓存获取
-        List<RemoteDictDataVo> datas = (List<RemoteDictDataVo>) ceffeine.get(CacheConstants.SYS_DICT_KEY + "remote:" + dictType, k -> {
+        List<RemoteDictDataVo> datas = (List<RemoteDictDataVo>) ceffeine.get(CacheNames.SYS_DICT + ":remote:" + dictType, k -> {
             return remoteDictService.selectDictDataByType(dictType);
         });
         if (CollUtil.isEmpty(datas)) {
@@ -69,7 +69,7 @@ public class DictServiceImpl implements DictService {
     @Override
     public String getDictValue(String dictType, String dictLabel, String separator) {
         // 优先从本地缓存获取
-        List<RemoteDictDataVo> datas = (List<RemoteDictDataVo>) ceffeine.get(CacheConstants.SYS_DICT_KEY + "remote:" + dictType, k -> {
+        List<RemoteDictDataVo> datas = (List<RemoteDictDataVo>) ceffeine.get(CacheNames.SYS_DICT + ":remote:" + dictType, k -> {
             return remoteDictService.selectDictDataByType(dictType);
         });
         if (CollUtil.isEmpty(datas)) {

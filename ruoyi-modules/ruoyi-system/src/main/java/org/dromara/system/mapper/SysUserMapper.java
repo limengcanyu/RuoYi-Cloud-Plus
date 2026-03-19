@@ -79,7 +79,7 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
             .like(StringUtils.isNotBlank(user.getUserName()), "u", SysUser::getUserName, user.getUserName())
             .like(StringUtils.isNotBlank(user.getNickName()), "u", SysUser::getNickName, user.getNickName())
             .eq(StringUtils.isNotBlank(user.getStatus()), "u", SysUser::getStatus, user.getStatus())
-            .like(StringUtils.isNotBlank(user.getPhonenumber()), "u", SysUser::getPhonenumber, user.getPhonenumber())
+            .like(StringUtils.isNotBlank(user.getPhoneNumber()), "u", SysUser::getPhoneNumber, user.getPhoneNumber())
             .between(user.getParams().get("beginTime") != null && user.getParams().get("endTime") != null,
                 "u", SysUser::getCreateTime, user.getParams().get("beginTime"), user.getParams().get("endTime"))
             .in(deptIds != null && !deptIds.isEmpty(), "u", SysUser::getDeptId, deptIds)
@@ -173,7 +173,7 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
             .eq("u", SysUser::getDelFlag, SystemConstants.NORMAL)
             .like(StringUtils.isNotBlank(user.getUserName()), "u", SysUser::getUserName, user.getUserName())
             .eq(StringUtils.isNotBlank(user.getStatus()), "u", SysUser::getStatus, user.getStatus())
-            .like(StringUtils.isNotBlank(user.getPhonenumber()), "u", SysUser::getPhonenumber, user.getPhonenumber());
+            .like(StringUtils.isNotBlank(user.getPhoneNumber()), "u", SysUser::getPhoneNumber, user.getPhoneNumber());
     }
 
 }
