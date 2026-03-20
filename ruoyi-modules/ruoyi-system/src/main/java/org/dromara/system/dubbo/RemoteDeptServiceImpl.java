@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.dubbo.config.annotation.DubboService;
+import org.dromara.common.http.annotation.RemoteServiceController;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.system.api.RemoteDeptService;
@@ -13,7 +13,6 @@ import org.dromara.system.domain.SysDept;
 import org.dromara.system.domain.vo.SysDeptVo;
 import org.dromara.system.mapper.SysDeptMapper;
 import org.dromara.system.service.ISysDeptService;
-import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -26,8 +25,7 @@ import java.util.Map;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@Service
-@DubboService
+@RemoteServiceController
 public class RemoteDeptServiceImpl implements RemoteDeptService {
 
     private final ISysDeptService deptService;

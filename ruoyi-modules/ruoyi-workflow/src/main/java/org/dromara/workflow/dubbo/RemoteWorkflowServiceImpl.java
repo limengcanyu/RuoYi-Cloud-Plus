@@ -1,7 +1,7 @@
 package org.dromara.workflow.dubbo;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.dubbo.config.annotation.DubboService;
+import org.dromara.common.http.annotation.RemoteServiceController;
 import org.dromara.workflow.api.RemoteWorkflowService;
 import org.dromara.workflow.api.domain.RemoteCompleteTask;
 import org.dromara.workflow.api.domain.RemoteStartProcess;
@@ -17,7 +17,7 @@ import java.util.Map;
  * @Author ZETA
  * @Date 2024/6/3
  */
-@DubboService
+@RemoteServiceController
 @RequiredArgsConstructor
 public class RemoteWorkflowServiceImpl implements RemoteWorkflowService {
 

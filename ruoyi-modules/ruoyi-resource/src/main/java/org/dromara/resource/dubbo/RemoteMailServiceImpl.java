@@ -2,11 +2,10 @@ package org.dromara.resource.dubbo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.dubbo.config.annotation.DubboService;
+import org.dromara.common.http.annotation.RemoteServiceController;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.mail.utils.MailUtils;
 import org.dromara.resource.api.RemoteMailService;
-import org.springframework.stereotype.Service;
 
 /**
  * 邮件服务
@@ -15,8 +14,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @RequiredArgsConstructor
-@Service
-@DubboService
+@RemoteServiceController
 public class RemoteMailServiceImpl implements RemoteMailService {
 
     /**

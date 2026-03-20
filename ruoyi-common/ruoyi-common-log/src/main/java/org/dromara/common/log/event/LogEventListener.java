@@ -5,8 +5,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.constant.Constants;
 import org.dromara.common.core.utils.ServletUtils;
 import org.dromara.common.core.utils.StringUtils;
@@ -27,12 +27,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class LogEventListener {
 
-    @DubboReference
-    private RemoteLogService remoteLogService;
-    @DubboReference
-    private RemoteClientService remoteClientService;
+    private final RemoteLogService remoteLogService;
+    private final RemoteClientService remoteClientService;
 
     /**
      * 保存系统日志记录

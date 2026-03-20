@@ -2,13 +2,14 @@ package org.dromara.resource.dubbo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.dubbo.config.annotation.DubboService;
+import org.dromara.common.http.annotation.RemoteServiceController;
 import org.dromara.resource.api.RemoteSmsService;
 import org.dromara.resource.api.domain.RemoteSms;
+import org.dromara.resource.api.domain.RemoteSmsBatch;
+import org.dromara.resource.api.domain.RemoteSmsDelayBatch;
 import org.dromara.sms4j.api.SmsBlend;
 import org.dromara.sms4j.api.entity.SmsResponse;
 import org.dromara.sms4j.core.factory.SmsFactory;
-import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,8 +21,7 @@ import java.util.List;
  */
 @Slf4j
 @RequiredArgsConstructor
-@Service
-@DubboService
+@RemoteServiceController
 public class RemoteSmsServiceImpl implements RemoteSmsService {
 
     /**
@@ -122,6 +122,11 @@ public class RemoteSmsServiceImpl implements RemoteSmsService {
         return getRemoteSms(smsResponse);
     }
 
+    @Override
+    public RemoteSms messageTextingTemplate(RemoteSmsBatch request) {
+        return messageTexting(request.phones(), request.templateId(), request.messages());
+    }
+
     /**
      * 异步方法：发送简单文本短信
      *
@@ -193,6 +198,11 @@ public class RemoteSmsServiceImpl implements RemoteSmsService {
     @Override
     public void delayMessageTexting(List<String> phones, String templateId, LinkedHashMap<String, String> messages, Long delayedTime) {
         getSmsBlend().delayMassTexting(phones, templateId, messages, delayedTime);
+    }
+
+    @Override
+    public void delayMessageTextingTemplate(RemoteSmsDelayBatch request) {
+        delayMessageTexting(request.phones(), request.templateId(), request.messages(), request.delayedTime());
     }
 
     /**

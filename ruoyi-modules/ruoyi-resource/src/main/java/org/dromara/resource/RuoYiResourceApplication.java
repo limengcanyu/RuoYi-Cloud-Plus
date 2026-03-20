@@ -1,6 +1,5 @@
 package org.dromara.resource;
 
-import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
@@ -11,7 +10,6 @@ import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
  *
  * @author Lion Li
  */
-@EnableDubbo
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class RuoYiResourceApplication {
     public static void main(String[] args) {

@@ -2,11 +2,10 @@ package org.dromara.resource.dubbo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.dubbo.config.annotation.DubboService;
+import org.dromara.common.http.annotation.RemoteServiceController;
 import org.dromara.common.sse.dto.SseMessageDTO;
 import org.dromara.common.sse.utils.SseMessageUtils;
 import org.dromara.resource.api.RemoteMessageService;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -17,8 +16,7 @@ import java.util.List;
  */
 @Slf4j
 @RequiredArgsConstructor
-@Service
-@DubboService
+@RemoteServiceController
 public class RemoteMessageServiceImpl implements RemoteMessageService {
 
     /**

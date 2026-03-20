@@ -18,8 +18,6 @@
         <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
         <seata.version>2.5.0</seata.version>
         <nacos.client.version>3.1.1</nacos.client.version>
-        <dubbo.version>3.3.6</dubbo.version>
-        <dubbo-extensions.version>3.3.1</dubbo-extensions.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -60,30 +58,6 @@
                 <version>${seata.version}</version>
             </dependency>
 
-            <!-- Apache Dubbo 配置 -->
-            <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo-spring-boot-starter</artifactId>
-                <version>${dubbo.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo-spring-boot-actuator</artifactId>
-                <version>${dubbo.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>${dubbo.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.dubbo.extensions</groupId>
-                <artifactId>dubbo-metadata-report-redis</artifactId>
-                <version>${dubbo-extensions.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

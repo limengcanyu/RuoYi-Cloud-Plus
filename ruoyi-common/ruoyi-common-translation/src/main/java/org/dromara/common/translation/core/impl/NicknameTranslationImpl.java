@@ -2,7 +2,6 @@ package org.dromara.common.translation.core.impl;
 
 import cn.hutool.core.convert.Convert;
 import lombok.AllArgsConstructor;
-import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.redis.utils.CacheUtils;
@@ -23,8 +22,7 @@ import java.util.List;
 @TranslationType(type = TransConstant.USER_ID_TO_NICKNAME)
 public class NicknameTranslationImpl implements TranslationInterface<String> {
 
-    @DubboReference
-    private RemoteUserService remoteUserService;
+    private final RemoteUserService remoteUserService;
 
     @Override
     public String translation(Object key, String other) {

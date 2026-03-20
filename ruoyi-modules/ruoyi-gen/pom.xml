@@ -51,14 +51,13 @@
 
         <dependency>
             <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-mybatis</artifactId>
+            <artifactId>ruoyi-common-http</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-dubbo</artifactId>
+            <artifactId>ruoyi-common-mybatis</artifactId>
         </dependency>
-
 
         <dependency>
             <groupId>org.dromara</groupId>

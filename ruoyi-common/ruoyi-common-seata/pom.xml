@@ -22,12 +22,6 @@
             <artifactId>ruoyi-common-core</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.dubbo.extensions</groupId>
-            <artifactId>dubbo-filter-seata</artifactId>
-            <version>3.3.1</version>
-        </dependency>
-
         <!-- SpringBoot Seata -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -36,10 +30,6 @@
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.dubbo.extensions</groupId>
-                    <artifactId>dubbo-filter-seata</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>io.seata</groupId>

@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 public class RateLimiterConfig {
 
     @Bean
-    public RateLimiterAspect rateLimiterAspect() {
+    public RateLimiterAspect plusRateLimiterAspect() {
         return new RateLimiterAspect();
     }
 

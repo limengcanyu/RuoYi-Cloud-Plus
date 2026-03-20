@@ -2,7 +2,6 @@ package org.dromara.system.controller.system;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
-import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.core.service.DictService;
 import org.dromara.common.redis.annotation.RepeatSubmit;
@@ -32,8 +31,7 @@ public class SysNoticeController extends BaseController {
     private final ISysNoticeService noticeService;
     private final DictService dictService;
 
-    @DubboReference
-    private RemoteMessageService remoteMessageService;
+    private final RemoteMessageService remoteMessageService;
 
     /**
      * 获取通知公告列表

@@ -2,7 +2,7 @@ package org.dromara.system.dubbo;
 
 import cn.hutool.core.convert.Convert;
 import lombok.RequiredArgsConstructor;
-import org.apache.dubbo.config.annotation.DubboService;
+import org.dromara.common.http.annotation.RemoteServiceController;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.core.domain.PageResult;
@@ -21,7 +21,6 @@ import org.dromara.system.service.ISysDeptService;
 import org.dromara.system.service.ISysPostService;
 import org.dromara.system.service.ISysRoleService;
 import org.dromara.system.service.ISysUserService;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -32,8 +31,7 @@ import java.util.Map;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@Service
-@DubboService
+@RemoteServiceController
 public class RemoteTaskAssigneeServiceImpl implements RemoteTaskAssigneeService {
 
     // 上级Service注入下级Service 其他Service永远不可能注入当前类 避免循环注入

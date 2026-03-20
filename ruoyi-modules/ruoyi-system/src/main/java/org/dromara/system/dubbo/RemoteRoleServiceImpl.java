@@ -3,12 +3,11 @@ package org.dromara.system.dubbo;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.dubbo.config.annotation.DubboService;
+import org.dromara.common.http.annotation.RemoteServiceController;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.system.api.RemoteRoleService;
 import org.dromara.system.domain.SysRole;
 import org.dromara.system.mapper.SysRoleMapper;
-import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,8 +20,7 @@ import java.util.Map;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@Service
-@DubboService
+@RemoteServiceController
 public class RemoteRoleServiceImpl implements RemoteRoleService {
 
     private final SysRoleMapper roleMapper;

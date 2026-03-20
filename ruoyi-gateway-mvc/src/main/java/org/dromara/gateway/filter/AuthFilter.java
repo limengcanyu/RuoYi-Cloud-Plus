@@ -62,7 +62,7 @@ public class AuthFilter implements WebMvcConfigurer {
                 }
             })))
             .addPathPatterns("/**")
-            .excludePathPatterns("/favicon.ico", "/actuator", "/actuator/**", "/resource/sse");
+            .excludePathPatterns("/favicon.ico", "/actuator", "/actuator/**", "/resource/sse" , "/error");
     }
 
     /**

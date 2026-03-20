@@ -2,11 +2,10 @@ package org.dromara.system.dubbo;
 
 import cn.hutool.core.lang.Dict;
 import lombok.RequiredArgsConstructor;
-import org.apache.dubbo.config.annotation.DubboService;
+import org.dromara.common.http.annotation.RemoteServiceController;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.system.api.RemoteConfigService;
 import org.dromara.system.service.ISysConfigService;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -16,8 +15,7 @@ import java.util.List;
  * @author Michelle.Chung
  */
 @RequiredArgsConstructor
-@Service
-@DubboService
+@RemoteServiceController
 public class RemoteConfigServiceImpl implements RemoteConfigService {
 
     private final ISysConfigService configService;

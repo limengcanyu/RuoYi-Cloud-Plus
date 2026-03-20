@@ -20,9 +20,9 @@
         <module>ruoyi-common-security</module>
         <module>ruoyi-common-satoken</module>
         <module>ruoyi-common-web</module>
+        <module>ruoyi-common-http</module>
         <module>ruoyi-common-mybatis</module>
         <module>ruoyi-common-job</module>
-        <module>ruoyi-common-dubbo</module>
         <module>ruoyi-common-seata</module>
         <module>ruoyi-common-loadbalancer</module>
         <module>ruoyi-common-oss</module>

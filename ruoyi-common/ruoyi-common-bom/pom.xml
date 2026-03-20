@@ -82,6 +82,13 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- 内部HTTP远程调用 -->
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-common-http</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
             <!-- 数据库服务 -->
             <dependency>
                 <groupId>org.dromara</groupId>
@@ -93,13 +100,6 @@
             <dependency>
                 <groupId>org.dromara</groupId>
                 <artifactId>ruoyi-common-job</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <!-- RPC服务 -->
-            <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-common-dubbo</artifactId>
                 <version>${revision}</version>
             </dependency>
 

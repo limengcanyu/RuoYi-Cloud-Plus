@@ -8,7 +8,6 @@ import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.constant.Constants;
 import org.dromara.common.core.utils.MessageUtils;
@@ -35,10 +34,8 @@ import java.time.Duration;
 @Slf4j
 public class UserActionListener implements SaTokenListener {
 
-    @DubboReference
-    private RemoteUserService remoteUserService;
-    @DubboReference
-    private RemoteMessageService remoteMessageService;
+    private final RemoteUserService remoteUserService;
+    private final RemoteMessageService remoteMessageService;
 
     /**
      * 每次登录时触发

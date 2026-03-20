@@ -10,7 +10,6 @@ import com.baomidou.lock.annotation.Lock4j;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthUser;
-import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.auth.form.RegisterBody;
 import org.dromara.auth.properties.CaptchaProperties;
 import org.dromara.auth.properties.UserPasswordProperties;
@@ -50,10 +49,8 @@ import java.util.function.Supplier;
 @Slf4j
 public class SysLoginService {
 
-    @DubboReference
-    private RemoteUserService remoteUserService;
-    @DubboReference
-    private RemoteSocialService remoteSocialService;
+    private final RemoteUserService remoteUserService;
+    private final RemoteSocialService remoteSocialService;
 
     @Autowired
     private UserPasswordProperties userPasswordProperties;

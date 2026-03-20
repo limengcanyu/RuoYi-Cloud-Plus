@@ -17,6 +17,7 @@ import org.dromara.common.mybatis.handler.MybatisExceptionHandler;
 import org.dromara.common.mybatis.handler.PlusPostInitTableInfoHandler;
 import org.dromara.common.mybatis.interceptor.PlusDataPermissionInterceptor;
 import org.dromara.common.mybatis.service.SysDataScopeService;
+import org.dromara.system.api.RemoteDataScopeService;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -117,8 +118,8 @@ public class MybatisPlusConfiguration {
      * 数据权限处理实现
      */
     @Bean("sdss")
-    public SysDataScopeService sysDataScopeService() {
-        return new SysDataScopeService();
+    public SysDataScopeService sysDataScopeService(RemoteDataScopeService remoteDataScopeService) {
+        return new SysDataScopeService(remoteDataScopeService);
     }
 
     /**

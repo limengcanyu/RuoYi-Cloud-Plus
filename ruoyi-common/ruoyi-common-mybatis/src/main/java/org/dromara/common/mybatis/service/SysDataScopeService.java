@@ -1,6 +1,6 @@
 package org.dromara.common.mybatis.service;
 
-import org.apache.dubbo.config.annotation.DubboReference;
+import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.constant.CacheNames;
 import org.dromara.system.api.RemoteDataScopeService;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
  * @author Lion Li
  */
 @Service("sdss")
+@RequiredArgsConstructor
 public class SysDataScopeService {
 
-    @DubboReference
-    private RemoteDataScopeService remoteDataScopeService;
+    private final RemoteDataScopeService remoteDataScopeService;
 
     /**
      * 获取角色自定义权限语句

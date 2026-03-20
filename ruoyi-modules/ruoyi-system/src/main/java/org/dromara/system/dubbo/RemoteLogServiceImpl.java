@@ -1,7 +1,7 @@
 package org.dromara.system.dubbo;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.dubbo.config.annotation.DubboService;
+import org.dromara.common.http.annotation.RemoteServiceController;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.system.api.RemoteLogService;
 import org.dromara.system.api.domain.bo.RemoteLoginInfoBo;
@@ -11,7 +11,7 @@ import org.dromara.system.domain.bo.SysOperLogBo;
 import org.dromara.system.service.ISysLoginInfoService;
 import org.dromara.system.service.ISysOperLogService;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
 
 /**
  * 操作日志记录
@@ -19,8 +19,7 @@ import org.springframework.stereotype.Service;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@Service
-@DubboService
+@RemoteServiceController
 public class RemoteLogServiceImpl implements RemoteLogService {
 
     private final ISysOperLogService operLogService;
@@ -32,6 +31,7 @@ public class RemoteLogServiceImpl implements RemoteLogService {
      * @param remoteOperLogBo 日志实体
      */
     @Async
+    @PostMapping("/save-log")
     @Override
     public void saveLog(RemoteOperLogBo remoteOperLogBo) {
         SysOperLogBo sysOperLogBo = MapstructUtils.convert(remoteOperLogBo, SysOperLogBo.class);
@@ -44,6 +44,7 @@ public class RemoteLogServiceImpl implements RemoteLogService {
      * @param remoteLoginInfoBo 访问实体
      */
     @Async
+    @PostMapping("/save-login-info")
     @Override
     public void saveLoginInfo(RemoteLoginInfoBo remoteLoginInfoBo) {
         SysLoginInfoBo sysLoginInfoBo = MapstructUtils.convert(remoteLoginInfoBo, SysLoginInfoBo.class);

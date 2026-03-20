@@ -1,6 +1,13 @@
 package org.dromara.resource.api;
 
+import org.dromara.common.core.annotation.RemoteHttpService;
 import org.dromara.resource.api.domain.RemoteSms;
+import org.dromara.resource.api.domain.RemoteSmsBatch;
+import org.dromara.resource.api.domain.RemoteSmsDelayBatch;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +17,8 @@ import java.util.List;
  *
  * @author Feng
  */
+@RemoteHttpService("ruoyi-resource")
+@HttpExchange("/inner/remote/resource/sms")
 public interface RemoteSmsService {
 
     /**
@@ -19,7 +28,8 @@ public interface RemoteSmsService {
      * @param message 短信内容
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    RemoteSms sendMessage(String phone, String message);
+    @PostExchange("/send-text")
+    RemoteSms sendMessage(@RequestParam String phone, @RequestParam String message);
 
     /**
      * 同步方法：发送固定消息模板多模板参数短信
@@ -28,7 +38,8 @@ public interface RemoteSmsService {
      * @param messages 短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    RemoteSms sendMessage(String phone, LinkedHashMap<String, String> messages);
+    @PostExchange("/send-vars")
+    RemoteSms sendMessage(@RequestParam String phone, @RequestBody LinkedHashMap<String, String> messages);
 
     /**
      * 同步方法：使用自定义模板发送短信
@@ -38,7 +49,9 @@ public interface RemoteSmsService {
      * @param messages   短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    RemoteSms sendMessage(String phone, String templateId, LinkedHashMap<String, String> messages);
+    @PostExchange("/send-template")
+    RemoteSms sendMessage(@RequestParam String phone, @RequestParam String templateId,
+                          @RequestBody LinkedHashMap<String, String> messages);
 
     /**
      * 同步方法：群发固定模板短信
@@ -47,7 +60,8 @@ public interface RemoteSmsService {
      * @param message 短信内容
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    RemoteSms messageTexting(List<String> phones, String message);
+    @PostExchange("/message-texting")
+    RemoteSms messageTexting(@RequestBody List<String> phones, @RequestParam String message);
 
     /**
      * 同步方法：使用自定义模板群发短信
@@ -57,7 +71,19 @@ public interface RemoteSmsService {
      * @param messages   短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    RemoteSms messageTexting(List<String> phones, String templateId, LinkedHashMap<String, String> messages);
+    @PostExchange("/message-texting-template")
+    default RemoteSms messageTexting(List<String> phones, String templateId, LinkedHashMap<String, String> messages) {
+        return messageTextingTemplate(new RemoteSmsBatch(phones, templateId, messages));
+    }
+
+    /**
+     * 使用自定义模板群发短信.
+     *
+     * @param request 群发模板短信请求
+     * @return 封装了短信发送结果的 RemoteSms 对象
+     */
+    @PostExchange("/message-texting-template")
+    RemoteSms messageTextingTemplate(@RequestBody RemoteSmsBatch request);
 
     /**
      * 异步方法：发送固定消息模板短信
@@ -65,7 +91,8 @@ public interface RemoteSmsService {
      * @param phone   目标手机号
      * @param message 短信内容
      */
-    void sendMessageAsync(String phone, String message);
+    @PostExchange("/send-async-text")
+    void sendMessageAsync(@RequestParam String phone, @RequestParam String message);
 
     /**
      * 异步方法：使用自定义模板发送短信
@@ -74,7 +101,9 @@ public interface RemoteSmsService {
      * @param templateId 短信模板ID
      * @param messages   短信模板参数，使用 LinkedHashMap 以保持参数顺序
      */
-    void sendMessageAsync(String phone, String templateId, LinkedHashMap<String, String> messages);
+    @PostExchange("/send-async-template")
+    void sendMessageAsync(@RequestParam String phone, @RequestParam String templateId,
+                          @RequestBody LinkedHashMap<String, String> messages);
 
     /**
      * 延迟发送：发送固定消息模板短信
@@ -83,7 +112,8 @@ public interface RemoteSmsService {
      * @param message     短信内容
      * @param delayedTime 延迟发送时间（毫秒）
      */
-    void delayMessage(String phone, String message, Long delayedTime);
+    @PostExchange("/delay-text")
+    void delayMessage(@RequestParam String phone, @RequestParam String message, @RequestParam Long delayedTime);
 
     /**
      * 延迟发送：使用自定义模板发送定时短信
@@ -93,7 +123,9 @@ public interface RemoteSmsService {
      * @param messages    短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @param delayedTime 延迟发送时间（毫秒）
      */
-    void delayMessage(String phone, String templateId, LinkedHashMap<String, String> messages, Long delayedTime);
+    @PostExchange("/delay-template")
+    void delayMessage(@RequestParam String phone, @RequestParam String templateId,
+                      @RequestBody LinkedHashMap<String, String> messages, @RequestParam Long delayedTime);
 
     /**
      * 延迟群发：群发延迟短信
@@ -102,7 +134,8 @@ public interface RemoteSmsService {
      * @param message     短信内容
      * @param delayedTime 延迟发送时间（毫秒）
      */
-    void delayMessageTexting(List<String> phones, String message, Long delayedTime);
+    @PostExchange("/delay-message-texting")
+    void delayMessageTexting(@RequestBody List<String> phones, @RequestParam String message, @RequestParam Long delayedTime);
 
     /**
      * 延迟群发：使用自定义模板发送群体延迟短信
@@ -112,34 +145,50 @@ public interface RemoteSmsService {
      * @param messages    短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @param delayedTime 延迟发送时间（毫秒）
      */
-    void delayMessageTexting(List<String> phones, String templateId, LinkedHashMap<String, String> messages, Long delayedTime);
+    @PostExchange("/delay-message-texting-template")
+    default void delayMessageTexting(List<String> phones, String templateId,
+                                     LinkedHashMap<String, String> messages, Long delayedTime) {
+        delayMessageTextingTemplate(new RemoteSmsDelayBatch(phones, templateId, messages, delayedTime));
+    }
+
+    /**
+     * 延迟群发模板短信.
+     *
+     * @param request 延迟群发模板短信请求
+     */
+    @PostExchange("/delay-message-texting-template")
+    void delayMessageTextingTemplate(@RequestBody RemoteSmsDelayBatch request);
 
     /**
      * 加入黑名单
      *
      * @param phone 手机号
      */
-    void addBlacklist(String phone);
+    @PostExchange("/add-blacklist-one")
+    void addBlacklist(@RequestParam String phone);
 
     /**
      * 加入黑名单
      *
      * @param phones 手机号列表
      */
-    void addBlacklist(List<String> phones);
+    @PostExchange("/add-blacklist-list")
+    void addBlacklist(@RequestBody List<String> phones);
 
     /**
      * 移除黑名单
      *
      * @param phone 手机号
      */
-    void removeBlacklist(String phone);
+    @PostExchange("/remove-blacklist-one")
+    void removeBlacklist(@RequestParam String phone);
 
     /**
      * 移除黑名单
      *
      * @param phones 手机号
      */
-    void removeBlacklist(List<String> phones);
+    @PostExchange("/remove-blacklist-list")
+    void removeBlacklist(@RequestBody List<String> phones);
 
 }

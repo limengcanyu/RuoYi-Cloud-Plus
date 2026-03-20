@@ -1,8 +1,14 @@
 package org.dromara.workflow.api;
 
+import org.dromara.common.core.annotation.RemoteHttpService;
 import org.dromara.workflow.api.domain.RemoteCompleteTask;
 import org.dromara.workflow.api.domain.RemoteStartProcess;
 import org.dromara.workflow.api.domain.RemoteStartProcessReturn;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +19,8 @@ import java.util.Map;
  * @Author ZETA
  * @Date 2024/6/3
  */
+@RemoteHttpService(value = "ruoyi-workflow", fallback = RemoteWorkflowServiceFallback.class)
+@HttpExchange("/remote/workflow")
 public interface RemoteWorkflowService {
 
     /**
@@ -21,7 +29,8 @@ public interface RemoteWorkflowService {
      * @param businessIds 业务id
      * @return 结果
      */
-    boolean deleteInstance(List<String> businessIds);
+    @PostExchange("/delete-instance")
+    boolean deleteInstance(@RequestBody List<String> businessIds);
 
     /**
      * 获取当前流程状态
@@ -29,7 +38,8 @@ public interface RemoteWorkflowService {
      * @param taskId 任务id
      * @return 状态
      */
-    String getBusinessStatusByTaskId(Long taskId);
+    @GetExchange("/business-status-by-task-id")
+    String getBusinessStatusByTaskId(@RequestParam Long taskId);
 
     /**
      * 获取当前流程状态
@@ -37,7 +47,8 @@ public interface RemoteWorkflowService {
      * @param businessId 业务id
      * @return 状态
      */
-    String getBusinessStatus(String businessId);
+    @GetExchange("/business-status")
+    String getBusinessStatus(@RequestParam String businessId);
 
     /**
      * 设置流程变量
@@ -45,14 +56,16 @@ public interface RemoteWorkflowService {
      * @param instanceId 流程实例id
      * @param variable   流程变量
      */
-    void setVariable(Long instanceId, Map<String, Object> variable);
+    @PostExchange("/set-variable")
+    void setVariable(@RequestParam Long instanceId, @RequestBody Map<String, Object> variable);
 
     /**
      * 获取流程变量
      *
      * @param instanceId 流程实例id
      */
-    Map<String, Object> instanceVariable(Long instanceId);
+    @GetExchange("/instance-variable")
+    Map<String, Object> instanceVariable(@RequestParam Long instanceId);
 
     /**
      * 按照业务id查询流程实例id
@@ -60,7 +73,8 @@ public interface RemoteWorkflowService {
      * @param businessId 业务id
      * @return 结果
      */
-    Long getInstanceIdByBusinessId(String businessId);
+    @GetExchange("/instance-id-by-business-id")
+    Long getInstanceIdByBusinessId(@RequestParam String businessId);
 
     /**
      * 启动流程
@@ -68,7 +82,8 @@ public interface RemoteWorkflowService {
      * @param startProcess 参数
      * @return 结果
      */
-    RemoteStartProcessReturn startWorkFlow(RemoteStartProcess startProcess);
+    @PostExchange("/start-workflow")
+    RemoteStartProcessReturn startWorkFlow(@RequestBody RemoteStartProcess startProcess);
 
     /**
      * 办理任务
@@ -76,7 +91,8 @@ public interface RemoteWorkflowService {
      * @param completeTask 参数
      * @return 结果
      */
-    boolean completeTask(RemoteCompleteTask completeTask);
+    @PostExchange("/complete-task")
+    boolean completeTask(@RequestBody RemoteCompleteTask completeTask);
 
 
     /**
@@ -86,7 +102,8 @@ public interface RemoteWorkflowService {
      * @param message 办理意见
      * @return 结果
      */
-    boolean completeTask(Long taskId, String message);
+    @PostExchange("/complete-task-simple")
+    boolean completeTask(@RequestParam Long taskId, @RequestParam String message);
 
     /**
      * 启动流程并办理第一个任务
@@ -94,6 +111,7 @@ public interface RemoteWorkflowService {
      * @param startProcess 参数
      * @return 结果
      */
-    boolean startCompleteTask(RemoteStartProcess startProcess);
+    @PostExchange("/start-complete-task")
+    boolean startCompleteTask(@RequestBody RemoteStartProcess startProcess);
 
 }
