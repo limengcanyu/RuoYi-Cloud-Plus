@@ -1,11 +1,14 @@
 package org.dromara.system.api;
 
-import org.dromara.common.core.annotation.RemoteHttpService;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.dromara.system.api.domain.vo.RemoteDictDataVo;
 import org.dromara.system.api.domain.vo.RemoteDictTypeVo;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.service.annotation.GetExchange;
-import org.springframework.web.service.annotation.HttpExchange;
 
 import java.util.List;
 
@@ -14,8 +17,7 @@ import java.util.List;
  *
  * @author Lion Li
  */
-@RemoteHttpService("ruoyi-system")
-@HttpExchange("/remote/dict")
+@FeignClient(contextId = "remoteDictService", name = "ruoyi-system", path = "/remote/dict", primary = false)
 public interface RemoteDictService {
 
     /**
@@ -24,7 +26,7 @@ public interface RemoteDictService {
      * @param dictType 字典类型
      * @return 字典类型
      */
-    @GetExchange("/select-dict-type-by-type")
+    @GetMapping("/select-dict-type-by-type")
     RemoteDictTypeVo selectDictTypeByType(@RequestParam String dictType);
 
     /**
@@ -33,7 +35,8 @@ public interface RemoteDictService {
      * @param dictType 字典类型
      * @return 字典数据集合信息
      */
-    @GetExchange("/select-dict-data-by-type")
+    @GetMapping("/select-dict-data-by-type")
     List<RemoteDictDataVo> selectDictDataByType(@RequestParam String dictType);
 
 }
+

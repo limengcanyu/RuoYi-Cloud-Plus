@@ -25,7 +25,7 @@ import java.util.Map;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@RemoteServiceController(path = "/remote/dept")
 public class RemoteDeptServiceImpl implements RemoteDeptService {
 
     private final ISysDeptService deptService;

@@ -31,7 +31,7 @@ import java.util.Map;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@RemoteServiceController(path = "/remote/task-assignee")
 public class RemoteTaskAssigneeServiceImpl implements RemoteTaskAssigneeService {
 
     // 上级Service注入下级Service 其他Service永远不可能注入当前类 避免循环注入

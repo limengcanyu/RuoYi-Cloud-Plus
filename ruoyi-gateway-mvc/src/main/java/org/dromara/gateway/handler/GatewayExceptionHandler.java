@@ -34,7 +34,8 @@ public class GatewayExceptionHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, Throwable ex) throws IOException {
         int code;
         String msg;
-        if ("NotFoundException".equals(ex.getClass().getSimpleName())) {
+        if ("NotFoundException".equals(ex.getClass().getSimpleName())
+            || ex.getMessage().contains("Unable to find instance")) {
             code = HttpStatus.NOT_FOUND;
             msg = "服务未找到";
         } else if (ex instanceof ResponseStatusException responseStatusException) {

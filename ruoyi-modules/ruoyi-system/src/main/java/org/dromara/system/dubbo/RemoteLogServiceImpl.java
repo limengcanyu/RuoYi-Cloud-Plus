@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@RemoteServiceController(path = "/remote/log")
 public class RemoteLogServiceImpl implements RemoteLogService {
 
     private final ISysOperLogService operLogService;

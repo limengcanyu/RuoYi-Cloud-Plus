@@ -1,10 +1,13 @@
 package org.dromara.resource.api;
 
-import org.dromara.common.core.annotation.RemoteHttpService;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.service.annotation.HttpExchange;
-import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.List;
 
@@ -13,8 +16,8 @@ import java.util.List;
  *
  * @author Lion Li
  */
-@RemoteHttpService(value = "ruoyi-resource", fallback = RemoteMessageServiceFallback.class)
-@HttpExchange("/remote/message")
+@FeignClient(contextId = "remoteMessageService", name = "ruoyi-resource", path = "/remote/message",
+    fallbackFactory = RemoteMessageServiceFallbackFactory.class, primary = false)
 public interface RemoteMessageService {
 
     /**
@@ -23,7 +26,7 @@ public interface RemoteMessageService {
      * @param sessionKey session主键 一般为用户id
      * @param message    消息文本
      */
-    @PostExchange("/publish-message")
+    @PostMapping("/publish-message")
     void publishMessage(@RequestBody List<Long> sessionKey, @RequestParam String message);
 
     /**
@@ -31,6 +34,7 @@ public interface RemoteMessageService {
      *
      * @param message 消息内容
      */
-    @PostExchange("/publish-all")
+    @PostMapping("/publish-all")
     void publishAll(@RequestParam String message);
 }
+

@@ -1,17 +1,19 @@
 package org.dromara.system.api;
 
-import org.dromara.common.core.annotation.RemoteHttpService;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.service.annotation.GetExchange;
-import org.springframework.web.service.annotation.HttpExchange;
 
 /**
  * 数据权限服务
  *
  * @author Lion Li
  */
-@RemoteHttpService("ruoyi-system")
-@HttpExchange("/remote/data-scope")
+@FeignClient(contextId = "remoteDataScopeService", name = "ruoyi-system", path = "/remote/data-scope", primary = false)
 public interface RemoteDataScopeService {
 
     /**
@@ -20,7 +22,7 @@ public interface RemoteDataScopeService {
      * @param roleId 角色ID
      * @return 返回角色的自定义权限语句，如果没有找到则返回 null
      */
-    @GetExchange("/role-custom")
+    @GetMapping("/role-custom")
     String getRoleCustom(@RequestParam Long roleId);
 
     /**
@@ -29,7 +31,8 @@ public interface RemoteDataScopeService {
      * @param deptId 部门ID
      * @return 返回部门及其下级的权限语句，如果没有找到则返回 null
      */
-    @GetExchange("/dept-and-child")
+    @GetMapping("/dept-and-child")
     String getDeptAndChild(@RequestParam Long deptId);
 
 }
+

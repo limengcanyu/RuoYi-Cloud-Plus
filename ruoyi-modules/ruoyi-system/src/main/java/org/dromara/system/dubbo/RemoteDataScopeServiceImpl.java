@@ -25,7 +25,7 @@ import java.util.List;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@RemoteServiceController(path = "/remote/data-scope")
 public class RemoteDataScopeServiceImpl implements RemoteDataScopeService {
 
     private final SysRoleDeptMapper roleDeptMapper;

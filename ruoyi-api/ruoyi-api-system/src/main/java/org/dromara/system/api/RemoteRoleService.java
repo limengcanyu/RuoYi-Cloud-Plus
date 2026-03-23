@@ -1,9 +1,12 @@
 package org.dromara.system.api;
 
-import org.dromara.common.core.annotation.RemoteHttpService;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.service.annotation.HttpExchange;
-import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.Collection;
 import java.util.Map;
@@ -13,8 +16,7 @@ import java.util.Map;
  *
  * @author Lion Li
  */
-@RemoteHttpService("ruoyi-system")
-@HttpExchange("/remote/role")
+@FeignClient(contextId = "remoteRoleService", name = "ruoyi-system", path = "/remote/role", primary = false)
 public interface RemoteRoleService {
 
     /**
@@ -23,7 +25,8 @@ public interface RemoteRoleService {
      * @param roleIds 角色 ID 列表
      * @return Map，其中 key 为角色 ID，value 为对应的角色名称
      */
-    @PostExchange("/select-role-names-by-ids")
+    @PostMapping("/select-role-names-by-ids")
     Map<Long, String> selectRoleNamesByIds(@RequestBody Collection<Long> roleIds);
 
 }
+

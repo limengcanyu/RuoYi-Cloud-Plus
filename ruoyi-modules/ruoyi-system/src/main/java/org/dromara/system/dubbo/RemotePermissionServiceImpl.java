@@ -13,7 +13,7 @@ import java.util.Set;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@RemoteServiceController(path = "/remote/permission")
 public class RemotePermissionServiceImpl implements RemotePermissionService {
 
     private final ISysPermissionService permissionService;

@@ -15,7 +15,7 @@ import java.util.List;
  * @author Michelle.Chung
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@RemoteServiceController(path = "/remote/config")
 public class RemoteConfigServiceImpl implements RemoteConfigService {
 
     private final ISysConfigService configService;

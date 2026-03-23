@@ -1,19 +1,21 @@
 package org.dromara.system.api;
 
-import org.dromara.common.core.annotation.RemoteHttpService;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.dromara.system.api.domain.bo.RemoteLoginInfoBo;
 import org.dromara.system.api.domain.bo.RemoteOperLogBo;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.service.annotation.HttpExchange;
-import org.springframework.web.service.annotation.PostExchange;
 
 /**
  * 日志服务
  *
  * @author Lion Li
  */
-@RemoteHttpService("ruoyi-system")
-@HttpExchange("/remote/log")
+@FeignClient(contextId = "remoteLogService", name = "ruoyi-system", path = "/remote/log", primary = false)
 public interface RemoteLogService {
 
     /**
@@ -21,7 +23,7 @@ public interface RemoteLogService {
      *
      * @param sysOperLog 日志实体
      */
-    @PostExchange("/save-log")
+    @PostMapping("/save-log")
     void saveLog(@RequestBody RemoteOperLogBo sysOperLog);
 
     /**
@@ -29,7 +31,8 @@ public interface RemoteLogService {
      *
      * @param sysLoginInfo 访问实体
      */
-    @PostExchange("/save-login-info")
+    @PostMapping("/save-login-info")
     void saveLoginInfo(@RequestBody RemoteLoginInfoBo sysLoginInfo);
 
 }
+

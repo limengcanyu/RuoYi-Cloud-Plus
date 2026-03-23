@@ -18,7 +18,7 @@ import java.util.List;
  * @author Michelle.Chung
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@RemoteServiceController(path = "/remote/social")
 public class RemoteSocialServiceImpl implements RemoteSocialService {
 
     private final ISysSocialService sysSocialService;

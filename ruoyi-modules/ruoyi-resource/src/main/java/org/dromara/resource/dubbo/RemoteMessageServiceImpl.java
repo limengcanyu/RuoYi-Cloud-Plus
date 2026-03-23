@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Slf4j
 @RequiredArgsConstructor
-@RemoteServiceController
+@RemoteServiceController(path = "/remote/message")
 public class RemoteMessageServiceImpl implements RemoteMessageService {
 
     /**

@@ -20,7 +20,7 @@ import java.util.Map;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@RemoteServiceController(path = "/remote/post")
 public class RemotePostServiceImpl implements RemotePostService {
 
     private final SysPostMapper postMapper;

@@ -1,13 +1,15 @@
 package org.dromara.resource.api;
 
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.dromara.common.core.exception.ServiceException;
-import org.dromara.common.core.annotation.RemoteHttpService;
 import org.dromara.resource.api.domain.RemoteFile;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.service.annotation.GetExchange;
-import org.springframework.web.service.annotation.HttpExchange;
-import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.List;
 
@@ -16,8 +18,8 @@ import java.util.List;
  *
  * @author Lion Li
  */
-@RemoteHttpService(value = "ruoyi-resource", fallback = RemoteFileServiceFallback.class)
-@HttpExchange("/remote/file")
+@FeignClient(contextId = "remoteFileService", name = "ruoyi-resource", path = "/remote/file",
+    fallbackFactory = RemoteFileServiceFallbackFactory.class, primary = false)
 public interface RemoteFileService {
 
     /**
@@ -26,7 +28,7 @@ public interface RemoteFileService {
      * @param file 文件信息
      * @return 结果
      */
-    @PostExchange("/upload")
+    @PostMapping("/upload")
     RemoteFile upload(@RequestParam String name, @RequestParam String originalFilename,
                       @RequestParam String contentType, @RequestBody byte[] file) throws ServiceException;
 
@@ -36,7 +38,7 @@ public interface RemoteFileService {
      * @param ossIds ossId串逗号分隔
      * @return url串逗号分隔
      */
-    @GetExchange("/select-url-by-ids")
+    @GetMapping("/select-url-by-ids")
     String selectUrlByIds(@RequestParam String ossIds);
 
     /**
@@ -45,6 +47,7 @@ public interface RemoteFileService {
      * @param ossIds ossId串逗号分隔
      * @return 列表
      */
-    @GetExchange("/select-by-ids")
+    @GetMapping("/select-by-ids")
     List<RemoteFile> selectByIds(@RequestParam String ossIds);
 }
+

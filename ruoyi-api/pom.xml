@@ -22,4 +22,11 @@
         ruoyi-api系统接口
     </description>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-openfeign-core</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

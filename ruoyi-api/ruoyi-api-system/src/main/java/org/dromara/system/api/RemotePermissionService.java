@@ -1,9 +1,12 @@
 package org.dromara.system.api;
 
-import org.dromara.common.core.annotation.RemoteHttpService;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.service.annotation.GetExchange;
-import org.springframework.web.service.annotation.HttpExchange;
 
 import java.util.Set;
 
@@ -12,8 +15,7 @@ import java.util.Set;
  *
  * @author Lion Li
  */
-@RemoteHttpService("ruoyi-system")
-@HttpExchange("/remote/permission")
+@FeignClient(contextId = "remotePermissionService", name = "ruoyi-system", path = "/remote/permission", primary = false)
 public interface RemotePermissionService {
 
     /**
@@ -22,7 +24,7 @@ public interface RemotePermissionService {
      * @param userId  用户id
      * @return 角色权限信息
      */
-    @GetExchange("/role-permission")
+    @GetMapping("/role-permission")
     Set<String> getRolePermission(@RequestParam Long userId);
 
     /**
@@ -31,7 +33,8 @@ public interface RemotePermissionService {
      * @param userId  用户id
      * @return 菜单权限信息
      */
-    @GetExchange("/menu-permission")
+    @GetMapping("/menu-permission")
     Set<String> getMenuPermission(@RequestParam Long userId);
 
 }
+
