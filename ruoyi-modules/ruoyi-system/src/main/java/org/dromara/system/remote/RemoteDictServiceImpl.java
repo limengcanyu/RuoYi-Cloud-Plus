@@ -1,4 +1,4 @@
-package org.dromara.system.dubbo;
+package org.dromara.system.remote;
 
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.http.annotation.RemoteServiceController;

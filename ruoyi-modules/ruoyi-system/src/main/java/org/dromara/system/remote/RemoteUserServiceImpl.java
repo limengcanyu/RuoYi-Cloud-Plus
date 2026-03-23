@@ -1,4 +1,4 @@
-package org.dromara.system.dubbo;
+package org.dromara.system.remote;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -32,10 +32,6 @@ import org.dromara.system.mapper.SysUserMapper;
 import org.dromara.system.mapper.SysUserPostMapper;
 import org.dromara.system.mapper.SysUserRoleMapper;
 import org.dromara.system.service.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.service.annotation.GetExchange;
-import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.*;
 

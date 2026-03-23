@@ -1,4 +1,4 @@
-package org.dromara.resource.dubbo;
+package org.dromara.resource.remote;
 
 import cn.hutool.core.convert.Convert;
 import lombok.RequiredArgsConstructor;
