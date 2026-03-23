@@ -1,46 +1,59 @@
 package org.dromara.gateway.handler;
 
-import org.dromara.gateway.utils.WebFluxUtils;
+import cn.dev33.satoken.exception.NotLoginException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.webflux.error.ErrorWebExceptionHandler;
-import org.springframework.cloud.gateway.support.NotFoundException;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.dromara.common.core.constant.HttpStatus;
+import org.dromara.common.core.domain.R;
+import org.dromara.common.json.utils.JsonUtils;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 网关统一异常处理
  *
- * @author ruoyi
+ * @author Lion Li
  */
 @Slf4j
-@Order(-1)
-@Configuration
-public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
+@RestControllerAdvice
+public class GatewayExceptionHandler {
 
-    @Override
-    public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-        ServerHttpResponse response = exchange.getResponse();
+    @ExceptionHandler(NotLoginException.class)
+    public void handleNotLogin(HttpServletRequest request, HttpServletResponse response, NotLoginException ex) throws IOException {
+        log.warn("[网关认证失败]请求路径:{},异常信息:{}", request.getRequestURI(), ex.getMessage());
+        writeJson(response, HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
 
-        if (exchange.getResponse().isCommitted()) {
-            return Mono.error(ex);
-        }
-
+    @ExceptionHandler(Throwable.class)
+    public void handle(HttpServletRequest request, HttpServletResponse response, Throwable ex) throws IOException {
+        int code;
         String msg;
-
-        if (ex instanceof NotFoundException) {
+        if ("NotFoundException".equals(ex.getClass().getSimpleName())
+            || ex.getMessage().contains("Unable to find instance")) {
+            code = HttpStatus.NOT_FOUND;
             msg = "服务未找到";
         } else if (ex instanceof ResponseStatusException responseStatusException) {
+            code = responseStatusException.getStatusCode().value();
             msg = responseStatusException.getMessage();
         } else {
+            code = HttpStatus.ERROR;
             msg = "内部服务器错误";
         }
 
-        log.error("[网关异常处理]请求路径:{},异常信息:{}", exchange.getRequest().getPath(), ex.getMessage());
+        log.error("[网关异常处理]请求路径:{},异常信息:{}", request.getRequestURI(), ex.getMessage(), ex);
+        writeJson(response, code, msg);
+    }
 
-        return WebFluxUtils.webFluxResponseWriter(response, msg);
+    private void writeJson(HttpServletResponse response, int code, String msg) throws IOException {
+        response.setStatus(code);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(JsonUtils.toJsonString(R.fail(code, msg)));
     }
 }

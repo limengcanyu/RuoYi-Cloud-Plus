@@ -3,29 +3,31 @@ package org.dromara.gateway.filter;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
-import lombok.SneakyThrows;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.gateway.config.properties.ApiDecryptProperties;
 import org.dromara.gateway.config.properties.CustomGatewayProperties;
-import org.dromara.gateway.utils.WebFluxUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.dromara.gateway.filter.support.CachedBodyHttpServletRequest;
 import org.springframework.core.Ordered;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.UriComponentsBuilder;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,60 +40,89 @@ import java.util.Set;
  */
 @Slf4j
 @Component
-public class GlobalLogFilter implements GlobalFilter, Ordered {
+@Order(Ordered.LOWEST_PRECEDENCE - 10)
+public class GlobalLogFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private CustomGatewayProperties customGatewayProperties;
-    @Autowired
-    private ApiDecryptProperties apiDecryptProperties;
+    private final CustomGatewayProperties customGatewayProperties;
+    private final ApiDecryptProperties apiDecryptProperties;
 
-    private static final String START_TIME = "startTime";
+    public GlobalLogFilter(CustomGatewayProperties customGatewayProperties, ApiDecryptProperties apiDecryptProperties) {
+        this.customGatewayProperties = customGatewayProperties;
+        this.apiDecryptProperties = apiDecryptProperties;
+    }
 
-    @SneakyThrows
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        if (!customGatewayProperties.getRequestLog()) {
-            return chain.filter(exchange);
-        }
-        ServerHttpRequest request = exchange.getRequest();
-        String path = WebFluxUtils.getOriginalRequestUrl(exchange);
-        String url = request.getMethod().name() + " " + path;
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return !Boolean.TRUE.equals(customGatewayProperties.getRequestLog());
+    }
 
-        // 打印请求参数
-        if (WebFluxUtils.isJsonRequest(exchange)) {
-            if (apiDecryptProperties.getEnabled()
-                && ObjectUtil.isNotNull(request.getHeaders().getFirst(apiDecryptProperties.getHeaderFlag()))) {
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+        throws ServletException, IOException {
+        HttpServletRequest requestToUse = request;
+        if (isJsonRequest(request) && !(request instanceof CachedBodyHttpServletRequest)) {
+            requestToUse = new CachedBodyHttpServletRequest(request);
+        }
+
+        String url = requestToUse.getMethod() + " " + requestToUse.getRequestURI();
+        logRequest(requestToUse, url);
+
+        long startTime = System.currentTimeMillis();
+        try {
+            filterChain.doFilter(requestToUse, response);
+        } finally {
+            log.info("[PLUS]结束请求 => URL[{}],耗时:[{}]毫秒", url, System.currentTimeMillis() - startTime);
+        }
+    }
+
+    private void logRequest(HttpServletRequest request, String url) {
+        if (isJsonRequest(request)) {
+            if (Boolean.TRUE.equals(apiDecryptProperties.getEnabled())
+                && ObjectUtil.isNotNull(request.getHeader(apiDecryptProperties.getHeaderFlag()))) {
                 log.info("[PLUS]开始请求 => URL[{}],参数类型[encrypt]", url);
-            } else {
-                String jsonParam = WebFluxUtils.resolveBodyFromCacheRequest(exchange);
-                if (StringUtils.isNotBlank(jsonParam)) {
-                    JsonMapper jsonMapper = JsonUtils.getJsonMapper();
-                    JsonNode rootNode = jsonMapper.readTree(jsonParam);
-                    removeSensitiveFields(rootNode, SystemConstants.EXCLUDE_PROPERTIES);
-                    jsonParam = rootNode.toString();
-                }
-                log.info("[PLUS]开始请求 => URL[{}],参数类型[json],参数:[{}]", url, jsonParam);
+                return;
             }
-        } else {
-            MultiValueMap<String, String> parameterMap = request.getQueryParams();
-            if (MapUtil.isNotEmpty(parameterMap)) {
-                LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>(parameterMap);
-                MapUtil.removeAny(map, SystemConstants.EXCLUDE_PROPERTIES);
-                String parameters = JsonUtils.toJsonString(map);
-                log.info("[PLUS]开始请求 => URL[{}],参数类型[param],参数:[{}]", url, parameters);
-            } else {
-                log.info("[PLUS]开始请求 => URL[{}],无参数", url);
+            String jsonParam = resolveBody(request);
+            if (StringUtils.isNotBlank(jsonParam)) {
+                jsonParam = removeSensitiveFields(jsonParam);
             }
+            log.info("[PLUS]开始请求 => URL[{}],参数类型[json],参数:[{}]", url, jsonParam);
+            return;
         }
 
-        exchange.getAttributes().put(START_TIME, System.currentTimeMillis());
-        return chain.filter(exchange).then(Mono.fromRunnable(() -> {
-            Long startTime = exchange.getAttribute(START_TIME);
-            if (startTime != null) {
-                long executeTime = (System.currentTimeMillis() - startTime);
-                log.info("[PLUS]结束请求 => URL[{}],耗时:[{}]毫秒", url, executeTime);
-            }
-        }));
+        MultiValueMap<String, String> parameterMap = UriComponentsBuilder.newInstance()
+            .query(request.getQueryString())
+            .build()
+            .getQueryParams();
+        if (MapUtil.isNotEmpty(parameterMap)) {
+            LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>(parameterMap);
+            MapUtil.removeAny(map, SystemConstants.EXCLUDE_PROPERTIES);
+            log.info("[PLUS]开始请求 => URL[{}],参数类型[param],参数:[{}]", url, JsonUtils.toJsonString(map));
+        } else {
+            log.info("[PLUS]开始请求 => URL[{}],无参数", url);
+        }
+    }
+
+    private boolean isJsonRequest(HttpServletRequest request) {
+        return StringUtils.startsWithIgnoreCase(request.getContentType(), MediaType.APPLICATION_JSON_VALUE);
+    }
+
+    private String resolveBody(HttpServletRequest request) {
+        if (request instanceof CachedBodyHttpServletRequest cachedRequest) {
+            return cachedRequest.getCachedBodyAsString();
+        }
+        return null;
+    }
+
+    private String removeSensitiveFields(String jsonParam) {
+        try {
+            JsonMapper jsonMapper = JsonUtils.getJsonMapper();
+            JsonNode rootNode = jsonMapper.readTree(jsonParam);
+            removeSensitiveFields(rootNode, SystemConstants.EXCLUDE_PROPERTIES);
+            return rootNode.toString();
+        } catch (Exception ex) {
+            return jsonParam;
+        }
     }
 
     private void removeSensitiveFields(JsonNode node, String[] excludeProperties) {
@@ -100,7 +131,6 @@ public class GlobalLogFilter implements GlobalFilter, Ordered {
         }
         if (node.isObject()) {
             ObjectNode objectNode = (ObjectNode) node;
-            // 收集要删除的字段名（避免 ConcurrentModification）
             Set<String> fieldsToRemove = new HashSet<>();
             objectNode.propertyNames().forEach(fieldName -> {
                 if (ArrayUtil.contains(excludeProperties, fieldName)) {
@@ -108,7 +138,6 @@ public class GlobalLogFilter implements GlobalFilter, Ordered {
                 }
             });
             fieldsToRemove.forEach(objectNode::remove);
-            // 递归处理子节点
             objectNode.values().forEach(child -> removeSensitiveFields(child, excludeProperties));
         } else if (node.isArray()) {
             ArrayNode arrayNode = (ArrayNode) node;
@@ -116,14 +145,6 @@ public class GlobalLogFilter implements GlobalFilter, Ordered {
                 removeSensitiveFields(child, excludeProperties);
             }
         }
-    }
-
-    @Override
-    public int getOrder() {
-        // 日志处理器在负载均衡器之后执行 负载均衡器会导致线程切换 无法获取上下文内容
-        // 如需在日志内操作线程上下文 例如获取登录用户数据等 可以打开下方注释代码
-        // return ReactiveLoadBalancerClientFilter.LOAD_BALANCER_CLIENT_FILTER_ORDER - 1;
-        return Ordered.LOWEST_PRECEDENCE;
     }
 
 }

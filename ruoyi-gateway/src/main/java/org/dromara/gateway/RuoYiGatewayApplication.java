@@ -7,14 +7,16 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
 /**
  * 网关启动程序
  *
- * @author ruoyi
+ * @author Lion Li
  */
 @SpringBootApplication
 public class RuoYiGatewayApplication {
+
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(RuoYiGatewayApplication.class);
         application.setApplicationStartup(new BufferingApplicationStartup(2048));
         application.run(args);
-        System.out.println("(♥◠‿◠)ﾉﾞ  网关启动成功   ლ(´ڡ`ლ)ﾞ  ");
+        System.out.println("(♥◠‿◠)ﾉﾞ  MVC网关启动成功   ლ(´ڡ`ლ)ﾞ  ");
     }
+
 }
