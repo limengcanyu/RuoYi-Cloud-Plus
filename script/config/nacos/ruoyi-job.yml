@@ -26,7 +26,7 @@ snail-job:
     host: 127.0.0.1
     port: 17888
   # 详见 sql/ry_job.sql `sj_namespace` 表 `unique_id`
-  namespace: ${spring.profiles.active}
+  namespace: public
   # 随主应用端口飘逸
   port: 2${server.port}
   # 客户端ip指定

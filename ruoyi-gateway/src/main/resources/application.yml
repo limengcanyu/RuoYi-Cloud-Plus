@@ -23,12 +23,12 @@ spring:
       password: @nacos.password@
       discovery:
         # 注册组
-        group: @nacos.discovery.group@
-        namespace: ${spring.profiles.active}
+        group: DEFAULT_GROUP
+        namespace: public
       config:
         # 配置组
-        group: @nacos.config.group@
-        namespace: ${spring.profiles.active}
+        group: DEFAULT_GROUP
+        namespace: public
   config:
     import:
       - optional:nacos:application-common.yml
