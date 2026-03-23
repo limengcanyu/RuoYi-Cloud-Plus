@@ -27,20 +27,23 @@ services:
     network_mode: "host"
 
   nacos:
-    image: ruoyi/ruoyi-nacos:2.5.3
+    image: nacos/nacos-server:v3.1.1
     container_name: nacos
     ports:
       - "8848:8848"
       - "9848:9848"
       - "9849:9849"
+      - "18080:18080"
     environment:
       TZ: Asia/Shanghai
-      JAVA_OPTS: "-Xms256m -Xmx512m"
+      MODE: standalone
+      PREFER_HOST_MODE: hostname
+      JVM_XMS: 256m
+      JVM_XMX: 512m
     volumes:
-      # 日志目录 注意集群模式下 日志目录不能一致 需要区分例如 nacos1 nacos2
-      - /docker/nacos/logs/:/root/nacos/logs
-      # 集群配置文件 集群所有nacos都必须使用此文件
-      - /docker/nacos/conf/cluster.conf:/root/nacos/conf/cluster.conf
+      - /docker/nacos/logs/:/home/nacos/logs
+      # 默认单机模式 使用 mysql 等按 nacos 文档在配置文件内修改 所有配置均可在配置文件修改
+      - /docker/nacos/conf/application.properties:/home/nacos/conf/application.properties
     network_mode: "host"
 
   redis:
@@ -95,7 +98,7 @@ services:
     network_mode: "host"
 
   seata-server:
-    image: ruoyi/ruoyi-seata-server:2.5.3
+    image: apache/seata-server:2.6.0
     container_name: seata-server
     ports:
       - "7091:7091"
@@ -106,9 +109,8 @@ services:
       # SEATA_IP: 127.0.0.1
       SEATA_PORT: 8091
     volumes:
-      - /docker/ruoyi-seata-server/logs/:/ruoyi/seata-server/logs
-      # skywalking 探针
-      - /docker/skywalking/agent/:/ruoyi/skywalking/agent
+      - /docker/seata/conf/application.yml:/seata-server/resources/application.yml
+      - /docker/seata/logs/:/root/logs/seata
     privileged: true
     network_mode: "host"
 
