@@ -95,17 +95,17 @@ public class RemoteUserServiceImpl implements RemoteUserService {
     /**
      * 通过手机号查询用户信息
      *
-     * @param phonenumber 手机号
+     * @param phoneNumber 手机号
      * @return 结果
      */
     @Override
-    public LoginUser getUserInfoByPhonenumber(String phonenumber) throws UserException {
-        SysUserVo sysUser = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhoneNumber, phonenumber));
+    public LoginUser getUserInfoByPhoneNumber(String phoneNumber) throws UserException {
+        SysUserVo sysUser = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhoneNumber, phoneNumber));
         if (ObjectUtil.isNull(sysUser)) {
-            throw new UserException("user.not.exists", phonenumber);
+            throw new UserException("user.not.exists", phoneNumber);
         }
         if (UserStatus.DISABLE.getCode().equals(sysUser.getStatus())) {
-            throw new UserException("user.blocked", phonenumber);
+            throw new UserException("user.blocked", phoneNumber);
         }
         // 框架登录不限制从什么表查询 只要最终构建出 LoginUser 即可
         // 此处可根据登录用户的数据不同 自行创建 loginUser 属性不够用继承扩展就行了

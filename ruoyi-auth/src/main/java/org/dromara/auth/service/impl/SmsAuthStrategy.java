@@ -41,10 +41,10 @@ public class SmsAuthStrategy implements IAuthStrategy {
     public LoginVo login(String body, RemoteClientVo client) {
         SmsLoginBody loginBody = JsonUtils.parseObject(body, SmsLoginBody.class);
         ValidatorUtils.validate(loginBody);
-        String phonenumber = loginBody.getPhonenumber();
+        String phoneNumber = loginBody.getPhoneNumber();
         String smsCode = loginBody.getSmsCode();
-        LoginUser loginUser = remoteUserService.getUserInfoByPhonenumber(phonenumber);
-        loginService.checkLogin(LoginType.SMS, loginUser.getUsername(), () -> !validateSmsCode(phonenumber, smsCode));
+        LoginUser loginUser = remoteUserService.getUserInfoByPhoneNumber(phoneNumber);
+        loginService.checkLogin(LoginType.SMS, loginUser.getUsername(), () -> !validateSmsCode(phoneNumber, smsCode));
         loginUser.setClientKey(client.getClientKey());
         loginUser.setDeviceType(client.getDeviceType());
         SaLoginParameter model = new SaLoginParameter();
@@ -67,10 +67,10 @@ public class SmsAuthStrategy implements IAuthStrategy {
     /**
      * 校验短信验证码
      */
-    private boolean validateSmsCode(String phonenumber, String smsCode) {
-        String code = RedisUtils.getCacheObject(GlobalConstants.CAPTCHA_CODE_KEY + phonenumber);
+    private boolean validateSmsCode(String phoneNumber, String smsCode) {
+        String code = RedisUtils.getCacheObject(GlobalConstants.CAPTCHA_CODE_KEY + phoneNumber);
         if (StringUtils.isBlank(code)) {
-            loginService.recordLoginInfo(phonenumber, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire"));
+            loginService.recordLoginInfo(phoneNumber, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire"));
             throw new CaptchaExpireException();
         }
         return code.equals(smsCode);

@@ -48,11 +48,11 @@ public interface RemoteUserService {
     /**
      * 通过手机号查询用户信息
      *
-     * @param phonenumber 手机号
+     * @param phoneNumber 手机号
      * @return 结果
      */
     @GetMapping("/get-by-phonenumber")
-    LoginUser getUserInfoByPhonenumber(@RequestParam String phonenumber) throws UserException;
+    LoginUser getUserInfoByPhoneNumber(@RequestParam String phoneNumber) throws UserException;
 
     /**
      * 通过邮箱查询用户信息
