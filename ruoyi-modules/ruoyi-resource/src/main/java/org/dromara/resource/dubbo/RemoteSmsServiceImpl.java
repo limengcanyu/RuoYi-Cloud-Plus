@@ -1,4 +1,4 @@
-package org.dromara.resource.remote;
+package org.dromara.resource.dubbo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

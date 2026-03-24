@@ -1,4 +1,4 @@
-package org.dromara.system.remote;
+package org.dromara.system.dubbo;
 
 import cn.hutool.core.lang.Dict;
 import lombok.RequiredArgsConstructor;

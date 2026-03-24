@@ -1,4 +1,4 @@
-package org.dromara.workflow.remote;
+package org.dromara.workflow.dubbo;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboService;
