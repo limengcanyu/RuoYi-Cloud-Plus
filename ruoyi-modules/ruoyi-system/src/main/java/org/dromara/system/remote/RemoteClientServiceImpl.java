@@ -14,7 +14,7 @@ import org.dromara.system.service.ISysClientService;
  * @author Michelle.Chung
  */
 @RequiredArgsConstructor
-@RemoteServiceController(path = "/remote/client")
+@RemoteServiceController
 public class RemoteClientServiceImpl implements RemoteClientService {
 
     private final ISysClientService sysClientService;

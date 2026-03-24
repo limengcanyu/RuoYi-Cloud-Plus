@@ -41,7 +41,7 @@ import java.util.*;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController(path = "/remote/user")
+@RemoteServiceController
 public class RemoteUserServiceImpl implements RemoteUserService {
 
     private final ISysUserService userService;

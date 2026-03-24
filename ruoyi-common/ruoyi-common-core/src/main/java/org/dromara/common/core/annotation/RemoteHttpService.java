@@ -1,7 +1,6 @@
-package org.dromara.common.http.annotation;
+package org.dromara.common.core.annotation;
 
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -10,16 +9,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 内部 HTTP 服务控制器.
+ * 声明远程 HTTP Service 所属服务.
  *
  * @author Lion Li
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@RestController
-public @interface RemoteServiceController {
+public @interface RemoteHttpService {
 
-    @AliasFor(annotation = RestController.class, attribute = "value")
+    /**
+     * 服务名.
+     */
+    @AliasFor("serviceId")
     String value() default "";
+
+    /**
+     * 服务名.
+     */
+    @AliasFor("value")
+    String serviceId() default "";
+
+    /**
+     * 远程调用失败时的 fallback 实现.
+     */
+    Class<?> fallback() default void.class;
+
 }

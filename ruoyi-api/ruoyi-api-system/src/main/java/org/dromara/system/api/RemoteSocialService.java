@@ -1,15 +1,13 @@
 package org.dromara.system.api;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.dromara.common.core.annotation.RemoteHttpService;
 import org.dromara.system.api.domain.bo.RemoteSocialBo;
 import org.dromara.system.api.domain.vo.RemoteSocialVo;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.List;
 
@@ -18,7 +16,8 @@ import java.util.List;
  *
  * @author Michelle.Chung
  */
-@FeignClient(contextId = "remoteSocialService", name = "ruoyi-system", path = "/remote/social", primary = false)
+@RemoteHttpService("ruoyi-system")
+@HttpExchange("/remote/social")
 public interface RemoteSocialService {
 
     /**
@@ -27,7 +26,7 @@ public interface RemoteSocialService {
      * @param authId 认证id
      * @return 授权信息
      */
-    @GetMapping("/select-by-auth-id")
+    @GetExchange("/select-by-auth-id")
     List<RemoteSocialVo> selectByAuthId(@RequestParam String authId);
 
     /**
@@ -35,7 +34,7 @@ public interface RemoteSocialService {
      *
      * @param bo 社会化关系业务对象
      */
-    @PostMapping("/query-list")
+    @PostExchange("/query-list")
     List<RemoteSocialVo> queryList(@RequestBody RemoteSocialBo bo);
 
     /**
@@ -43,7 +42,7 @@ public interface RemoteSocialService {
      *
      * @param bo 社会化关系业务对象
      */
-    @PostMapping("/insert-by-bo")
+    @PostExchange("/insert-by-bo")
     void insertByBo(@RequestBody RemoteSocialBo bo);
 
     /**
@@ -51,7 +50,7 @@ public interface RemoteSocialService {
      *
      * @param bo 社会化关系业务对象
      */
-    @PostMapping("/update-by-bo")
+    @PostExchange("/update-by-bo")
     void updateByBo(@RequestBody RemoteSocialBo bo);
 
     /**
@@ -60,8 +59,7 @@ public interface RemoteSocialService {
      * @param socialId 社会化关系ID
      * @return 结果
      */
-    @PostMapping("/delete-with-valid-by-id")
+    @PostExchange("/delete-with-valid-by-id")
     Boolean deleteWithValidById(@RequestParam Long socialId);
 
 }
-

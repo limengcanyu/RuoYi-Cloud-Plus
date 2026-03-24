@@ -28,7 +28,7 @@ import java.util.List;
  */
 @Slf4j
 @RequiredArgsConstructor
-@RemoteServiceController(path = "/remote/file")
+@RemoteServiceController
 public class RemoteFileServiceImpl implements RemoteFileService {
 
     private final ISysOssService sysOssService;

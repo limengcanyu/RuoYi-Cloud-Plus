@@ -1,12 +1,9 @@
 package org.dromara.system.api;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.dromara.common.core.annotation.RemoteHttpService;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.Collection;
 import java.util.Map;
@@ -16,7 +13,8 @@ import java.util.Map;
  *
  * @author Lion Li
  */
-@FeignClient(contextId = "remotePostService", name = "ruoyi-system", path = "/remote/post", primary = false)
+@RemoteHttpService("ruoyi-system")
+@HttpExchange("/remote/post")
 public interface RemotePostService {
 
     /**
@@ -25,8 +23,7 @@ public interface RemotePostService {
      * @param postIds 岗位 ID 列表
      * @return Map，其中 key 为岗位 ID，value 为对应的岗位名称
      */
-    @PostMapping("/select-post-names-by-ids")
+    @PostExchange("/select-post-names-by-ids")
     Map<Long, String> selectPostNamesByIds(@RequestBody Collection<Long> postIds);
 
 }
-

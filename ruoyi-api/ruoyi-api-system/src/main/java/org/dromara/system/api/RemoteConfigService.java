@@ -1,15 +1,12 @@
 package org.dromara.system.api;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Dict;
+import org.dromara.common.core.annotation.RemoteHttpService;
 import org.dromara.common.json.utils.JsonUtils;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,14 +16,15 @@ import java.util.List;
  *
  * @author Michelle.Chung
  */
-@FeignClient(contextId = "remoteConfigService", name = "ruoyi-system", path = "/remote/config", primary = false)
+@RemoteHttpService("ruoyi-system")
+@HttpExchange("/remote/config")
 public interface RemoteConfigService {
 
     /**
      * 获取注册开关
      * @return true开启，false关闭
      */
-    @GetMapping("/select-register-enabled")
+    @GetExchange("/select-register-enabled")
     boolean selectRegisterEnabled();
 
     /**
@@ -35,7 +33,7 @@ public interface RemoteConfigService {
      * @param configKey 参数 key
      * @return 参数值
      */
-    @GetMapping("/get-config-value")
+    @GetExchange("/get-config-value")
     String getConfigValue(@RequestParam String configKey);
 
     /**
@@ -123,4 +121,3 @@ public interface RemoteConfigService {
     }
 
 }
-

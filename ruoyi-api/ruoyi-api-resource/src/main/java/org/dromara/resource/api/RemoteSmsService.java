@@ -1,16 +1,13 @@
 package org.dromara.resource.api;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.dromara.common.core.annotation.RemoteHttpService;
 import org.dromara.resource.api.domain.RemoteSms;
 import org.dromara.resource.api.domain.RemoteSmsBatch;
 import org.dromara.resource.api.domain.RemoteSmsDelayBatch;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,7 +17,8 @@ import java.util.List;
  *
  * @author Feng
  */
-@FeignClient(contextId = "remoteSmsService", name = "ruoyi-resource", path = "/inner/remote/resource/sms", primary = false)
+@RemoteHttpService("ruoyi-resource")
+@HttpExchange("/inner/remote/resource/sms")
 public interface RemoteSmsService {
 
     /**
@@ -30,7 +28,7 @@ public interface RemoteSmsService {
      * @param message 短信内容
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    @PostMapping("/send-text")
+    @PostExchange("/send-text")
     RemoteSms sendMessage(@RequestParam String phone, @RequestParam String message);
 
     /**
@@ -40,7 +38,7 @@ public interface RemoteSmsService {
      * @param messages 短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    @PostMapping("/send-vars")
+    @PostExchange("/send-vars")
     RemoteSms sendMessage(@RequestParam String phone, @RequestBody LinkedHashMap<String, String> messages);
 
     /**
@@ -51,7 +49,7 @@ public interface RemoteSmsService {
      * @param messages   短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    @PostMapping("/send-template")
+    @PostExchange("/send-template")
     RemoteSms sendMessage(@RequestParam String phone, @RequestParam String templateId,
                           @RequestBody LinkedHashMap<String, String> messages);
 
@@ -62,7 +60,7 @@ public interface RemoteSmsService {
      * @param message 短信内容
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    @PostMapping("/message-texting")
+    @PostExchange("/message-texting")
     RemoteSms messageTexting(@RequestBody List<String> phones, @RequestParam String message);
 
     /**
@@ -73,7 +71,7 @@ public interface RemoteSmsService {
      * @param messages   短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    @PostMapping("/message-texting-template")
+    @PostExchange("/message-texting-template")
     default RemoteSms messageTexting(List<String> phones, String templateId, LinkedHashMap<String, String> messages) {
         return messageTextingTemplate(new RemoteSmsBatch(phones, templateId, messages));
     }
@@ -84,7 +82,7 @@ public interface RemoteSmsService {
      * @param request 群发模板短信请求
      * @return 封装了短信发送结果的 RemoteSms 对象
      */
-    @PostMapping("/message-texting-template")
+    @PostExchange("/message-texting-template")
     RemoteSms messageTextingTemplate(@RequestBody RemoteSmsBatch request);
 
     /**
@@ -93,7 +91,7 @@ public interface RemoteSmsService {
      * @param phone   目标手机号
      * @param message 短信内容
      */
-    @PostMapping("/send-async-text")
+    @PostExchange("/send-async-text")
     void sendMessageAsync(@RequestParam String phone, @RequestParam String message);
 
     /**
@@ -103,7 +101,7 @@ public interface RemoteSmsService {
      * @param templateId 短信模板ID
      * @param messages   短信模板参数，使用 LinkedHashMap 以保持参数顺序
      */
-    @PostMapping("/send-async-template")
+    @PostExchange("/send-async-template")
     void sendMessageAsync(@RequestParam String phone, @RequestParam String templateId,
                           @RequestBody LinkedHashMap<String, String> messages);
 
@@ -114,7 +112,7 @@ public interface RemoteSmsService {
      * @param message     短信内容
      * @param delayedTime 延迟发送时间（毫秒）
      */
-    @PostMapping("/delay-text")
+    @PostExchange("/delay-text")
     void delayMessage(@RequestParam String phone, @RequestParam String message, @RequestParam Long delayedTime);
 
     /**
@@ -125,7 +123,7 @@ public interface RemoteSmsService {
      * @param messages    短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @param delayedTime 延迟发送时间（毫秒）
      */
-    @PostMapping("/delay-template")
+    @PostExchange("/delay-template")
     void delayMessage(@RequestParam String phone, @RequestParam String templateId,
                       @RequestBody LinkedHashMap<String, String> messages, @RequestParam Long delayedTime);
 
@@ -136,7 +134,7 @@ public interface RemoteSmsService {
      * @param message     短信内容
      * @param delayedTime 延迟发送时间（毫秒）
      */
-    @PostMapping("/delay-message-texting")
+    @PostExchange("/delay-message-texting")
     void delayMessageTexting(@RequestBody List<String> phones, @RequestParam String message, @RequestParam Long delayedTime);
 
     /**
@@ -147,7 +145,7 @@ public interface RemoteSmsService {
      * @param messages    短信模板参数，使用 LinkedHashMap 以保持参数顺序
      * @param delayedTime 延迟发送时间（毫秒）
      */
-    @PostMapping("/delay-message-texting-template")
+    @PostExchange("/delay-message-texting-template")
     default void delayMessageTexting(List<String> phones, String templateId,
                                      LinkedHashMap<String, String> messages, Long delayedTime) {
         delayMessageTextingTemplate(new RemoteSmsDelayBatch(phones, templateId, messages, delayedTime));
@@ -158,7 +156,7 @@ public interface RemoteSmsService {
      *
      * @param request 延迟群发模板短信请求
      */
-    @PostMapping("/delay-message-texting-template")
+    @PostExchange("/delay-message-texting-template")
     void delayMessageTextingTemplate(@RequestBody RemoteSmsDelayBatch request);
 
     /**
@@ -166,7 +164,7 @@ public interface RemoteSmsService {
      *
      * @param phone 手机号
      */
-    @PostMapping("/add-blacklist-one")
+    @PostExchange("/add-blacklist-one")
     void addBlacklist(@RequestParam String phone);
 
     /**
@@ -174,7 +172,7 @@ public interface RemoteSmsService {
      *
      * @param phones 手机号列表
      */
-    @PostMapping("/add-blacklist-list")
+    @PostExchange("/add-blacklist-list")
     void addBlacklist(@RequestBody List<String> phones);
 
     /**
@@ -182,7 +180,7 @@ public interface RemoteSmsService {
      *
      * @param phone 手机号
      */
-    @PostMapping("/remove-blacklist-one")
+    @PostExchange("/remove-blacklist-one")
     void removeBlacklist(@RequestParam String phone);
 
     /**
@@ -190,8 +188,7 @@ public interface RemoteSmsService {
      *
      * @param phones 手机号
      */
-    @PostMapping("/remove-blacklist-list")
+    @PostExchange("/remove-blacklist-list")
     void removeBlacklist(@RequestBody List<String> phones);
 
 }
-

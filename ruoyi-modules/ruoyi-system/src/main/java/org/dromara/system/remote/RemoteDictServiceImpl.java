@@ -18,7 +18,7 @@ import java.util.List;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController(path = "/remote/dict")
+@RemoteServiceController
 public class RemoteDictServiceImpl implements RemoteDictService {
 
     private final ISysDictTypeService sysDictTypeService;

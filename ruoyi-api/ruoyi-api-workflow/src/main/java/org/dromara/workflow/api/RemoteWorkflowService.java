@@ -1,16 +1,14 @@
 package org.dromara.workflow.api;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.dromara.common.core.annotation.RemoteHttpService;
 import org.dromara.workflow.api.domain.RemoteCompleteTask;
 import org.dromara.workflow.api.domain.RemoteStartProcess;
 import org.dromara.workflow.api.domain.RemoteStartProcessReturn;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.List;
 import java.util.Map;
@@ -21,8 +19,8 @@ import java.util.Map;
  * @Author ZETA
  * @Date 2024/6/3
  */
-@FeignClient(contextId = "remoteWorkflowService", name = "ruoyi-workflow", path = "/remote/workflow",
-    fallbackFactory = RemoteWorkflowServiceFallbackFactory.class, primary = false)
+@RemoteHttpService(value = "ruoyi-workflow", fallback = RemoteWorkflowServiceFallback.class)
+@HttpExchange("/remote/workflow")
 public interface RemoteWorkflowService {
 
     /**
@@ -31,7 +29,7 @@ public interface RemoteWorkflowService {
      * @param businessIds 业务id
      * @return 结果
      */
-    @PostMapping("/delete-instance")
+    @PostExchange("/delete-instance")
     boolean deleteInstance(@RequestBody List<String> businessIds);
 
     /**
@@ -40,7 +38,7 @@ public interface RemoteWorkflowService {
      * @param taskId 任务id
      * @return 状态
      */
-    @GetMapping("/business-status-by-task-id")
+    @GetExchange("/business-status-by-task-id")
     String getBusinessStatusByTaskId(@RequestParam Long taskId);
 
     /**
@@ -49,7 +47,7 @@ public interface RemoteWorkflowService {
      * @param businessId 业务id
      * @return 状态
      */
-    @GetMapping("/business-status")
+    @GetExchange("/business-status")
     String getBusinessStatus(@RequestParam String businessId);
 
     /**
@@ -58,7 +56,7 @@ public interface RemoteWorkflowService {
      * @param instanceId 流程实例id
      * @param variable   流程变量
      */
-    @PostMapping("/set-variable")
+    @PostExchange("/set-variable")
     void setVariable(@RequestParam Long instanceId, @RequestBody Map<String, Object> variable);
 
     /**
@@ -66,7 +64,7 @@ public interface RemoteWorkflowService {
      *
      * @param instanceId 流程实例id
      */
-    @GetMapping("/instance-variable")
+    @GetExchange("/instance-variable")
     Map<String, Object> instanceVariable(@RequestParam Long instanceId);
 
     /**
@@ -75,7 +73,7 @@ public interface RemoteWorkflowService {
      * @param businessId 业务id
      * @return 结果
      */
-    @GetMapping("/instance-id-by-business-id")
+    @GetExchange("/instance-id-by-business-id")
     Long getInstanceIdByBusinessId(@RequestParam String businessId);
 
     /**
@@ -84,7 +82,7 @@ public interface RemoteWorkflowService {
      * @param startProcess 参数
      * @return 结果
      */
-    @PostMapping("/start-workflow")
+    @PostExchange("/start-workflow")
     RemoteStartProcessReturn startWorkFlow(@RequestBody RemoteStartProcess startProcess);
 
     /**
@@ -93,7 +91,7 @@ public interface RemoteWorkflowService {
      * @param completeTask 参数
      * @return 结果
      */
-    @PostMapping("/complete-task")
+    @PostExchange("/complete-task")
     boolean completeTask(@RequestBody RemoteCompleteTask completeTask);
 
 
@@ -104,7 +102,7 @@ public interface RemoteWorkflowService {
      * @param message 办理意见
      * @return 结果
      */
-    @PostMapping("/complete-task-simple")
+    @PostExchange("/complete-task-simple")
     boolean completeTask(@RequestParam Long taskId, @RequestParam String message);
 
     /**
@@ -113,8 +111,7 @@ public interface RemoteWorkflowService {
      * @param startProcess 参数
      * @return 结果
      */
-    @PostMapping("/start-complete-task")
+    @PostExchange("/start-complete-task")
     boolean startCompleteTask(@RequestBody RemoteStartProcess startProcess);
 
 }
-

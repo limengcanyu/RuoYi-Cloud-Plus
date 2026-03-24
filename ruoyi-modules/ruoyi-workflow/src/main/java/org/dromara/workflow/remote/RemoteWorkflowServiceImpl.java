@@ -17,7 +17,7 @@ import java.util.Map;
  * @Author ZETA
  * @Date 2024/6/3
  */
-@RemoteServiceController(path = "/remote/workflow")
+@RemoteServiceController
 @RequiredArgsConstructor
 public class RemoteWorkflowServiceImpl implements RemoteWorkflowService {
 

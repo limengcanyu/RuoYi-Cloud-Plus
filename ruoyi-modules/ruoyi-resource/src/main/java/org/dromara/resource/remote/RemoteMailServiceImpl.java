@@ -14,7 +14,7 @@ import org.dromara.resource.api.RemoteMailService;
  */
 @Slf4j
 @RequiredArgsConstructor
-@RemoteServiceController(path = "/remote/mail")
+@RemoteServiceController
 public class RemoteMailServiceImpl implements RemoteMailService {
 
     /**

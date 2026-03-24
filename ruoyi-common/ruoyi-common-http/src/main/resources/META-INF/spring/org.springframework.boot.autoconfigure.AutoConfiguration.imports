@@ -1,2 +1,1 @@
 org.dromara.common.http.config.RemoteHttpAutoConfiguration
-org.dromara.common.http.config.RemoteHttpDataPermissionAutoConfiguration

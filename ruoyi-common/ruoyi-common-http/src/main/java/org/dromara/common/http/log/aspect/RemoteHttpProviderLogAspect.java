@@ -1,19 +1,19 @@
 package org.dromara.common.http.log.aspect;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.cloud.openfeign.FeignClient;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.dromara.common.core.utils.ServletUtils;
+import org.dromara.common.core.annotation.RemoteHttpService;
 import org.dromara.common.http.log.support.RemoteHttpLogSupport;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.Method;
 
@@ -40,9 +40,9 @@ public class RemoteHttpProviderLogAspect {
         HttpServletRequest request = ServletUtils.getRequest();
         Class<?> remoteInterface = resolveRemoteInterface(targetClass, method);
         // 真实 HTTP 调用时优先从 servlet 请求拿 method/path；
-        // 本地注入 provider bean 时再回退到接口上的 Spring MVC 映射注解。
-        HttpMethod httpMethod = resolveHttpMethod(request, remoteInterface, targetClass, method);
-        String path = resolvePath(request, remoteInterface, targetClass, method);
+        // 本地短路调用时再回退到接口上的 @HttpExchange 注解。
+        HttpMethod httpMethod = resolveHttpMethod(request, remoteInterface, method);
+        String path = resolvePath(request, remoteInterface, method);
         this.logSupport.logRequest(RemoteHttpLogSupport.PROVIDER, httpMethod, path, arguments);
         long startTime = System.currentTimeMillis();
         try {
@@ -55,25 +55,22 @@ public class RemoteHttpProviderLogAspect {
         }
     }
 
-    private HttpMethod resolveHttpMethod(HttpServletRequest request, Class<?> remoteInterface, Class<?> targetClass, Method method) {
+    private HttpMethod resolveHttpMethod(HttpServletRequest request, Class<?> remoteInterface, Method method) {
         if (request != null && StringUtils.hasText(request.getMethod())) {
             return HttpMethod.valueOf(request.getMethod());
         }
-        RequestMapping methodMapping = resolveMethodMapping(remoteInterface, method);
-        if (methodMapping != null && methodMapping.method().length > 0) {
-            return HttpMethod.valueOf(methodMapping.method()[0].name());
+        HttpExchange methodExchange = resolveMethodExchange(remoteInterface, method);
+        if (methodExchange != null && StringUtils.hasText(methodExchange.method())) {
+            return HttpMethod.valueOf(methodExchange.method());
         }
-        RequestMapping typeMapping = resolveTypeMapping(remoteInterface);
-        if (typeMapping == null) {
-            typeMapping = resolveTypeMapping(targetClass);
-        }
-        if (typeMapping != null && typeMapping.method().length > 0) {
-            return HttpMethod.valueOf(typeMapping.method()[0].name());
+        HttpExchange typeExchange = resolveTypeExchange(remoteInterface);
+        if (typeExchange != null && StringUtils.hasText(typeExchange.method())) {
+            return HttpMethod.valueOf(typeExchange.method());
         }
         return null;
     }
 
-    private String resolvePath(HttpServletRequest request, Class<?> remoteInterface, Class<?> targetClass, Method method) {
+    private String resolvePath(HttpServletRequest request, Class<?> remoteInterface, Method method) {
         if (request != null) {
             String requestUri = request.getRequestURI();
             if (StringUtils.hasText(requestUri)) {
@@ -84,11 +81,8 @@ public class RemoteHttpProviderLogAspect {
                 return requestUri + '?' + queryString;
             }
         }
-        String typePath = extractPath(resolveTypeMapping(remoteInterface));
-        if (!StringUtils.hasText(typePath)) {
-            typePath = extractPath(resolveTypeMapping(targetClass));
-        }
-        String methodPath = extractPath(resolveMethodMapping(remoteInterface, method));
+        String typePath = extractPath(resolveTypeExchange(remoteInterface));
+        String methodPath = extractPath(resolveMethodExchange(remoteInterface, method));
         if (!StringUtils.hasText(typePath)) {
             return methodPath;
         }
@@ -101,7 +95,7 @@ public class RemoteHttpProviderLogAspect {
 
     private Class<?> resolveRemoteInterface(Class<?> targetClass, Method method) {
         for (Class<?> interfaceType : targetClass.getInterfaces()) {
-            if (interfaceType.isAnnotationPresent(FeignClient.class)
+            if (interfaceType.isAnnotationPresent(RemoteHttpService.class)
                 && org.springframework.util.ReflectionUtils.findMethod(interfaceType, method.getName(), method.getParameterTypes()) != null) {
                 return interfaceType;
             }
@@ -109,14 +103,14 @@ public class RemoteHttpProviderLogAspect {
         return null;
     }
 
-    private RequestMapping resolveTypeMapping(Class<?> remoteInterface) {
+    private HttpExchange resolveTypeExchange(Class<?> remoteInterface) {
         if (remoteInterface == null) {
             return null;
         }
-        return AnnotatedElementUtils.findMergedAnnotation(remoteInterface, RequestMapping.class);
+        return AnnotatedElementUtils.findMergedAnnotation(remoteInterface, HttpExchange.class);
     }
 
-    private RequestMapping resolveMethodMapping(Class<?> remoteInterface, Method method) {
+    private HttpExchange resolveMethodExchange(Class<?> remoteInterface, Method method) {
         if (remoteInterface == null) {
             return null;
         }
@@ -124,18 +118,18 @@ public class RemoteHttpProviderLogAspect {
         if (interfaceMethod == null) {
             return null;
         }
-        return AnnotatedElementUtils.findMergedAnnotation(interfaceMethod, RequestMapping.class);
+        return AnnotatedElementUtils.findMergedAnnotation(interfaceMethod, HttpExchange.class);
     }
 
-    private String extractPath(RequestMapping mapping) {
-        if (mapping == null) {
+    private String extractPath(HttpExchange exchange) {
+        if (exchange == null) {
             return null;
         }
-        if (mapping.path().length > 0 && StringUtils.hasText(mapping.path()[0])) {
-            return mapping.path()[0];
+        if (StringUtils.hasText(exchange.url())) {
+            return exchange.url();
         }
-        if (mapping.value().length > 0 && StringUtils.hasText(mapping.value()[0])) {
-            return mapping.value()[0];
+        if (StringUtils.hasText(exchange.value())) {
+            return exchange.value();
         }
         return null;
     }

@@ -20,7 +20,7 @@ import java.util.Map;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController(path = "/remote/role")
+@RemoteServiceController
 public class RemoteRoleServiceImpl implements RemoteRoleService {
 
     private final SysRoleMapper roleMapper;

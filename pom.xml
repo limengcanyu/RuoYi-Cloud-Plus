@@ -60,7 +60,6 @@
         <mica-mqtt.version>2.5.11</mica-mqtt.version>
         <!-- mq配置 -->
         <rocketmq.version>2.3.4</rocketmq.version>
-        <fory.version>0.16.0</fory.version>
 
         <!-- 插件版本 -->
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
@@ -364,12 +363,6 @@
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
                 <version>${rocketmq.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.fory</groupId>
-                <artifactId>fory-core</artifactId>
-                <version>${fory.version}</version>
             </dependency>
 
             <!-- Warm-Flow国产工作流引擎, 在线文档：http://warm-flow.cn/ -->
