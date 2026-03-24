@@ -8,6 +8,7 @@ import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.utils.AuthStateUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.auth.domain.vo.LoginVo;
 import org.dromara.auth.form.RegisterBody;
 import org.dromara.auth.form.SocialLoginBody;
@@ -52,9 +53,13 @@ public class TokenController {
     private final SysLoginService sysLoginService;
     private final ScheduledExecutorService scheduledExecutorService;
 
+    @DubboReference
     private final RemoteConfigService remoteConfigService;
+    @DubboReference
     private final RemoteClientService remoteClientService;
+    @DubboReference
     private final RemoteSocialService remoteSocialService;
+    @DubboReference(stub = "true")
     private final RemoteMessageService remoteMessageService;
 
     /**

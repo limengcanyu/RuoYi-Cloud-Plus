@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.auth.domain.vo.LoginVo;
 import org.dromara.auth.form.SocialLoginBody;
 import org.dromara.auth.service.IAuthStrategy;
@@ -36,8 +37,10 @@ public class SocialAuthStrategy implements IAuthStrategy {
 
     private final SocialProperties socialProperties;
 
-    private final RemoteSocialService remoteSocialService;
-    private final RemoteUserService remoteUserService;
+    @DubboReference
+    private RemoteSocialService remoteSocialService;
+    @DubboReference
+    private RemoteUserService remoteUserService;
 
     /**
      * 登录-第三方授权登录

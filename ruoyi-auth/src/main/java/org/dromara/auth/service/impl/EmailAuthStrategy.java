@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.auth.domain.vo.LoginVo;
 import org.dromara.auth.form.EmailLoginBody;
 import org.dromara.auth.service.IAuthStrategy;
@@ -35,7 +36,8 @@ public class EmailAuthStrategy implements IAuthStrategy {
 
     private final SysLoginService loginService;
 
-    private final RemoteUserService remoteUserService;
+    @DubboReference
+    private RemoteUserService remoteUserService;
 
     @Override
     public LoginVo login(String body, RemoteClientVo client) {

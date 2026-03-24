@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.SpringUtils;
 import org.dromara.common.core.utils.StreamUtils;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 
@@ -39,9 +41,12 @@ public class FlwCommonServiceImpl implements IFlwCommonService {
 
     private static final String DEFAULT_SUBJECT = "单据审批提醒";
 
-    private final RemoteMessageService remoteMessageService;
-    private final RemoteMailService remoteMailService;
-    private final RemoteSmsService remoteSmsService;
+    @DubboReference
+    private RemoteMessageService remoteMessageService;
+    @DubboReference
+    private RemoteMailService remoteMailService;
+    @DubboReference
+    private RemoteSmsService remoteSmsService;
 
     /**
      * 根据流程实例发送消息给当前处理人

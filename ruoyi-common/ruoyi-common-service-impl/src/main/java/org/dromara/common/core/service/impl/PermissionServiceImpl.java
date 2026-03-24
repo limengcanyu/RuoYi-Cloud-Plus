@@ -1,6 +1,6 @@
 package org.dromara.common.core.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.service.PermissionService;
 import org.dromara.system.api.RemotePermissionService;
 import org.springframework.stereotype.Service;
@@ -13,10 +13,10 @@ import java.util.Set;
  * @author Lion Li
  */
 @Service
-@RequiredArgsConstructor
 public class PermissionServiceImpl implements PermissionService {
 
-    private final RemotePermissionService remotePermissionService;
+    @DubboReference
+    private RemotePermissionService remotePermissionService;
 
     @Override
     public Set<String> getRolePermission(Long userId) {

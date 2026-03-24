@@ -3,7 +3,7 @@ package org.dromara.resource.remote;
 import cn.hutool.core.convert.Convert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.common.http.annotation.RemoteServiceController;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
@@ -17,6 +17,7 @@ import org.dromara.resource.domain.SysOssExt;
 import org.dromara.resource.domain.bo.SysOssBo;
 import org.dromara.resource.domain.vo.SysOssVo;
 import org.dromara.resource.service.ISysOssService;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -27,8 +28,9 @@ import java.util.List;
  * @author Lion Li
  */
 @Slf4j
+@Service
 @RequiredArgsConstructor
-@RemoteServiceController
+@DubboService
 public class RemoteFileServiceImpl implements RemoteFileService {
 
     private final ISysOssService sysOssService;

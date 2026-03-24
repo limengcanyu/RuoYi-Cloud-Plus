@@ -3,11 +3,12 @@ package org.dromara.system.remote;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
-import org.dromara.common.http.annotation.RemoteServiceController;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.system.api.RemotePostService;
 import org.dromara.system.domain.SysPost;
 import org.dromara.system.mapper.SysPostMapper;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +21,8 @@ import java.util.Map;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@Service
+@DubboService
 public class RemotePostServiceImpl implements RemotePostService {
 
     private final SysPostMapper postMapper;

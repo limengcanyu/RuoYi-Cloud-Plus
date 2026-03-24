@@ -9,6 +9,7 @@ import org.dromara.common.translation.constant.TransConstant;
 import org.dromara.common.translation.core.TranslationInterface;
 import org.dromara.system.api.RemoteUserService;
 import lombok.AllArgsConstructor;
+import org.apache.dubbo.config.annotation.DubboReference;
 
 /**
  * 用户名翻译实现
@@ -19,7 +20,8 @@ import lombok.AllArgsConstructor;
 @TranslationType(type = TransConstant.USER_ID_TO_NAME)
 public class UserNameTranslationImpl implements TranslationInterface<String> {
 
-    private final RemoteUserService remoteUserService;
+    @DubboReference
+    private RemoteUserService remoteUserService;
 
     @Override
     public String translation(Object key, String other) {

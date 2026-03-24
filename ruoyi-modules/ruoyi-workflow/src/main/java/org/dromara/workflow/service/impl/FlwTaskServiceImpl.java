@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.enums.BusinessStatusEnum;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.StreamUtils;
@@ -97,7 +98,8 @@ public class FlwTaskServiceImpl implements IFlwTaskService {
     private final IFlwNodeExtService flwNodeExtService;
     private final FlwInstanceBizExtMapper flwInstanceBizExtMapper;
 
-    private final RemoteUserService remoteUserService;
+    @DubboReference
+    private RemoteUserService remoteUserService;
 
     /**
      * 启动任务

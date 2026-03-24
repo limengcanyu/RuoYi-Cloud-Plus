@@ -8,6 +8,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.enums.FormatsType;
 import org.dromara.common.core.utils.DateUtils;
 import org.dromara.common.core.utils.StreamUtils;
@@ -45,11 +46,16 @@ public class FlwTaskAssigneeServiceImpl implements IFlwTaskAssigneeService, Hand
 
     private static final String DEFAULT_GROUP_NAME = "默认分组";
 
-    private final RemoteTaskAssigneeService remoteTaskAssigneeService;
-    private final RemoteUserService remoteUserService;
-    private final RemoteDeptService remoteDeptService;
-    private final RemoteRoleService remoteRoleService;
-    private final RemotePostService remotePostService;
+    @DubboReference
+    private RemoteTaskAssigneeService remoteTaskAssigneeService;
+    @DubboReference
+    private RemoteUserService remoteUserService;
+    @DubboReference
+    private RemoteDeptService remoteDeptService;
+    @DubboReference
+    private RemoteRoleService remoteRoleService;
+    @DubboReference
+    private RemotePostService remotePostService;
 
     private final IFlwSpelService spelService;
 

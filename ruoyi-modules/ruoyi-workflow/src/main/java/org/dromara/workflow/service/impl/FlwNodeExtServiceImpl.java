@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.system.api.RemoteDictService;
@@ -72,7 +73,8 @@ public class FlwNodeExtServiceImpl implements NodeExtService, IFlwNodeExtService
         );
     }
 
-    private final RemoteDictService remoteDictService;
+    @DubboReference
+    private RemoteDictService remoteDictService;
 
     /**
      * 获取节点扩展属性

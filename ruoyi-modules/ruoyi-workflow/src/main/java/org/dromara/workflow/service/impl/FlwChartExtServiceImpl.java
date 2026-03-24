@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.service.DictService;
 import org.dromara.common.core.utils.DateUtils;
 import org.dromara.common.core.utils.StreamUtils;
@@ -50,8 +51,10 @@ public class FlwChartExtServiceImpl implements ChartExtService {
     @Value("${warm-flow.node-tooltip:true}")
     private boolean nodeTooltip;
 
-    private final RemoteUserService remoteUserService;
-    private final RemoteDeptService remoteDeptService;
+    @DubboReference
+    private RemoteUserService remoteUserService;
+    @DubboReference
+    private RemoteDeptService remoteDeptService;
 
     /**
      * 设置流程图提示信息

@@ -8,6 +8,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.enums.BusinessStatusEnum;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
@@ -53,7 +54,8 @@ public class WorkflowGlobalListener implements GlobalListener {
     private final IFlwCommonService flwCommonService;
     private final IFlwNodeExtService nodeExtService;
 
-    private final RemoteUserService remoteUserService;
+    @DubboReference
+    private RemoteUserService remoteUserService;
 
     /**
      * 创建监听器，任务创建时执行

@@ -2,13 +2,14 @@ package org.dromara.common.core.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.github.benmanes.caffeine.cache.Cache;
-import lombok.RequiredArgsConstructor;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.service.DictService;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.system.api.RemoteDictService;
 import org.dromara.system.api.domain.vo.RemoteDictDataVo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -20,12 +21,13 @@ import java.util.stream.Collectors;
  * @author Lion Li
  */
 @Service
-@RequiredArgsConstructor
 public class DictServiceImpl implements DictService {
 
-    private final Cache<Object, Object> ceffeine;
+    @Autowired
+    private Cache<Object, Object> ceffeine;
 
-    private final RemoteDictService remoteDictService;
+    @DubboReference
+    private RemoteDictService remoteDictService;
 
     /**
      * 根据字典类型和字典值获取字典标签

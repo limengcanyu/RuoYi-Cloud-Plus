@@ -11,6 +11,7 @@ import me.zhyd.oauth.model.AuthToken;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.request.AuthWechatMiniProgramRequest;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.auth.domain.vo.LoginVo;
 import org.dromara.auth.form.XcxLoginBody;
 import org.dromara.auth.service.IAuthStrategy;
@@ -36,7 +37,8 @@ public class XcxAuthStrategy implements IAuthStrategy {
 
     private final SysLoginService loginService;
 
-    private final RemoteUserService remoteUserService;
+    @DubboReference
+    private RemoteUserService remoteUserService;
 
     @Override
     public LoginVo login(String body, RemoteClientVo client) {

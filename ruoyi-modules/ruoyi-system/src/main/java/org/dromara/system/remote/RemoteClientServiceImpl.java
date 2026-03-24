@@ -1,12 +1,13 @@
 package org.dromara.system.remote;
 
 import lombok.RequiredArgsConstructor;
-import org.dromara.common.http.annotation.RemoteServiceController;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.system.api.RemoteClientService;
 import org.dromara.system.api.domain.vo.RemoteClientVo;
 import org.dromara.system.domain.vo.SysClientVo;
 import org.dromara.system.service.ISysClientService;
+import org.springframework.stereotype.Service;
 
 /**
  * 客户端服务
@@ -14,7 +15,8 @@ import org.dromara.system.service.ISysClientService;
  * @author Michelle.Chung
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@Service
+@DubboService
 public class RemoteClientServiceImpl implements RemoteClientService {
 
     private final ISysClientService sysClientService;

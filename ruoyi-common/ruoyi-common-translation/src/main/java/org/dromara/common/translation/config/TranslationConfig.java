@@ -8,7 +8,6 @@ import org.dromara.common.translation.core.handler.TranslationBeanSerializerModi
 import org.dromara.common.translation.core.handler.TranslationHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import tools.jackson.databind.ser.SerializerFactory;
@@ -41,6 +40,15 @@ public class TranslationConfig {
             }
         }
         TranslationHandler.TRANSLATION_MAPPER.putAll(map);
+    }
+
+    @Bean
+    public JsonMapperBuilderCustomizer translationInitCustomizer() {
+        return builder -> {
+            SerializerFactory serializerFactory = builder.serializerFactory();
+            serializerFactory = serializerFactory.withSerializerModifier(new TranslationBeanSerializerModifier());
+            builder.serializerFactory(serializerFactory);
+        };
     }
 
 }

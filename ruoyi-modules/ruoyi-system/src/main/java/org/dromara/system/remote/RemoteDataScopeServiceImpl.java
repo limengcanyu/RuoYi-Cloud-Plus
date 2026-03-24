@@ -5,7 +5,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
-import org.dromara.common.http.annotation.RemoteServiceController;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.system.api.RemoteDataScopeService;
@@ -13,6 +13,7 @@ import org.dromara.system.domain.SysRoleDept;
 import org.dromara.system.mapper.SysDeptMapper;
 import org.dromara.system.mapper.SysRoleDeptMapper;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -25,7 +26,8 @@ import java.util.List;
  * @author Lion Li
  */
 @RequiredArgsConstructor
-@RemoteServiceController
+@Service
+@DubboService
 public class RemoteDataScopeServiceImpl implements RemoteDataScopeService {
 
     private final SysRoleDeptMapper roleDeptMapper;

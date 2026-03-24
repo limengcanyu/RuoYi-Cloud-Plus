@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.core.utils.StringUtils;
@@ -45,7 +46,8 @@ public class SysProfileController extends BaseController {
 
     private final ISysUserService userService;
 
-    private final RemoteFileService remoteFileService;
+    @DubboReference
+    private RemoteFileService remoteFileService;
 
     /**
      * 个人信息

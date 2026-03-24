@@ -1,32 +1,52 @@
 server:
-  # jetty 配置
-  jetty:
+  # undertow 配置
+  undertow:
     # HTTP post内容的最大大小。当值为-1时，默认值为大小是无限的
-    max-http-form-post-size: -1
+    max-http-post-size: 1GB
+    # 以下的配置会影响buffer,这些buffer会用于服务器连接的IO操作,有点类似netty的池化内存管理
+    # 每块buffer的空间大小,越小的空间被利用越充分
+    buffer-size: 512
+    # 是否分配的直接内存
+    direct-buffers: true
     threads:
-      # 最小线程数
-      min: 8
-      # 最大线程数
-      max: 256
+      # 设置IO线程数, 它主要执行非阻塞的任务,它们会负责多个连接, 默认设置每个CPU核心一个线程
+      io: 8
+      # 阻塞任务线程池, 当执行类似servlet请求阻塞操作, undertow会从这个线程池中取得线程,它的值设置取决于系统的负载
+      worker: 256
 
-remote:
-  http:
-    # 远程接口扫描范围，支持 Ant 风格包路径
-    scan-packages:
-      - org.dromara.**.api
+dubbo:
+  application:
+    # 关闭qos端口避免单机多生产者端口冲突 如需使用自行开启
+    qos-enable: false
+  protocol:
+    # 如需使用 Triple 3.0 新协议 可查看官方文档
+    # 使用 dubbo 协议通信
+    name: dubbo
+    # dubbo 协议端口(-1表示自增端口,从20880开始)
+    port: -1
+    # 指定dubbo协议注册ip
+    # host: 192.168.0.100
+    # 开启虚拟线程
+    # threadpool: virtual
+  # 消费者相关配置
+  consumer:
+    # 超时时间
+    timeout: 3000
+  metadata-report:
+    # Redis集群开关
+    cluster: false
+    parameters:
+      # 集群地址 cluster 为 true 生效
+      # 集群把所有Redis集群节点写到这里就行了
+      backup: 127.0.0.1:6379,127.0.0.1:6381
+  # 自定义配置
+  custom:
     # 全局请求log
     request-log: true
     # info 基础信息 param 参数信息 full 全部
     log-level: info
 
 spring:
-  http:
-    clients:
-      # 默认 client HTTP 请求超时，供 RestClient / HTTP Service Client 复用
-      connect-timeout: 3s
-      read-timeout: 10s
-      imperative:
-        factory: jetty
   threads:
     # 开启虚拟线程 仅jdk21可用
     virtual:
