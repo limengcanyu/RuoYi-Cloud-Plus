@@ -35,7 +35,7 @@ import java.util.Arrays;
 @RequestMapping("/oss/config")
 public class SysOssConfigController extends BaseController {
 
-    private final ISysOssConfigService iSysOssConfigService;
+    private final ISysOssConfigService ossConfigService;
 
     /**
      * 查询对象存储配置列表
@@ -43,7 +43,7 @@ public class SysOssConfigController extends BaseController {
     @SaCheckPermission("system:ossConfig:list")
     @GetMapping("/list")
     public R<PageResult<SysOssConfigVo>> list(@Validated(QueryGroup.class) SysOssConfigBo bo, PageQuery pageQuery) {
-        return R.ok(iSysOssConfigService.queryPageList(bo, pageQuery));
+        return R.ok(ossConfigService.queryPageList(bo, pageQuery));
     }
 
     /**
@@ -54,7 +54,7 @@ public class SysOssConfigController extends BaseController {
     @SaCheckPermission("system:ossConfig:list")
     @GetMapping("/{ossConfigId}")
     public R<SysOssConfigVo> getInfo(@NotNull(message = "主键不能为空") @PathVariable("ossConfigId") Long ossConfigId) {
-        return R.ok(iSysOssConfigService.queryById(ossConfigId));
+        return R.ok(ossConfigService.queryById(ossConfigId));
     }
 
     /**
@@ -64,7 +64,7 @@ public class SysOssConfigController extends BaseController {
     @Log(title = "对象存储配置", businessType = BusinessType.INSERT)
     @PostMapping()
     public R<Void> add(@Validated(AddGroup.class) @RequestBody SysOssConfigBo bo) {
-        return toAjax(iSysOssConfigService.insertByBo(bo));
+        return toAjax(ossConfigService.insertByBo(bo));
     }
 
     /**
@@ -74,7 +74,7 @@ public class SysOssConfigController extends BaseController {
     @Log(title = "对象存储配置", businessType = BusinessType.UPDATE)
     @PutMapping()
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody SysOssConfigBo bo) {
-        return toAjax(iSysOssConfigService.updateByBo(bo));
+        return toAjax(ossConfigService.updateByBo(bo));
     }
 
     /**
@@ -86,7 +86,7 @@ public class SysOssConfigController extends BaseController {
     @Log(title = "对象存储配置", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ossConfigIds}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ossConfigIds) {
-        return toAjax(iSysOssConfigService.deleteWithValidByIds(Arrays.asList(ossConfigIds), true));
+        return toAjax(ossConfigService.deleteWithValidByIds(Arrays.asList(ossConfigIds), true));
     }
 
     /**
@@ -97,6 +97,6 @@ public class SysOssConfigController extends BaseController {
     @RepeatSubmit()
     @PutMapping("/changeStatus")
     public R<Void> changeStatus(@RequestBody SysOssConfigBo bo) {
-        return toAjax(iSysOssConfigService.updateOssConfigStatus(bo));
+        return toAjax(ossConfigService.updateOssConfigStatus(bo));
     }
 }

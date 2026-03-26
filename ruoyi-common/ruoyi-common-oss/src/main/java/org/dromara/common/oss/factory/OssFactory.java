@@ -1,24 +1,26 @@
 package org.dromara.common.oss.factory;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.json.utils.JsonUtils;
+import org.dromara.common.oss.client.DefaultOssClientImpl;
+import org.dromara.common.oss.client.OssClient;
+import org.dromara.common.oss.config.OssClientConfig;
 import org.dromara.common.oss.constant.OssConstant;
-import org.dromara.common.oss.core.OssClient;
-import org.dromara.common.oss.exception.OssException;
+import org.dromara.common.oss.exception.S3StorageException;
 import org.dromara.common.oss.properties.OssProperties;
 import org.dromara.common.redis.utils.CacheUtils;
 import org.dromara.common.redis.utils.RedisUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 文件上传Factory
+ * S3存储客户端工厂
  *
- * @author Lion Li
+ * @author 秋辞未寒
  */
 @Slf4j
 public class OssFactory {
@@ -33,7 +35,7 @@ public class OssFactory {
         // 获取redis 默认类型
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
         if (StringUtils.isEmpty(configKey)) {
-            throw new OssException("文件存储服务类型无法找到!");
+            throw S3StorageException.form("文件存储服务类型无法找到!");
         }
         return instance(configKey);
     }
@@ -41,29 +43,47 @@ public class OssFactory {
     /**
      * 根据类型获取实例
      */
-    public static synchronized OssClient instance(String configKey) {
+    public static OssClient instance(String configKey) {
         String json = CacheUtils.get(CacheNames.SYS_OSS_CONFIG, configKey);
         if (json == null) {
-            throw new OssException("系统异常, '" + configKey + "'配置信息不存在!");
+            throw S3StorageException.form("系统异常, '" + configKey + "'配置信息不存在!");
         }
         OssProperties properties = JsonUtils.parseObject(json, OssProperties.class);
-        // 使用租户标识避免多个租户相同key实例覆盖
-        OssClient client = CLIENT_CACHE.get(configKey);
-        // 客户端不存在或配置不相同则重新构建
-        if (client == null || !client.checkPropertiesSame(properties)) {
-            LOCK.lock();
-            try {
-                client = CLIENT_CACHE.get(configKey);
-                if (client == null || !client.checkPropertiesSame(properties)) {
-                    CLIENT_CACHE.put(configKey, new OssClient(configKey, properties));
-                    log.info("创建OSS实例 key => {}", configKey);
-                    return CLIENT_CACHE.get(configKey);
+        OssClientConfig config = OssClientConfig.formProperties(properties);
+        LOCK.lock();
+        try {
+            // 如果已经存在，则校验配置一致性
+            if (CLIENT_CACHE.containsKey(configKey)) {
+                OssClient client = CLIENT_CACHE.get(configKey);
+                if (!client.verifyConfig(config)) {
+                    // 配置不一致，刷新配置
+                    client.refresh(config);
+                    CLIENT_CACHE.put(configKey, client);
                 }
-            } finally {
-                LOCK.unlock();
+                return client;
             }
+            DefaultOssClientImpl client = new DefaultOssClientImpl(configKey, config);
+            CLIENT_CACHE.put(configKey, client);
+            return client;
+        } finally {
+            LOCK.lock();
         }
-        return client;
+    }
+
+    /**
+     * 移除实例
+     */
+    public static boolean remove(String configKey) {
+        OssClient client = CLIENT_CACHE.remove(configKey);
+        if (client == null) {
+            return false;
+        }
+        try {
+            client.close();
+        } catch (Exception e) {
+            log.warn("S3存储客户端关闭异常，错误信息: {}", e.getMessage(), e);
+        }
+        return true;
     }
 
 }

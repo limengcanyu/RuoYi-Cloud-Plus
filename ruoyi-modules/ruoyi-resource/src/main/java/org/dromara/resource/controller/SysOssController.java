@@ -17,6 +17,7 @@ import org.dromara.resource.domain.vo.SysOssUploadVo;
 import org.dromara.resource.domain.vo.SysOssVo;
 import org.dromara.resource.service.ISysOssService;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +37,7 @@ import java.util.List;
 @RequestMapping("/oss")
 public class SysOssController extends BaseController {
 
-    private final ISysOssService iSysOssService;
+    private final ISysOssService ossService;
 
     /**
      * 查询OSS对象存储列表
@@ -44,7 +45,7 @@ public class SysOssController extends BaseController {
     @SaCheckPermission("system:oss:list")
     @GetMapping("/list")
     public R<PageResult<SysOssVo>> list(@Validated(QueryGroup.class) SysOssBo bo, PageQuery pageQuery) {
-        return R.ok(iSysOssService.queryPageList(bo, pageQuery));
+        return R.ok(ossService.queryPageList(bo, pageQuery));
     }
 
     /**
@@ -55,7 +56,7 @@ public class SysOssController extends BaseController {
     @SaCheckPermission("system:oss:query")
     @GetMapping("/listByIds/{ossIds}")
     public R<List<SysOssVo>> listByIds(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ossIds) {
-        List<SysOssVo> list = iSysOssService.listByIds(Arrays.asList(ossIds));
+        List<SysOssVo> list = ossService.listByIds(Arrays.asList(ossIds));
         return R.ok(list);
     }
 
@@ -68,7 +69,7 @@ public class SysOssController extends BaseController {
     @Log(title = "OSS对象存储", businessType = BusinessType.INSERT)
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R<SysOssUploadVo> upload(@RequestPart("file") MultipartFile file) {
-        SysOssVo oss = iSysOssService.upload(file);
+        SysOssVo oss = ossService.upload(file);
         SysOssUploadVo uploadVo = new SysOssUploadVo();
         uploadVo.setUrl(oss.getUrl());
         uploadVo.setFileName(oss.getOriginalName());
@@ -77,14 +78,15 @@ public class SysOssController extends BaseController {
     }
 
     /**
-     * 下载OSS对象存储
+     * 下载OSS对象
      *
      * @param ossId OSS对象ID
+     * @throws IOException IO 异常
      */
     @SaCheckPermission("system:oss:download")
     @GetMapping("/download/{ossId}")
-    public void download(@PathVariable Long ossId, HttpServletResponse response) throws IOException {
-        iSysOssService.download(ossId, response);
+    public ResponseEntity<byte[]> download(@PathVariable Long ossId) throws IOException {
+        return ossService.download(ossId);
     }
 
     /**
@@ -96,7 +98,7 @@ public class SysOssController extends BaseController {
     @Log(title = "OSS对象存储", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ossIds}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ossIds) {
-        return toAjax(iSysOssService.deleteWithValidByIds(Arrays.asList(ossIds), true));
+        return toAjax(ossService.deleteWithValidByIds(Arrays.asList(ossIds), true));
     }
 
 }
