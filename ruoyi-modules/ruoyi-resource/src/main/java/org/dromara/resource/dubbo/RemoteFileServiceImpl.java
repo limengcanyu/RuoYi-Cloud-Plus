@@ -8,9 +8,10 @@ import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.json.utils.JsonUtils;
-import org.dromara.common.oss.core.OssClient;
-import org.dromara.common.oss.entity.UploadResult;
+import org.dromara.common.oss.client.OssClient;
 import org.dromara.common.oss.factory.OssFactory;
+import org.dromara.common.oss.model.PutObjectResult;
+import org.dromara.common.oss.util.S3ObjectUtil;
 import org.dromara.resource.api.RemoteFileService;
 import org.dromara.resource.api.domain.RemoteFile;
 import org.dromara.resource.domain.SysOssExt;
@@ -43,15 +44,16 @@ public class RemoteFileServiceImpl implements RemoteFileService {
     public RemoteFile upload(String name, String originalFilename, String contentType, byte[] file) throws ServiceException {
         try {
             String suffix = StringUtils.substring(originalFilename, originalFilename.lastIndexOf("."), originalFilename.length());
-            OssClient storage = OssFactory.instance();
-            UploadResult uploadResult = storage.uploadSuffix(file, suffix, contentType);
+            OssClient instance = OssFactory.instance();
+            String pathKey = S3ObjectUtil.buildPathKey(originalFilename);
+            PutObjectResult result = instance.upload(pathKey, file);
             // 保存文件信息
             SysOssBo oss = new SysOssBo();
-            oss.setUrl(uploadResult.getUrl());
+            oss.setUrl(result.url());
             oss.setFileSuffix(suffix);
-            oss.setFileName(uploadResult.getFilename());
+            oss.setFileName(result.key());
             oss.setOriginalName(originalFilename);
-            oss.setService(storage.getConfigKey());
+            oss.setService(instance.clientId());
             SysOssExt ext1 = new SysOssExt();
             ext1.setFileSize((long) file.length);
             String extStr = JsonUtils.toJsonString(ext1);
@@ -59,8 +61,8 @@ public class RemoteFileServiceImpl implements RemoteFileService {
             sysOssService.insertByBo(oss);
             RemoteFile sysFile = new RemoteFile();
             sysFile.setOssId(oss.getOssId());
-            sysFile.setName(uploadResult.getFilename());
-            sysFile.setUrl(uploadResult.getUrl());
+            sysFile.setName(result.key());
+            sysFile.setUrl(result.url());
             sysFile.setOriginalName(originalFilename);
             sysFile.setFileSuffix(suffix);
             sysFile.setExt1(extStr);

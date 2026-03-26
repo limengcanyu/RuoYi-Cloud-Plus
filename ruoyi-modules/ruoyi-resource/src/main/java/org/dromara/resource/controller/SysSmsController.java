@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.Constants;
 import org.dromara.common.core.constant.GlobalConstants;
 import org.dromara.common.core.domain.R;
+import org.dromara.common.core.utils.regex.RegexValidator;
 import org.dromara.common.redis.annotation.RateLimiter;
 import org.dromara.common.redis.utils.RedisUtils;
 import org.dromara.common.web.core.BaseController;
@@ -42,6 +43,9 @@ public class SysSmsController extends BaseController {
     @RateLimiter(key = "#phonenumber", time = 60, count = 1)
     @GetMapping("/code")
     public R<Void> smsCaptcha(@NotBlank(message = "{user.phonenumber.not.blank}") String phoneNumber) {
+        if (!RegexValidator.isMobile(phoneNumber)) {
+            return R.fail("请输入正确的手机号！");
+        }
         String key = GlobalConstants.CAPTCHA_CODE_KEY + phoneNumber;
         String code = RandomUtil.randomNumbers(4);
         RedisUtils.setCacheObject(key, code, Duration.ofMinutes(Constants.CAPTCHA_EXPIRATION));

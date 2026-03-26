@@ -9,6 +9,7 @@ import org.dromara.common.core.constant.GlobalConstants;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.SpringUtils;
+import org.dromara.common.core.utils.regex.RegexValidator;
 import org.dromara.common.redis.annotation.RateLimiter;
 import org.dromara.common.web.core.BaseController;
 import org.dromara.common.mail.config.properties.MailProperties;
@@ -37,7 +38,7 @@ public class SysEmailController extends BaseController {
     private final MailProperties mailProperties;
 
     /**
-     * 邮箱验证码
+     * 发送邮箱验证码
      *
      * @param email 邮箱
      */
@@ -45,6 +46,9 @@ public class SysEmailController extends BaseController {
     public R<Void> emailCode(@NotBlank(message = "{user.email.not.blank}") String email) {
         if (!mailProperties.getEnabled()) {
             return R.fail("当前系统没有开启邮箱功能！");
+        }
+        if (!RegexValidator.isEmail(email)) {
+            return R.fail("请输入正确的邮箱地址！");
         }
         SpringUtils.getAopProxy(this).emailCodeImpl(email);
         return R.ok();
