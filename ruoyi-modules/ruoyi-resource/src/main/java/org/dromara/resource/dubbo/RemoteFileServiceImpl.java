@@ -11,7 +11,6 @@ import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.oss.client.OssClient;
 import org.dromara.common.oss.factory.OssFactory;
 import org.dromara.common.oss.model.PutObjectResult;
-import org.dromara.common.oss.util.S3ObjectUtil;
 import org.dromara.resource.api.RemoteFileService;
 import org.dromara.resource.api.domain.RemoteFile;
 import org.dromara.resource.domain.SysOssExt;
@@ -45,7 +44,7 @@ public class RemoteFileServiceImpl implements RemoteFileService {
         try {
             String suffix = StringUtils.substring(originalFilename, originalFilename.lastIndexOf("."), originalFilename.length());
             OssClient instance = OssFactory.instance();
-            String pathKey = S3ObjectUtil.buildPathKey(originalFilename);
+            String pathKey = instance.buildPathKey(originalFilename);
             PutObjectResult result = instance.upload(pathKey, file);
             // 保存文件信息
             SysOssBo oss = new SysOssBo();

@@ -21,8 +21,8 @@ import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.oss.client.OssClient;
 import org.dromara.common.oss.enums.AccessPolicy;
 import org.dromara.common.oss.factory.OssFactory;
+import org.dromara.common.oss.model.Options;
 import org.dromara.common.oss.model.PutObjectResult;
-import org.dromara.common.oss.util.S3ObjectUtil;
 import org.dromara.resource.domain.SysOss;
 import org.dromara.resource.domain.SysOssExt;
 import org.dromara.resource.domain.bo.SysOssBo;
@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -194,9 +195,9 @@ public class SysOssServiceImpl implements ISysOssService {
         String originalfileName = file.getOriginalFilename();
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
         OssClient instance = OssFactory.instance();
-        try {
-            String pathKey = S3ObjectUtil.buildPathKey(originalfileName);
-            PutObjectResult result = instance.upload(pathKey, file.getInputStream(), file.getSize());
+        String pathKey = instance.buildPathKey(originalfileName);
+        try (InputStream inputStream = file.getInputStream()) {
+            PutObjectResult result = instance.upload(pathKey, inputStream, file.getSize(), Options.builder().setContentType(file.getContentType()));
             SysOssExt ext1 = new SysOssExt();
             ext1.setFileSize(file.getSize());
             ext1.setContentType(file.getContentType());
@@ -221,8 +222,8 @@ public class SysOssServiceImpl implements ISysOssService {
         String originalfileName = file.getName();
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
         OssClient instance = OssFactory.instance();
-        String pathKey = S3ObjectUtil.buildPathKey(originalfileName);
-        PutObjectResult result = instance.upload(pathKey, file);
+        String pathKey = instance.buildPathKey(originalfileName);
+        PutObjectResult result = instance.upload(pathKey, file, Options.builder().setContentType(FileUtils.getMimeType(file.toPath())));
         SysOssExt ext1 = new SysOssExt();
         ext1.setFileSize(result.size());
         // 保存文件信息

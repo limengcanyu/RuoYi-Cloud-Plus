@@ -2,20 +2,25 @@ package org.dromara.common.oss.client;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.dromara.common.core.utils.DateUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.oss.config.OssClientConfig;
 import org.dromara.common.oss.exception.S3StorageException;
 import org.dromara.common.oss.io.OutputStreamDownloadSubscriber;
 import org.dromara.common.oss.model.GetObjectResult;
 import org.dromara.common.oss.model.HandleAsyncResult;
+import org.dromara.common.oss.model.Options;
 import org.dromara.common.oss.model.PutObjectResult;
+import org.jspecify.annotations.NullMarked;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.core.async.ResponsePublisher;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.CompletedUpload;
@@ -24,8 +29,8 @@ import software.amazon.awssdk.transfer.s3.progress.TransferListener;
 
 import java.io.*;
 import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +51,6 @@ import java.util.function.Function;
  *
  * @author 秋辞未寒
  */
-@Slf4j
 public abstract class AbstractOssClientImpl implements OssClient {
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
@@ -128,27 +132,6 @@ public abstract class AbstractOssClientImpl implements OssClient {
     abstract void doInitialize();
 
     @Override
-    public void refresh(OssClientConfig config) {
-        if (Objects.equals(this.config, config)) {
-            return;
-        }
-        // 如果状态本来就是未初始化，直接则调用初始化
-        if (!initialized.get()) {
-            this.initialize();
-        }
-        // 将状态转为未初始化
-        if (initialized.compareAndSet(false, true)) {
-            try {
-                this.close();
-            } catch (Exception e) {
-                // 异常不影响刷新逻辑，此处屏蔽异常
-            }
-            // 状态交换成功才进行刷新
-            this.initialize();
-        }
-    }
-
-    @Override
     public boolean verifyConfig(Function<OssClientConfig, Boolean> verifyConfigAction) {
         OssClientConfig config = config();
         return Boolean.TRUE.equals(verifyConfigAction.apply(config));
@@ -157,6 +140,23 @@ public abstract class AbstractOssClientImpl implements OssClient {
     @Override
     public boolean verifyConfig(OssClientConfig verifyConfig) {
         return verifyConfig((config) -> Objects.equals(config, verifyConfig));
+    }
+
+    @Override
+    public String buildPathKey(String fileName) {
+        return buildPathKey(null, fileName);
+    }
+
+    @Override
+    public String buildPathKey(String businessPrefix, String fileName) {
+        String defaultPrefix = config.prefix()
+            .orElse("");
+        String mergedPrefix = mergePrefix(defaultPrefix, businessPrefix);
+        String suffix = suffix(fileName);
+        String datePath = DateUtils.datePath();
+        String uuid = IdUtil.fastSimpleUUID();
+        String path = mergedPrefix.isEmpty() ? datePath + StringUtils.SLASH + uuid : mergedPrefix + StringUtils.SLASH + datePath + StringUtils.SLASH + uuid;
+        return path + suffix;
     }
 
     @Override
@@ -204,21 +204,57 @@ public abstract class AbstractOssClientImpl implements OssClient {
     }
 
     @Override
-    public PutObjectResult bucketUpload(String bucket, String key, Path path) {
+    public PutObjectResult bucketUpload(String bucket, String key, Path path, Options options) {
         AsyncRequestBody body = AsyncRequestBody.fromFile(path);
-        return bucketUpload(bucket, key, body);
+        return bucketUpload(bucket, key, body, options);
+    }
+
+    @Override
+    public PutObjectResult bucketUpload(String bucket, String key, Path path) {
+        return bucketUpload(bucket, key, path, Options.builder());
+    }
+
+    @Override
+    public PutObjectResult bucketUpload(String bucket, String key, File file, Options options) {
+        AsyncRequestBody body = AsyncRequestBody.fromFile(file);
+        return bucketUpload(bucket, key, body, options);
     }
 
     @Override
     public PutObjectResult bucketUpload(String bucket, String key, File file) {
-        AsyncRequestBody body = AsyncRequestBody.fromFile(file);
-        return bucketUpload(bucket, key, body);
+        return bucketUpload(bucket, key, file, Options.builder());
+    }
+
+    @Override
+    public PutObjectResult bucketUpload(String bucket, String key, RandomAccessFile file, Options options) {
+        try {
+            // 以文件的大小为准
+            options.setLength(file.length());
+            return bucketUpload(bucket, key, file.getChannel(), -1L, options);
+        } catch (Exception e) {
+            if (e instanceof S3StorageException ex) {
+                throw ex;
+            }
+            throw S3StorageException.form(e);
+        }
     }
 
     @Override
     public PutObjectResult bucketUpload(String bucket, String key, RandomAccessFile file) {
+        return bucketUpload(bucket, key, file, Options.builder());
+    }
+
+    @Override
+    public PutObjectResult bucketUpload(String bucket, String key, ReadableByteChannel channel, long contentLength, Options options) {
+        // 让调用者自行处理通道的关闭
+        InputStream in = Channels.newInputStream(channel);
         try {
-            return bucketUpload(bucket, key, file.getChannel(), -1L);
+            // 如果可以实时获取文件大小，则优先是有实时获取的
+            long size = contentLength;
+            if (channel instanceof SeekableByteChannel byteChannel) {
+                size = byteChannel.size();
+            }
+            return bucketUpload(bucket, key, in, size, options);
         } catch (Exception e) {
             if (e instanceof S3StorageException ex) {
                 throw ex;
@@ -229,30 +265,25 @@ public abstract class AbstractOssClientImpl implements OssClient {
 
     @Override
     public PutObjectResult bucketUpload(String bucket, String key, ReadableByteChannel channel, long contentLength) {
-        long size = contentLength;
-        try (channel; InputStream in = Channels.newInputStream(channel)) {
-            if (channel instanceof FileChannel fileChannel) {
-                size = fileChannel.size();
-            }
-            return bucketUpload(bucket, key, in, size);
-        } catch (Exception e) {
-            if (e instanceof S3StorageException ex) {
-                throw ex;
-            }
-            throw S3StorageException.form(e);
-        }
+        return bucketUpload(bucket, key, channel, contentLength, Options.builder());
+    }
+
+    @Override
+    public PutObjectResult bucketUpload(String bucket, String key, InputStream in, long contentLength, Options options) {
+        options.setLength(contentLength);
+        AsyncRequestBody body = AsyncRequestBody.fromInputStream(in, contentLength, asyncExecutor);
+        return bucketUpload(bucket, key, body, options);
     }
 
     @Override
     public PutObjectResult bucketUpload(String bucket, String key, InputStream in, long contentLength) {
-        AsyncRequestBody body = AsyncRequestBody.fromInputStream(in, contentLength, asyncExecutor);
-        return bucketUpload(bucket, key, body);
+        return bucketUpload(bucket, key, in, contentLength, Options.builder());
     }
 
     @Override
-    public PutObjectResult bucketUpload(String bucket, String key, byte[] data) {
+    public PutObjectResult bucketUpload(String bucket, String key, byte[] data, Options options) {
         try (ByteArrayInputStream in = new ByteArrayInputStream(data)) {
-            return bucketUpload(bucket, key, in, data.length);
+            return bucketUpload(bucket, key, in, data.length, options);
         } catch (Exception e) {
             if (e instanceof S3StorageException ex) {
                 throw ex;
@@ -261,15 +292,28 @@ public abstract class AbstractOssClientImpl implements OssClient {
         }
     }
 
+    @Override
+    public PutObjectResult bucketUpload(String bucket, String key, byte[] data) {
+        return bucketUpload(bucket, key, data, Options.builder());
+    }
 
-    private PutObjectResult bucketUpload(String bucket, String key, AsyncRequestBody body) {
-        Long contentLength = body.contentLength().orElse(null);
+    @NullMarked
+    private PutObjectResult bucketUpload(String bucket, String key, AsyncRequestBody body, Options options) {
+        // 优先使用body中的内容大小，如果不存在，再获取可选项中的
+        Long contentLength = body.contentLength().orElse(options.getLength());
+        // 优先使用body中的内容类型，如果不存在，再获取可选项中的
+        String contentType = StringUtils.isBlank(options.getContentType()) ? body.contentType() : options.getContentType();
+        String md5Digest = options.getMd5Digest();
+        Map<String, String> metadata = options.getMetadata();
+        Collection<TransferListener> transferListeners = options.getTransferListeners();
         HandleAsyncResult<PutObjectResponse> result = doCustomUpload(body, builder -> {
             builder.bucket(bucket)
                 .key(key)
+                .contentMD5(md5Digest)
+                .contentType(contentType)
                 .contentLength(contentLength)
-            ;
-        });
+                .metadata(metadata);
+        }, transferListeners);
         if (result.isFailure()) {
             throw S3StorageException.form(result.error());
         }
@@ -278,11 +322,13 @@ public abstract class AbstractOssClientImpl implements OssClient {
             throw S3StorageException.form("response is empty.");
         }
         PutObjectResponse response = opt.get();
-        String bucketUrl = config.getBucketUrl(bucket);
         // 不知道什么原因导致 response.size() 返回了一个 null size ，此处做一个适配...
         Long size = response.size();
-        size = size == null ? contentLength : size;
-        return PutObjectResult.form("%s/%s".formatted(bucketUrl, key), key, response.eTag(), size == null ? 0 : size);
+        if (size == null) {
+            size = contentLength == null ? 0 : contentLength;
+        }
+        String bucketUrl = config.getBucketUrl(bucket);
+        return PutObjectResult.form("%s/%s".formatted(bucketUrl, key), key, response.eTag(), size);
     }
 
     @Override
@@ -392,8 +438,8 @@ public abstract class AbstractOssClientImpl implements OssClient {
     @Override
     public boolean bucketDelete(String bucket, String key) {
         try {
-            DeleteObjectResponse response = s3AsyncClient.deleteObject(builder -> builder.bucket(bucket).key(key)).join();
-            return Boolean.TRUE.equals(response.deleteMarker());
+            s3AsyncClient.deleteObject(builder -> builder.bucket(bucket).key(key)).join();
+            return true;
         } catch (Exception e) {
             throw S3StorageException.form(e);
         }
@@ -428,8 +474,18 @@ public abstract class AbstractOssClientImpl implements OssClient {
     }
 
     @Override
+    public PutObjectResult upload(String key, Path path, Options options) {
+        return bucketUpload(defaultBucket(), key, path, options);
+    }
+
+    @Override
     public PutObjectResult upload(String key, Path path) {
         return bucketUpload(defaultBucket(), key, path);
+    }
+
+    @Override
+    public PutObjectResult upload(String key, File file, Options options) {
+        return bucketUpload(defaultBucket(), key, file, options);
     }
 
     @Override
@@ -438,8 +494,18 @@ public abstract class AbstractOssClientImpl implements OssClient {
     }
 
     @Override
+    public PutObjectResult upload(String key, RandomAccessFile file, Options options) {
+        return bucketUpload(defaultBucket(), key, file, options);
+    }
+
+    @Override
     public PutObjectResult upload(String key, RandomAccessFile file) {
         return bucketUpload(defaultBucket(), key, file);
+    }
+
+    @Override
+    public PutObjectResult upload(String key, ReadableByteChannel channel, long contentLength, Options options) {
+        return bucketUpload(defaultBucket(), key, channel, contentLength, options);
     }
 
     @Override
@@ -448,8 +514,18 @@ public abstract class AbstractOssClientImpl implements OssClient {
     }
 
     @Override
+    public PutObjectResult upload(String key, InputStream in, long contentLength, Options options) {
+        return bucketUpload(defaultBucket(), key, in, contentLength, options);
+    }
+
+    @Override
     public PutObjectResult upload(String key, InputStream in, long contentLength) {
         return bucketUpload(defaultBucket(), key, in, contentLength);
+    }
+
+    @Override
+    public PutObjectResult upload(String key, byte[] data, Options options) {
+        return bucketUpload(defaultBucket(), key, data, options);
     }
 
     @Override
@@ -511,6 +587,43 @@ public abstract class AbstractOssClientImpl implements OssClient {
         return config.bucket()
             .filter(bucket -> !bucket.isBlank())
             .orElseThrow(() -> S3StorageException.form("bucket is not configured."));
+    }
+
+    private String mergePrefix(String defaultPrefix, String businessPrefix) {
+        String left = normalizePrefix(defaultPrefix);
+        String right = normalizePrefix(businessPrefix);
+        if (left.isEmpty()) {
+            return right;
+        }
+        if (right.isEmpty()) {
+            return left;
+        }
+        return left + StringUtils.SLASH + right;
+    }
+
+    private String normalizePrefix(String prefix) {
+        if (prefix == null) {
+            return "";
+        }
+        String normalized = prefix.trim();
+        while (normalized.startsWith(StringUtils.SLASH)) {
+            normalized = normalized.substring(1);
+        }
+        while (normalized.endsWith(StringUtils.SLASH)) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
+    }
+
+    private String suffix(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+        int index = fileName.lastIndexOf('.');
+        if (index < 0) {
+            return "";
+        }
+        return fileName.substring(index);
     }
 
     @Override
