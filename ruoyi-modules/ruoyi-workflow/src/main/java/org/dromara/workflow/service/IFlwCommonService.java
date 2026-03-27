@@ -1,5 +1,6 @@
 package org.dromara.workflow.service;
 
+import org.dromara.common.core.enums.BusinessStatusEnum;
 import org.dromara.system.api.domain.vo.RemoteUserVo;
 
 import java.util.List;
@@ -29,6 +30,27 @@ public interface IFlwCommonService {
      * @param userList    接收用户
      */
     void sendMessage(List<String> messageType, String message, String subject, List<RemoteUserVo> userList);
+
+    /**
+     * 发送带跳转路径的消息
+     *
+     * @param messageType 消息类型
+     * @param message     消息内容
+     * @param subject     邮件标题
+     * @param userList    接收用户
+     * @param path        前端跳转路径
+     */
+    void sendMessage(List<String> messageType, String message, String subject, List<RemoteUserVo> userList, String path);
+
+    /**
+     * 发送流程结果消息
+     *
+     * @param flowName    流程名称
+     * @param status      流程状态
+     * @param messageType 消息类型
+     * @param userList    接收用户
+     */
+    void sendResultMessage(String flowName, BusinessStatusEnum status, List<String> messageType, List<RemoteUserVo> userList);
 
     /**
      * 申请人节点编码

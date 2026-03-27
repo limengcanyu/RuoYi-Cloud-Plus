@@ -5,6 +5,9 @@ import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.dromara.common.core.enums.BusinessStatusEnum;
+import org.dromara.common.core.enums.PushSourceEnum;
+import org.dromara.common.core.enums.PushTypeEnum;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.SpringUtils;
 import org.dromara.common.core.utils.StreamUtils;
@@ -12,6 +15,7 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.resource.api.RemoteMailService;
 import org.dromara.resource.api.RemoteMessageService;
 import org.dromara.resource.api.RemoteSmsService;
+import org.dromara.resource.api.domain.dto.RemotePushPayLoad;
 import org.dromara.system.api.domain.vo.RemoteUserVo;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.entity.Node;
@@ -24,8 +28,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
+
+import static org.dromara.workflow.common.constant.FlowConstant.PATH_MY_DOCUMENT;
+import static org.dromara.workflow.common.constant.FlowConstant.PATH_TASK_WAITING;
 
 
 /**
@@ -73,7 +79,7 @@ public class FlwCommonServiceImpl implements IFlwCommonService {
         if (CollUtil.isEmpty(userList)) {
             return;
         }
-        sendMessage(messageType, message, DEFAULT_SUBJECT, userList);
+        sendMessage(messageType, message, DEFAULT_SUBJECT, userList, PATH_TASK_WAITING);
     }
 
     /**
@@ -86,6 +92,20 @@ public class FlwCommonServiceImpl implements IFlwCommonService {
      */
     @Override
     public void sendMessage(List<String> messageType, String message, String subject, List<RemoteUserVo> userList) {
+        sendMessage(messageType, message, subject, userList, null);
+    }
+
+    @Override
+    public void sendResultMessage(String flowName, BusinessStatusEnum status, List<String> messageType, List<RemoteUserVo> userList) {
+        if (status == null || CollUtil.isEmpty(messageType) || CollUtil.isEmpty(userList)) {
+            return;
+        }
+        String message = "您发起的【" + flowName + "】单据审批已" + status.getDesc() + "。";
+        sendMessage(messageType, message, DEFAULT_SUBJECT, userList, PATH_MY_DOCUMENT);
+    }
+
+    @Override
+    public void sendMessage(List<String> messageType, String message, String subject, List<RemoteUserVo> userList, String path) {
         if (CollUtil.isEmpty(messageType) || CollUtil.isEmpty(userList)) {
             return;
         }
@@ -100,7 +120,12 @@ public class FlwCommonServiceImpl implements IFlwCommonService {
             try {
                 switch (messageTypeEnum) {
                     case SYSTEM_MESSAGE -> {
-                        remoteMessageService.publishMessage(userIds, message);
+                        RemotePushPayLoad payload = RemotePushPayLoad.of(
+                            PushTypeEnum.MESSAGE,
+                            PushSourceEnum.WORKFLOW,
+                            message, null, path
+                        );
+                        remoteMessageService.publishMessagePayload(userIds, payload);
                     }
                     case EMAIL_MESSAGE -> {
                         remoteMailService.send(emails, subject, message);

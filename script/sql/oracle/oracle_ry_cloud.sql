@@ -1017,9 +1017,50 @@ comment on column sys_notice.remark            is '备注';
 insert into sys_notice values('1', '温馨提醒：2018-07-01 新版本发布啦', '2', '新版本内容', '0', 103, 1, sysdate, null, null, '管理员');
 insert into sys_notice values('2', '维护通知：2018-07-01 系统凌晨维护', '1', '维护内容',   '0', 103, 1, sysdate, null, null, '管理员');
 
+-- ----------------------------
+-- 18、消息记录表
+-- ----------------------------
+create table sys_message (
+  message_id       number(20)      not null,
+  category         varchar2(32)    not null,
+  type             varchar2(32)    not null,
+  source           varchar2(32)    not null,
+  title            varchar2(100)   not null,
+  message          varchar2(500)   default null,
+  content          varchar2(2000)  default null,
+  data_json        clob            default null,
+  path             varchar2(255)   default null,
+  send_user_ids    varchar2(1000)  not null,
+  create_dept      number(20)      default null,
+  create_by        number(20)      default null,
+  create_time      date,
+  update_by        number(20)      default null,
+  update_time      date
+);
+
+alter table sys_message add constraint pk_sys_message primary key (message_id);
+create index idx_sys_message_category_time on sys_message(category, create_time);
+
+comment on table  sys_message                  is '消息记录表';
+comment on column sys_message.message_id       is '消息ID';
+comment on column sys_message.category         is '消息分组(system/notice/workflow)';
+comment on column sys_message.type             is '消息类型';
+comment on column sys_message.source           is '消息来源';
+comment on column sys_message.title            is '标题';
+comment on column sys_message.message          is '摘要消息';
+comment on column sys_message.content          is '详细内容';
+comment on column sys_message.data_json        is '扩展数据JSON';
+comment on column sys_message.path             is '前端跳转路径';
+comment on column sys_message.send_user_ids    is '目标用户ID串，0表示全局';
+comment on column sys_message.create_dept      is '创建部门';
+comment on column sys_message.create_by        is '创建者';
+comment on column sys_message.create_time      is '创建时间';
+comment on column sys_message.update_by        is '更新者';
+comment on column sys_message.update_time      is '更新时间';
+
 
 -- ----------------------------
--- 18、代码生成业务表
+-- 19、代码生成业务表
 -- ----------------------------
 create table gen_table (
   table_id          number(20)       not null,

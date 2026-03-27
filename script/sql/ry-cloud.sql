@@ -763,9 +763,32 @@ create table sys_notice (
 insert into sys_notice values('1', '温馨提醒：2018-07-01 新版本发布啦', '2', '新版本内容', '0', 103, 1, sysdate(), null, null, '管理员');
 insert into sys_notice values('2', '维护通知：2018-07-01 系统凌晨维护', '1', '维护内容',   '0', 103, 1, sysdate(), null, null, '管理员');
 
+-- ----------------------------
+-- 18、消息记录表
+-- ----------------------------
+create table sys_message (
+  message_id        bigint(20)      not null                   comment '消息ID',
+  category          varchar(32)     not null                   comment '消息分组(system/notice/workflow)',
+  type              varchar(32)     not null                   comment '消息类型',
+  source            varchar(32)     not null                   comment '消息来源',
+  title             varchar(100)    not null                   comment '标题',
+  message           varchar(500)    default null               comment '摘要消息',
+  content           varchar(2000)   default null               comment '详细内容',
+  data_json         text                                      comment '扩展数据JSON',
+  path              varchar(255)    default null               comment '前端跳转路径',
+  send_user_ids     varchar(1000)   not null                   comment '目标用户ID串，0表示全局',
+  create_dept       bigint(20)      default null               comment '创建部门',
+  create_by         bigint(20)      default null               comment '创建者',
+  create_time       datetime                                   comment '创建时间',
+  update_by         bigint(20)      default null               comment '更新者',
+  update_time       datetime                                   comment '更新时间',
+  primary key (message_id),
+  key idx_sys_message_category_time (category, create_time)
+) engine=innodb comment = '消息记录表';
+
 
 -- ----------------------------
--- 18、代码生成业务表
+-- 19、代码生成业务表
 -- ----------------------------
 create table gen_table (
   table_id          bigint(20)      not null                   comment '编号',

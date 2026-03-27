@@ -44,6 +44,7 @@ import org.dromara.warm.flow.orm.mapper.FlowTaskMapper;
 import org.dromara.workflow.api.domain.RemoteStartProcessReturn;
 import org.dromara.workflow.common.ConditionalOnEnable;
 import org.dromara.workflow.common.constant.FlowConstant;
+import org.dromara.workflow.common.enums.MessageTypeEnum;
 import org.dromara.workflow.common.enums.TaskAssigneeType;
 import org.dromara.workflow.common.enums.TaskOperationEnum;
 import org.dromara.workflow.common.enums.TaskStatusEnum;
@@ -367,6 +368,13 @@ public class FlwTaskServiceImpl implements IFlwTaskService {
                 .setAssociated(taskId));
         // 批量保存抄送人员
         FlowEngine.userService().saveBatch(userList);
+        flwCommonService.sendMessage(
+            Collections.singletonList(MessageTypeEnum.SYSTEM_MESSAGE.getCode()),
+            "您收到一条新的流程抄送，请及时查看。",
+            "单据抄送提醒",
+            remoteUserService.selectListByIds(StreamUtils.toList(flowCopyList, FlowCopyBo::getUserId)),
+            PATH_TASK_COPY
+        );
     }
 
     /**
@@ -812,7 +820,8 @@ public class FlwTaskServiceImpl implements IFlwTaskService {
                     bo.getMessageType(),
                     StringUtils.isNotBlank(bo.getMessage()) ? bo.getMessage() : "单据「" + op.getDesc() + "」通知",
                     "单据「" + op.getDesc() + "」提醒",
-                    remoteUserService.selectListByIds(userIdList)
+                    remoteUserService.selectListByIds(userIdList),
+                    PATH_TASK_WAITING
                 );
             }
         }
@@ -891,7 +900,7 @@ public class FlwTaskServiceImpl implements IFlwTaskService {
         }
         List<String> messageType = bo.getMessageType();
         String message = bo.getMessage();
-        flwCommonService.sendMessage(messageType, message, "单据审批提醒", userList);
+        flwCommonService.sendMessage(messageType, message, "单据审批提醒", userList, PATH_TASK_WAITING);
         return true;
     }
 

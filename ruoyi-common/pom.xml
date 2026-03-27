@@ -36,11 +36,10 @@
         <module>ruoyi-common-sensitive</module>
         <module>ruoyi-common-json</module>
         <module>ruoyi-common-encrypt</module>
-        <module>ruoyi-common-websocket</module>
+        <module>ruoyi-common-push</module>
         <module>ruoyi-common-social</module>
         <module>ruoyi-common-nacos</module>
         <module>ruoyi-common-bus</module>
-        <module>ruoyi-common-sse</module>
         <module>ruoyi-common-mqtt</module>
     </modules>
 

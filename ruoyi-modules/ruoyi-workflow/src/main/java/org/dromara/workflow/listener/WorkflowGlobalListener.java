@@ -12,6 +12,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.enums.BusinessStatusEnum;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
+import org.dromara.system.api.domain.vo.RemoteUserVo;
 import org.dromara.system.api.RemoteUserService;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.FlowParams;
@@ -22,6 +23,7 @@ import org.dromara.warm.flow.core.listener.GlobalListener;
 import org.dromara.warm.flow.core.listener.ListenerVariable;
 import org.dromara.workflow.common.ConditionalOnEnable;
 import org.dromara.workflow.common.constant.FlowConstant;
+import org.dromara.workflow.common.enums.MessageTypeEnum;
 import org.dromara.workflow.common.enums.TaskStatusEnum;
 import org.dromara.workflow.domain.bo.FlowCopyBo;
 import org.dromara.workflow.domain.vo.NodeExtVo;
@@ -32,6 +34,7 @@ import org.dromara.workflow.service.IFlwNodeExtService;
 import org.dromara.workflow.service.IFlwTaskService;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -201,12 +204,14 @@ public class WorkflowGlobalListener implements GlobalListener {
             String status = determineFlowStatus(instance);
             if (StringUtils.isNotBlank(status)) {
                 flowProcessEventHandler.processHandler(definition.getFlowCode(), instance, status, params, false);
+                notifyInitiatorIfNeeded(definition, instance, status, variable);
             }
             if (!BusinessStatusEnum.initialState(instance.getFlowStatus())) {
                 if (task != null && CollUtil.isNotEmpty(nextTasks) && nextTasks.size() == 1
                     && flwCommonService.applyNodeCode(definition.getId()).equals(nextTasks.get(0).getNodeCode())) {
                     // 如果为画线指定驳回 线条指定为驳回 驳回得节点为申请人节点 则修改流程状态为退回
                     flowProcessEventHandler.processHandler(definition.getFlowCode(), instance, BusinessStatusEnum.BACK.getStatus(), params, false);
+                    notifyInitiatorIfNeeded(definition, instance, BusinessStatusEnum.BACK.getStatus(), variable);
                     // 修改流程实例状态
                     instance.setFlowStatus(BusinessStatusEnum.BACK.getStatus());
                     FlowEngine.insService().updateById(instance);
@@ -238,7 +243,9 @@ public class WorkflowGlobalListener implements GlobalListener {
         if (variable.containsKey(FlowConstant.MESSAGE_TYPE)) {
             List<String> messageType = MapUtil.get(variable, FlowConstant.MESSAGE_TYPE, new TypeReference<>() {});
             String notice = MapUtil.getStr(variable, FlowConstant.MESSAGE_NOTICE);
-            flwCommonService.sendMessage(definition.getFlowName(), instance.getId(), messageType, notice);
+            if (shouldSendTaskMessage(flowParams, definition, nextTasks)) {
+                flwCommonService.sendMessage(definition.getFlowName(), instance.getId(), messageType, notice);
+            }
         }
         FlowEngine.insService().removeVariables(instance.getId(),
             FlowConstant.FLOW_COPY_LIST,
@@ -246,6 +253,43 @@ public class WorkflowGlobalListener implements GlobalListener {
             FlowConstant.MESSAGE_NOTICE,
             FlowConstant.SUBMIT
         );
+    }
+
+    private boolean shouldSendTaskMessage(FlowParams flowParams, Definition definition, List<Task> nextTasks) {
+        if (flowParams == null || !TaskStatusEnum.BACK.getStatus().equals(flowParams.getHisStatus())) {
+            return true;
+        }
+        if (CollUtil.isEmpty(nextTasks) || nextTasks.size() != 1) {
+            return true;
+        }
+        String applyNodeCode = flwCommonService.applyNodeCode(definition.getId());
+        return !StringUtils.equals(applyNodeCode, nextTasks.get(0).getNodeCode());
+    }
+
+    private void notifyInitiatorIfNeeded(Definition definition, Instance instance, String status, Map<String, Object> variable) {
+        if (!StringUtils.equalsAny(status, BusinessStatusEnum.FINISH.getStatus(), BusinessStatusEnum.BACK.getStatus())) {
+            return;
+        }
+        if (StringUtils.isBlank(instance.getCreateBy())) {
+            return;
+        }
+        Long createBy = Convert.toLong(instance.getCreateBy(), null);
+        if (createBy == null) {
+            return;
+        }
+        BusinessStatusEnum statusEnum = BusinessStatusEnum.getByStatus(status);
+        if (statusEnum == null) {
+            return;
+        }
+        List<RemoteUserVo> initiators = remoteUserService.selectListByIds(Collections.singletonList(createBy));
+        if (CollUtil.isEmpty(initiators)) {
+            return;
+        }
+        List<String> messageType = Collections.singletonList(MessageTypeEnum.SYSTEM_MESSAGE.getCode());
+        if (MapUtil.isNotEmpty(variable) && variable.containsKey(FlowConstant.MESSAGE_TYPE)) {
+            messageType = MapUtil.get(variable, FlowConstant.MESSAGE_TYPE, new TypeReference<>() {});
+        }
+        flwCommonService.sendResultMessage(definition.getFlowName(), statusEnum, messageType, initiators);
     }
 
     /**

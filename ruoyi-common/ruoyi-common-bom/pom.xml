@@ -195,10 +195,10 @@
             </dependency>
 
 
-            <!-- websocket模块 -->
+            <!-- 消息推送模块 -->
             <dependency>
                 <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-common-websocket</artifactId>
+                <artifactId>ruoyi-common-push</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -220,13 +220,6 @@
             <dependency>
                 <groupId>org.dromara</groupId>
                 <artifactId>ruoyi-common-bus</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <!-- sse -->
-            <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-common-sse</artifactId>
                 <version>${revision}</version>
             </dependency>
 

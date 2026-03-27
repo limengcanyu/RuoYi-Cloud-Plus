@@ -4,6 +4,8 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.dromara.common.core.domain.R;
+import org.dromara.common.core.enums.PushSourceEnum;
+import org.dromara.common.core.enums.PushTypeEnum;
 import org.dromara.common.core.service.DictService;
 import org.dromara.common.redis.annotation.RepeatSubmit;
 import org.dromara.common.web.core.BaseController;
@@ -12,11 +14,15 @@ import org.dromara.common.log.enums.BusinessType;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.core.domain.PageResult;
 import org.dromara.resource.api.RemoteMessageService;
+import org.dromara.resource.api.domain.dto.RemotePushPayLoad;
 import org.dromara.system.domain.bo.SysNoticeBo;
 import org.dromara.system.domain.vo.SysNoticeVo;
 import org.dromara.system.service.ISysNoticeService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 公告 信息操作处理
@@ -68,7 +74,20 @@ public class SysNoticeController extends BaseController {
             return R.fail();
         }
         String type = dictService.getDictLabel("sys_notice_type", notice.getNoticeType());
-        remoteMessageService.publishAll("[" + type + "] " + notice.getNoticeTitle());
+        Map<String, Object> data = new HashMap<>(6);
+        data.put("noticeType", notice.getNoticeType());
+        data.put("noticeTypeLabel", type);
+        data.put("noticeTitle", notice.getNoticeTitle());
+        data.put("noticeId", notice.getNoticeId());
+        data.put("noticeContent", notice.getNoticeContent());
+        data.put("status", notice.getStatus());
+        remoteMessageService.publishAllPayload(RemotePushPayLoad.of(
+            PushTypeEnum.NOTICE,
+            PushSourceEnum.NOTICE,
+            "[" + type + "] " + notice.getNoticeTitle(),
+            data,
+            "/system/notice?noticeId=" + notice.getNoticeId()
+        ));
         return R.ok();
     }
 
