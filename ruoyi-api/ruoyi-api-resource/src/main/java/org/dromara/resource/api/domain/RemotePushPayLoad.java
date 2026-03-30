@@ -1,4 +1,4 @@
-package org.dromara.resource.api.domain.dto;
+package org.dromara.resource.api.domain;
 
 import lombok.Data;
 import org.dromara.common.core.enums.PushSourceEnum;

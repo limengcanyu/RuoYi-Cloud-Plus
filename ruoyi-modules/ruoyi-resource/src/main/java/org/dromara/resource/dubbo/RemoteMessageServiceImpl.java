@@ -9,7 +9,7 @@ import org.dromara.common.core.enums.PushTypeEnum;
 import org.dromara.common.push.dto.PushPayloadDTO;
 import org.dromara.common.push.helper.PushHelper;
 import org.dromara.resource.api.RemoteMessageService;
-import org.dromara.resource.api.domain.dto.RemotePushPayLoad;
+import org.dromara.resource.api.domain.RemotePushPayLoad;
 import org.dromara.resource.service.ISysMessageService;
 import org.springframework.stereotype.Service;
 

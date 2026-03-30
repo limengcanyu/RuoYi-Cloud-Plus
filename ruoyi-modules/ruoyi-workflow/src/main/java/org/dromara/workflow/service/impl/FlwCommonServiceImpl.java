@@ -15,7 +15,7 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.resource.api.RemoteMailService;
 import org.dromara.resource.api.RemoteMessageService;
 import org.dromara.resource.api.RemoteSmsService;
-import org.dromara.resource.api.domain.dto.RemotePushPayLoad;
+import org.dromara.resource.api.domain.RemotePushPayLoad;
 import org.dromara.system.api.domain.vo.RemoteUserVo;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.entity.Node;

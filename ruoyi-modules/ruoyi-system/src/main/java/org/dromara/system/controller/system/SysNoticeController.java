@@ -14,7 +14,7 @@ import org.dromara.common.log.enums.BusinessType;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.core.domain.PageResult;
 import org.dromara.resource.api.RemoteMessageService;
-import org.dromara.resource.api.domain.dto.RemotePushPayLoad;
+import org.dromara.resource.api.domain.RemotePushPayLoad;
 import org.dromara.system.domain.bo.SysNoticeBo;
 import org.dromara.system.domain.vo.SysNoticeVo;
 import org.dromara.system.service.ISysNoticeService;

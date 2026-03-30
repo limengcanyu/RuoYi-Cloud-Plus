@@ -1,6 +1,6 @@
 package org.dromara.resource.api;
 
-import org.dromara.resource.api.domain.dto.RemotePushPayLoad;
+import org.dromara.resource.api.domain.RemotePushPayLoad;
 
 import java.util.List;
 

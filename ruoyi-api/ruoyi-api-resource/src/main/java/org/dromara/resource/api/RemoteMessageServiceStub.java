@@ -2,7 +2,7 @@ package org.dromara.resource.api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.resource.api.domain.dto.RemotePushPayLoad;
+import org.dromara.resource.api.domain.RemotePushPayLoad;
 
 import java.util.List;
 
