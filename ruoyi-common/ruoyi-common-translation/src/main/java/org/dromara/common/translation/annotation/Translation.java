@@ -1,26 +1,23 @@
 package org.dromara.common.translation.annotation;
 
-import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
-import org.dromara.common.translation.core.handler.TranslationHandler;
-import tools.jackson.databind.annotation.JsonSerialize;
-
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * 通用翻译注解
  *
  * @author Lion Li
  */
-@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Documented
-@JacksonAnnotationsInside
-@JsonSerialize(using = TranslationHandler.class)
 public @interface Translation {
 
     /**
-     * 类型 (需与实现类上的 {@link org.dromara.common.translation.annotation.TranslationType} 注解type对应)
+     * 类型 (需与实现类上的 {@link TranslationType} 注解type对应)
      * <p>
      * 默认取当前字段的值 如果设置了 @{@link Translation#mapper()} 则取映射字段的值
      */
