@@ -56,27 +56,25 @@ public class SysMenuServiceImpl implements ISysMenuService {
     /**
      * 查询系统菜单列表
      *
-     * @param menu 菜单信息
+     * @param menu   菜单筛选条件
+     * @param userId 当前查询的用户主键
      * @return 菜单列表
      */
     @Override
     public List<SysMenuVo> selectMenuList(SysMenuBo menu, Long userId) {
-        List<SysMenuVo> menuList;
-        LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
         // 管理员显示所有菜单信息 不是管理员 按用户id过滤菜单
-        if (!LoginHelper.isSuperAdmin(userId)) {
-            // 通过用户id获取角色id 通过角色id获取菜单id 然后in菜单
-            wrapper.inSql(SysMenu::getMenuId, baseMapper.buildMenuByUserSql(userId));
+        if (LoginHelper.isSuperAdmin(userId)) {
+            return baseMapper.selectVoList(
+                new LambdaQueryWrapper<SysMenu>()
+                    .like(StringUtils.isNotBlank(menu.getMenuName()), SysMenu::getMenuName, menu.getMenuName())
+                    .eq(StringUtils.isNotBlank(menu.getVisible()), SysMenu::getVisible, menu.getVisible())
+                    .eq(StringUtils.isNotBlank(menu.getStatus()), SysMenu::getStatus, menu.getStatus())
+                    .eq(StringUtils.isNotBlank(menu.getMenuType()), SysMenu::getMenuType, menu.getMenuType())
+                    .eq(ObjectUtil.isNotNull(menu.getParentId()), SysMenu::getParentId, menu.getParentId())
+                    .orderByAsc(SysMenu::getParentId)
+                    .orderByAsc(SysMenu::getOrderNum));
         }
-        menuList = baseMapper.selectVoList(
-            wrapper.like(StringUtils.isNotBlank(menu.getMenuName()), SysMenu::getMenuName, menu.getMenuName())
-                .eq(StringUtils.isNotBlank(menu.getVisible()), SysMenu::getVisible, menu.getVisible())
-                .eq(StringUtils.isNotBlank(menu.getStatus()), SysMenu::getStatus, menu.getStatus())
-                .eq(StringUtils.isNotBlank(menu.getMenuType()), SysMenu::getMenuType, menu.getMenuType())
-                .eq(ObjectUtil.isNotNull(menu.getParentId()), SysMenu::getParentId, menu.getParentId())
-                .orderByAsc(SysMenu::getParentId)
-                .orderByAsc(SysMenu::getOrderNum));
-        return menuList;
+        return baseMapper.selectMenuListByUserId(menu, userId);
     }
 
     /**
@@ -108,7 +106,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
      * @return 角色权限映射
      */
     @Override
-    public Map<Long, Set<String>> selectMenuPermsByRoleIds(List<Long> roleIds) {
+    public Map<Long, Set<String>> selectMenuPermsByRoleIds(Collection<Long> roleIds) {
         return baseMapper.selectMenuPermsByRoleIds(roleIds);
     }
 
@@ -116,7 +114,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
      * 根据用户ID查询菜单
      *
      * @param userId 用户ID
-     * @return 菜单列表
+     * @return 按树结构组织的菜单列表
      */
     @Override
     public List<SysMenu> selectMenuTreeByUserId(Long userId) {
@@ -124,17 +122,17 @@ public class SysMenuServiceImpl implements ISysMenuService {
         if (LoginHelper.isSuperAdmin(userId)) {
             menus = baseMapper.selectMenuTreeAll();
         } else {
-            LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
-            menus = baseMapper.selectList(
-                wrapper.in(SysMenu::getMenuType, SystemConstants.TYPE_DIR, SystemConstants.TYPE_MENU)
-                    .eq(SysMenu::getStatus, SystemConstants.NORMAL)
-                    .inSql(SysMenu::getMenuId, baseMapper.buildMenuByUserSql(userId))
-                    .orderByAsc(SysMenu::getParentId)
-                    .orderByAsc(SysMenu::getOrderNum));
+            menus = baseMapper.selectMenuTreeByUserId(userId);
         }
+
         return TreeBuildUtils.build(menus, Constants.TOP_PARENT_ID, SysMenu::getParentId, (menu, nodeTreeMaps) -> {
+            // 将当前节点的菜单ID用作父节点ID
             Long menuParentId = menu.getMenuId();
+            // 从动态规划表中取出子节点列表
+            // 如果不存在子节点，则返回一个空的列表，确保数据在进行JSON序列化时该字段的类型和结构是正确的
             List<SysMenu> childMenus = nodeTreeMaps.getOrDefault(menuParentId, Collections.emptyList());
+            // 设置子节点
+            // 如果存在根节点指向尾节点的情况，则会出现环形依赖。但在菜单表中基本不会出现这种情况...
             menu.setChildren(childMenus);
         });
     }
@@ -258,7 +256,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
      * @return 结果
      */
     @Override
-    public boolean hasChildByMenuId(List<Long> menuIds) {
+    public boolean hasChildByMenuId(Collection<Long> menuIds) {
         return baseMapper.exists(new LambdaQueryWrapper<SysMenu>().in(SysMenu::getParentId, menuIds).notIn(SysMenu::getMenuId, menuIds));
     }
 
@@ -312,11 +310,10 @@ public class SysMenuServiceImpl implements ISysMenuService {
      * 批量删除菜单管理信息
      *
      * @param menuIds 菜单ID串
-     * @return 结果
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteMenuById(List<Long> menuIds) {
+    public void deleteMenuById(Collection<Long> menuIds) {
         baseMapper.deleteByIds(menuIds);
         roleMenuMapper.deleteByMenuIds(menuIds);
     }
