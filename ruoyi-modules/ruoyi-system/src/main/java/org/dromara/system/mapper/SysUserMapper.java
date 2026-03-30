@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.yulichang.base.MPJBaseMapper;
 import com.github.yulichang.toolkit.JoinWrappers;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Param;
@@ -27,7 +28,7 @@ import java.util.List;
  *
  * @author Lion Li
  */
-public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
+public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo>, MPJBaseMapper<SysUser> {
 
     /**
      * 分页查询用户列表，并进行数据权限控制
@@ -61,7 +62,8 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
     /**
      * 根据条件分页查询用户列表
      *
-     * @param queryWrapper 查询条件
+     * @param user      查询条件
+     * @param deptIds   部门ID集合
      * @return 用户信息集合信息
      */
     @DataPermission({
@@ -71,7 +73,6 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
     default List<SysUserExportVo> selectUserExportList(SysUserBo user, List<Long> deptIds) {
         MPJLambdaWrapper<SysUser> wrapper = JoinWrappers.lambda("u", SysUser.class)
             .selectAll(SysUser.class)
-            .selectAs(SysDept::getDeptName, SysUserExportVo::getDeptName)
             .selectAs("u1", SysUser::getUserName, SysUserExportVo::getLeaderName)
             .leftJoin(SysDept.class, "d", SysDept::getDeptId, SysUser::getDeptId)
             .leftJoin(SysUser.class, "u1", SysUser::getUserId, SysDept::getLeader)
@@ -91,7 +92,7 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
      * 根据条件分页查询已配用户角色列表
      *
      * @param page         分页信息
-     * @param queryWrapper 查询条件
+     * @param user         查询条件
      * @return 用户信息集合信息
      */
     @DataPermission({
@@ -108,7 +109,9 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
     /**
      * 根据条件分页查询未分配用户角色列表
      *
-     * @param queryWrapper 查询条件
+     * @param page    分页信息
+     * @param user    查询条件
+     * @param userIds 未分配用户角色的用户ID列表
      * @return 用户信息集合信息
      */
     @DataPermission({
@@ -163,7 +166,7 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
     })
     int updateById(@Param(Constants.ENTITY) SysUser user);
 
-    private MPJLambdaWrapper<SysUser> buildUserRoleJoinWrapper(SysUserBo user) {
+    default MPJLambdaWrapper<SysUser> buildUserRoleJoinWrapper(SysUserBo user) {
         return JoinWrappers.lambda("u", SysUser.class)
             .distinct()
             .selectAll(SysUser.class)

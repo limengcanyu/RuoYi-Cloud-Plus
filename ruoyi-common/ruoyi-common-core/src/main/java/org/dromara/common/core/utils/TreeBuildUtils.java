@@ -5,10 +5,12 @@ import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeNodeConfig;
 import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.lang.tree.parser.NodeParser;
+import cn.hutool.core.util.StrUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.dromara.common.core.utils.reflect.ReflectUtils;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -121,6 +123,20 @@ public class TreeBuildUtils extends TreeUtil {
     }
 
     /**
+     * 构建树节点路径 Map: 路径为 key, 节点为 value
+     *
+     * @param trees       树结构
+     * @param joiner      拼接符
+     * @param fieldGetter 路径拼接字段
+     * @return Map<拼接路径, 原始Tree节点>
+     */
+    public static <K> Map<String, Tree<K>> buildTreeNodeMap(List<Tree<K>> trees, String joiner, Function<Tree<K>, CharSequence> fieldGetter) {
+        Map<String, Tree<K>> nodeMap = new LinkedHashMap<>();
+        doBuildTreeNodeMap(trees, "", joiner, fieldGetter, nodeMap);
+        return nodeMap;
+    }
+
+    /**
      * 获取指定节点下的所有叶子节点
      *
      * @param <K>  节点ID的类型
@@ -134,6 +150,22 @@ public class TreeBuildUtils extends TreeUtil {
             // 递归调用，获取所有子节点的叶子节点
             return node.getChildren().stream()
                 .flatMap(TreeBuildUtils::extractLeafNodes);
+        }
+    }
+
+    private static <K> void doBuildTreeNodeMap(List<Tree<K>> trees, String parentPath, String joiner,
+                                               Function<Tree<K>, CharSequence> fieldGetter, Map<String, Tree<K>> nodeMap) {
+        if (CollUtil.isEmpty(trees)) {
+            return;
+        }
+        for (Tree<K> tree : trees) {
+            CharSequence field = fieldGetter.apply(tree);
+            if (StrUtil.isEmpty(field)) {
+                continue;
+            }
+            String currentPath = StrUtil.isEmpty(parentPath) ? field.toString() : parentPath + joiner + field;
+            nodeMap.put(currentPath, tree);
+            doBuildTreeNodeMap(tree.getChildren(), currentPath, joiner, fieldGetter, nodeMap);
         }
     }
 

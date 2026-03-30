@@ -1,6 +1,8 @@
 package org.dromara.workflow.mapper;
 
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.yulichang.base.MPJBaseMapper;
 import com.github.yulichang.toolkit.JoinWrappers;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.dromara.common.core.utils.StringUtils;
@@ -14,16 +16,20 @@ import org.dromara.workflow.domain.bo.FlowTaskBo;
 import org.dromara.workflow.domain.vo.FlowTaskVo;
 
 import java.util.List;
+import java.util.Map;
+
+import static org.dromara.workflow.common.constant.FlowConstant.NOT_DELETED;
 
 /**
  * 流程用户查询 Mapper
  */
-public interface FlwUserMapper extends BaseMapperPlus<FlowUser, FlowUser> {
+public interface FlwUserMapper extends BaseMapperPlus<FlowUser, FlowUser>, MPJBaseMapper<FlowUser> {
 
     default Page<FlowTaskVo> getTaskCopyByPage(Page<FlowTaskVo> page,
                                                FlowTaskBo bo,
                                                List<String> categoryIds,
                                                String userId) {
+        Map<String, Object> params = bo.getParams();
         MPJLambdaWrapper<FlowUser> wrapper = JoinWrappers.lambda("a", FlowUser.class)
             .selectAs("b", FlowHisTask::getId, FlowTaskVo::getId)
             .selectAs("b", FlowHisTask::getUpdateTime, FlowTaskVo::getUpdateTime)
@@ -47,32 +53,21 @@ public interface FlwUserMapper extends BaseMapperPlus<FlowUser, FlowUser> {
             .leftJoin(FlowDefinition.class, "d", FlowDefinition::getId, FlowInstance::getDefinitionId)
             .leftJoin(FlowInstanceBizExt.class, "biz", FlowInstanceBizExt::getInstanceId, FlowInstance::getId)
             .eq("a", FlowUser::getType, "4")
-            .eq("a", FlowUser::getDelFlag, "0")
-            .eq("b", FlowHisTask::getDelFlag, "0")
-            .eq("d", FlowDefinition::getDelFlag, "0")
-            .like(hasText(bo.getNodeName()), "b", FlowHisTask::getNodeName, bo.getNodeName())
-            .like(hasText(bo.getFlowName()), "d", FlowDefinition::getFlowName, bo.getFlowName())
-            .like(hasText(bo.getFlowCode()), "d", FlowDefinition::getFlowCode, bo.getFlowCode())
-            .like(hasText(bo.getFlowStatus()), "c", FlowInstance::getFlowStatus, bo.getFlowStatus())
-            .in(hasItems(bo.getCreateByIds()), "c", FlowInstance::getCreateBy, bo.getCreateByIds())
-            .in(hasItems(categoryIds), "d", FlowDefinition::getCategory, categoryIds)
-            .between(hasBetween(bo), "a", FlowUser::getCreateTime, bo.getParams().get("beginTime"), bo.getParams().get("endTime"))
+            .eq("a", FlowUser::getDelFlag, NOT_DELETED)
+            .eq("b", FlowHisTask::getDelFlag, NOT_DELETED)
+            .eq("d", FlowDefinition::getDelFlag, NOT_DELETED)
+            .like(StringUtils.isNotBlank(bo.getNodeName()), "b", FlowHisTask::getNodeName, bo.getNodeName())
+            .like(StringUtils.isNotBlank(bo.getFlowName()), "d", FlowDefinition::getFlowName, bo.getFlowName())
+            .like(StringUtils.isNotBlank(bo.getFlowCode()), "d", FlowDefinition::getFlowCode, bo.getFlowCode())
+            .like(StringUtils.isNotBlank(bo.getFlowStatus()), "c", FlowInstance::getFlowStatus, bo.getFlowStatus())
+            .in(CollUtil.isNotEmpty(bo.getCreateByIds()), "c", FlowInstance::getCreateBy, bo.getCreateByIds())
+            .in(CollUtil.isNotEmpty(categoryIds), "d", FlowDefinition::getCategory, categoryIds)
+            .between(params.get("beginTime") != null && params.get("endTime") != null,
+                "a", FlowUser::getCreateTime, params.get("beginTime"), params.get("endTime"))
             .eq(StringUtils.isNotBlank(userId), "a", FlowUser::getProcessedBy, userId)
             .orderByDesc("a", FlowUser::getCreateTime)
             .orderByDesc("b", FlowHisTask::getUpdateTime);
         return wrapper.page(page, FlowTaskVo.class);
-    }
-
-    default boolean hasText(String value) {
-        return StringUtils.isNotBlank(value);
-    }
-
-    default boolean hasItems(List<?> values) {
-        return values != null && !values.isEmpty();
-    }
-
-    default boolean hasBetween(FlowTaskBo bo) {
-        return bo != null && bo.getParams() != null && bo.getParams().get("beginTime") != null && bo.getParams().get("endTime") != null;
     }
 
 }

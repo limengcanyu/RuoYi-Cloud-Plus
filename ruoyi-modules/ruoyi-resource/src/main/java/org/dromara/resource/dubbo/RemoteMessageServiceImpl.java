@@ -31,12 +31,12 @@ public class RemoteMessageServiceImpl implements RemoteMessageService {
     /**
      * 发送消息
      *
-     * @param sessionKey session主键 一般为用户id
-     * @param message    消息文本
+     * @param userIds 用户ID列表
+     * @param message 消息文本
      */
     @Override
-    public void publishMessage(List<Long> sessionKey, String message) {
-        publishMessagePayload(sessionKey, RemotePushPayLoad.of(PushTypeEnum.MESSAGE, PushSourceEnum.BACKEND, message, null));
+    public void publishMessage(List<Long> userIds, String message) {
+        publishMessagePayload(userIds, RemotePushPayLoad.of(PushTypeEnum.MESSAGE, PushSourceEnum.BACKEND, message, null));
     }
 
     @Override

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dromara.common.excel.annotation.ExcelDictFormat;
 import org.dromara.common.excel.convert.ExcelDictConvert;
+import org.dromara.system.listener.DeptExcelConverter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -34,6 +35,12 @@ public class SysUserExportVo implements Serializable {
      */
     @ExcelProperty(value = "用户账号")
     private String userName;
+
+    /**
+     * 部门ID
+     */
+    @ExcelProperty(value = "部门名称", converter = DeptExcelConverter.class)
+    private Long deptId;
 
     /**
      * 用户昵称
@@ -78,12 +85,6 @@ public class SysUserExportVo implements Serializable {
      */
     @ExcelProperty(value = "最后登录时间")
     private Date loginDate;
-
-    /**
-     * 部门名称
-     */
-    @ExcelProperty(value = "部门名称")
-    private String deptName;
 
     /**
      * 负责人
