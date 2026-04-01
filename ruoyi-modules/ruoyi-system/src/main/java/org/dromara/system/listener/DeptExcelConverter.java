@@ -1,7 +1,8 @@
 package org.dromara.system.listener;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
 import org.apache.fesod.sheet.converters.Converter;
 import org.apache.fesod.sheet.enums.CellDataTypeEnum;
@@ -18,69 +19,92 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Excel 部门转换处理
+ *
+ * @author AprilWind
  */
 @RequiredArgsConstructor
-@Component
 public class DeptExcelConverter implements Converter<Long> {
 
-    private static final ThreadLocal<Map<Long, String>> TL_ID_TO_NAME = new ThreadLocal<>();
+    private static final String CACHE_KEY = "dept:excel";
 
-    private static final ThreadLocal<Map<String, Long>> TL_NAME_TO_ID = new ThreadLocal<>();
+    /**
+     * Caffeine 缓存：key=CACHE_KEY，value=[idToName, nameToId]，5分钟过期
+     */
+    private static final Cache<String, DeptMaps> DEPT_CACHE = Caffeine.newBuilder()
+        .expireAfterWrite(30, TimeUnit.SECONDS)
+        .build();
 
-    private void initThreadCache() {
-        Map<Long, String> idMap = TL_ID_TO_NAME.get();
-        if (CollUtil.isNotEmpty(idMap)) {
-            return;
-        }
+    private DeptMaps getDeptMaps() {
+        ISysDeptService deptService = SpringUtils.getBean(ISysDeptService.class);
+        return DEPT_CACHE.get(CACHE_KEY, k -> {
+            Map<String, Tree<Long>> deptPathToTreeMap = buildDeptPathMap(deptService);
+            Map<Long, String> idToName = new HashMap<>();
+            Map<String, Long> nameToId = new HashMap<>();
+            deptPathToTreeMap.forEach((name, treeNode) -> {
+                Long deptId = treeNode.getId();
+                idToName.put(deptId, name);
+                nameToId.put(name, deptId);
+            });
+            return new DeptMaps(idToName, nameToId);
+        });
+    }
 
-        Map<String, Tree<Long>> deptPathToTreeMap = TreeBuildUtils.buildTreeNodeMap(
-            SpringUtils.getBean(ISysDeptService.class).selectDeptTreeList(new SysDeptBo()),
+    /**
+     * 构建部门路径 → 树节点映射，供 Converter 和 Options 共用
+     */
+    static Map<String, Tree<Long>> buildDeptPathMap(ISysDeptService deptService) {
+        return TreeBuildUtils.buildTreeNodeMap(
+            deptService.selectDeptTreeList(new SysDeptBo()),
             "/",
             Tree::getName
         );
-
-        Map<Long, String> idToName = new HashMap<>();
-        Map<String, Long> nameToId = new HashMap<>();
-        deptPathToTreeMap.forEach((name, treeNode) -> {
-            Long deptId = treeNode.getId();
-            idToName.put(deptId, name);
-            nameToId.put(name, deptId);
-        });
-
-        TL_ID_TO_NAME.set(idToName);
-        TL_NAME_TO_ID.set(nameToId);
     }
 
+    /**
+     * 指定 Java 类型：Long（部门ID）
+     */
     @Override
     public Class<?> supportJavaTypeKey() {
         return Long.class;
     }
 
+    /**
+     * 指定 Excel 类型：字符串
+     */
     @Override
     public CellDataTypeEnum supportExcelTypeKey() {
         return CellDataTypeEnum.STRING;
     }
 
+    /**
+     * 【导入】Excel 填写的部门完整路径 → 转为 ID
+     */
     @Override
     public Long convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) {
         String deptName = cellData.getStringValue();
         if (StringUtils.isBlank(deptName)) {
             return null;
         }
-        initThreadCache();
-        return TL_NAME_TO_ID.get().get(deptName);
+        return getDeptMaps().nameToId().get(deptName);
     }
 
+    /**
+     * 【导出】部门 ID → 转为 Excel 显示的完整路径名称
+     */
     @Override
     public WriteCellData<?> convertToExcelData(Long value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) {
         if (value == null) {
             return new WriteCellData<>("");
         }
-        initThreadCache();
-        String deptName = TL_ID_TO_NAME.get().getOrDefault(value, "");
+        String deptName = getDeptMaps().idToName().getOrDefault(value, "");
         return new WriteCellData<>(deptName);
     }
+
+    private record DeptMaps(Map<Long, String> idToName, Map<String, Long> nameToId) {
+    }
+
 }
