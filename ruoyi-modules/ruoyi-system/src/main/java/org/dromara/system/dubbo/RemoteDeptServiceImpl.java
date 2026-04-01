@@ -2,6 +2,7 @@ package org.dromara.system.dubbo;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -53,7 +54,7 @@ public class RemoteDeptServiceImpl implements RemoteDeptService {
     @Override
     public Long selectDeptLeaderById(Long deptId) {
         SysDeptVo vo = deptService.selectDeptById(deptId);
-        return vo.getLeader();
+        return ObjectUtil.isNull(vo) ? null : vo.getLeader();
     }
 
     /**

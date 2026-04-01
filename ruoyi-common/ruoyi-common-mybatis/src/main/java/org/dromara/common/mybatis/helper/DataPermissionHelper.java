@@ -8,13 +8,14 @@ import com.baomidou.mybatisplus.core.plugins.IgnoreStrategy;
 import com.baomidou.mybatisplus.core.plugins.InterceptorIgnoreHelper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.dromara.common.mybatis.core.domain.DataPermissionAccess;
 import org.dromara.common.core.utils.reflect.ReflectUtils;
 import org.dromara.common.mybatis.annotation.DataPermission;
-import org.dromara.common.mybatis.core.domain.DataPermissionAccess;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 import java.util.function.Supplier;
 
 /**
@@ -27,10 +28,10 @@ import java.util.function.Supplier;
 @SuppressWarnings("unchecked")
 public class DataPermissionHelper {
 
-    public static final String DATA_PERMISSION_KEY = "data:permission";
+    private static final String DATA_PERMISSION_KEY = "data:permission";
     private static final String ACCESS_KEY = "data:permission:access";
 
-    private static final ThreadLocal<Stack<Integer>> REENTRANT_IGNORE = ThreadLocal.withInitial(Stack::new);
+    private static final ThreadLocal<Deque<Integer>> REENTRANT_IGNORE = ThreadLocal.withInitial(ArrayDeque::new);
 
     private static final ThreadLocal<DataPermission> PERMISSION_CACHE = new ThreadLocal<>();
 
@@ -46,7 +47,7 @@ public class DataPermissionHelper {
     /**
      * 设置当前执行mapper权限注解
      *
-     * @param dataPermission   数据权限注解
+     * @param dataPermission 数据权限注解
      */
     public static void setPermission(DataPermission dataPermission) {
         PERMISSION_CACHE.set(dataPermission);
@@ -82,10 +83,20 @@ public class DataPermissionHelper {
         context.put(key, value);
     }
 
+    /**
+     * 获取当前数据权限访问控制对象。
+     *
+     * @return 访问控制对象
+     */
     public static DataPermissionAccess getAccess() {
         return getVariable(ACCESS_KEY);
     }
 
+    /**
+     * 设置当前数据权限访问控制对象。
+     *
+     * @param access 访问控制对象
+     */
     public static void setAccess(DataPermissionAccess access) {
         setVariable(ACCESS_KEY, access);
     }
@@ -97,21 +108,23 @@ public class DataPermissionHelper {
      * @throws NullPointerException 如果数据权限上下文类型异常，则抛出NullPointerException
      */
     public static Map<String, Object> getContext() {
-        Object attribute = new HashMap<>();
-        if (SaHolder.getContext().isValid()) {
-            SaStorage saStorage = SaHolder.getStorage();
+        SaStorage saStorage = SaHolder.getStorage();
+        Object attribute = saStorage.get(DATA_PERMISSION_KEY);
+        if (ObjectUtil.isNull(attribute)) {
+            saStorage.set(DATA_PERMISSION_KEY, new HashMap<>());
             attribute = saStorage.get(DATA_PERMISSION_KEY);
-            if (ObjectUtil.isNull(attribute)) {
-                saStorage.set(DATA_PERMISSION_KEY, new HashMap<>());
-                attribute = saStorage.get(DATA_PERMISSION_KEY);
-            }
         }
         if (attribute instanceof Map map) {
             return map;
         }
-        throw new NullPointerException("data permission context type exception");
+        throw new IllegalStateException("data permission context type exception");
     }
 
+    /**
+     * 获取当前忽略策略。
+     *
+     * @return 忽略策略
+     */
     private static IgnoreStrategy getIgnoreStrategy() {
         Object ignoreStrategyLocal = ReflectUtils.getStaticFieldValue(ReflectUtils.getField(InterceptorIgnoreHelper.class, "IGNORE_STRATEGY_LOCAL"));
         if (ignoreStrategyLocal instanceof ThreadLocal<?> IGNORE_STRATEGY_LOCAL) {
@@ -132,7 +145,7 @@ public class DataPermissionHelper {
         } else {
             ignoreStrategy.setDataPermission(true);
         }
-        Stack<Integer> reentrantStack = REENTRANT_IGNORE.get();
+        Deque<Integer> reentrantStack = REENTRANT_IGNORE.get();
         reentrantStack.push(reentrantStack.size() + 1);
     }
 
@@ -147,7 +160,7 @@ public class DataPermissionHelper {
                 && !Boolean.TRUE.equals(ignoreStrategy.getIllegalSql())
                 && !Boolean.TRUE.equals(ignoreStrategy.getTenantLine())
                 && CollectionUtil.isEmpty(ignoreStrategy.getOthers());
-            Stack<Integer> reentrantStack = REENTRANT_IGNORE.get();
+            Deque<Integer> reentrantStack = REENTRANT_IGNORE.get();
             boolean empty = reentrantStack.isEmpty() || reentrantStack.pop() == 1;
             if (noOtherIgnoreStrategy && empty) {
                 InterceptorIgnoreHelper.clearIgnoreStrategy();
@@ -176,6 +189,7 @@ public class DataPermissionHelper {
      * 在忽略数据权限中执行
      *
      * @param handle 处理执行方法
+     * @return 执行结果
      */
     public static <T> T ignore(Supplier<T> handle) {
         enableIgnore();

@@ -17,6 +17,7 @@ import java.util.Date;
  * MP注入处理器
  *
  * @author Lion Li
+ * @date 2021/4/25
  */
 @Slf4j
 public class InjectionMetaObjectHandler implements MetaObjectHandler {
@@ -62,7 +63,7 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
                 this.strictInsertFill(metaObject, "updateTime", Date.class, date);
             }
         } catch (Exception e) {
-            throw new ServiceException("自动注入异常 => " + e.getMessage(), HttpStatus.HTTP_UNAUTHORIZED);
+            throw new ServiceException("自动注入异常 => " + e.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR);
         }
     }
 
@@ -80,17 +81,14 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
                 baseEntity.setUpdateTime(current);
 
                 // 获取当前登录用户的ID，并填充更新人信息
-                Long userId = LoginHelper.getUserId();
-                if (ObjectUtil.isNotNull(userId)) {
-                    baseEntity.setUpdateBy(userId);
-                } else {
-                    baseEntity.setUpdateBy(DEFAULT_USER_ID);
-                }
+                LoginUser loginUser = getLoginUser();
+                Long userId = ObjectUtil.isNotNull(loginUser) ? loginUser.getUserId() : DEFAULT_USER_ID;
+                baseEntity.setUpdateBy(userId);
             } else {
                 this.strictUpdateFill(metaObject, "updateTime", Date.class, new Date());
             }
         } catch (Exception e) {
-            throw new ServiceException("自动注入异常 => " + e.getMessage(), HttpStatus.HTTP_UNAUTHORIZED);
+            throw new ServiceException("自动注入异常 => " + e.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR);
         }
     }
 

@@ -67,7 +67,7 @@ public class PlusDataPermissionHandler {
     public Expression getSqlSegment(Expression where, boolean isSelect) {
         try {
             LoginUser currentUser = currentUser();
-            // 如果是超级管理员，则不过滤数据
+            // 如果是超级管理员或租户管理员，则不过滤数据
             if (LoginHelper.isSuperAdmin()) {
                 return where;
             }
@@ -134,7 +134,7 @@ public class PlusDataPermissionHandler {
         }
 
         for (RoleDTO role : scopeRoles) {
-            user.setRoleId(role.getRoleId());
+            context.setVariable("roleId", role.getRoleId());
             // 获取角色权限泛型
             DataScopeType type = DataScopeType.findCode(role.getDataScope());
             if (ObjectUtil.isNull(type)) {
@@ -175,7 +175,13 @@ public class PlusDataPermissionHandler {
         return StringUtils.EMPTY;
     }
 
+    /**
+     * 获取当前登录用户信息
+     *
+     * @return 当前登录用户的LoginUser对象，可能为null（如未登录场景）
+     */
     private LoginUser currentUser() {
+        // 从数据权限助手缓存中获取当前登录用户
         LoginUser currentUser = DataPermissionHelper.getVariable("user");
         if (ObjectUtil.isNull(currentUser)) {
             currentUser = LoginHelper.getLoginUser();
@@ -192,32 +198,6 @@ public class PlusDataPermissionHandler {
         DataPermissionAccess resolvedAccess = resolveAccess();
         DataPermissionHelper.setAccess(resolvedAccess);
         return resolvedAccess;
-    }
-
-    private DataPermissionAccess resolveAccess() {
-        HttpServletRequest request = ServletUtils.getRequest();
-        if (request == null) {
-            return DataPermissionAccess.EMPTY;
-        }
-        Object handler = request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE);
-        if (!(handler instanceof HandlerMethod handlerMethod)) {
-            return DataPermissionAccess.EMPTY;
-        }
-        Set<String> perms = new LinkedHashSet<>();
-        Set<String> roleKeys = new LinkedHashSet<>();
-        SaCheckPermission saCheckPermission = findAnnotation(handlerMethod, SaCheckPermission.class);
-        if (saCheckPermission != null) {
-            perms.addAll(toSet(saCheckPermission.value()));
-            roleKeys.addAll(toSet(saCheckPermission.orRole()));
-        }
-        SaCheckRole saCheckRole = findAnnotation(handlerMethod, SaCheckRole.class);
-        if (saCheckRole != null) {
-            roleKeys.addAll(toSet(saCheckRole.value()));
-        }
-        if (perms.isEmpty() && roleKeys.isEmpty()) {
-            return DataPermissionAccess.EMPTY;
-        }
-        return new DataPermissionAccess(Set.copyOf(perms), Set.copyOf(roleKeys));
     }
 
     private List<RoleDTO> scopeRoles(LoginUser user, DataPermissionAccess access) {
@@ -251,6 +231,32 @@ public class PlusDataPermissionHandler {
                 .forEach(role -> roleMap.putIfAbsent(role.getRoleId(), role));
         }
         return new ArrayList<>(roleMap.values());
+    }
+
+    private DataPermissionAccess resolveAccess() {
+        HttpServletRequest request = ServletUtils.getRequest();
+        if (request == null) {
+            return DataPermissionAccess.EMPTY;
+        }
+        Object handler = request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE);
+        if (!(handler instanceof HandlerMethod handlerMethod)) {
+            return DataPermissionAccess.EMPTY;
+        }
+        Set<String> perms = new LinkedHashSet<>();
+        Set<String> roleKeys = new LinkedHashSet<>();
+        SaCheckPermission saCheckPermission = findAnnotation(handlerMethod, SaCheckPermission.class);
+        if (saCheckPermission != null) {
+            perms.addAll(toSet(saCheckPermission.value()));
+            roleKeys.addAll(toSet(saCheckPermission.orRole()));
+        }
+        SaCheckRole saCheckRole = findAnnotation(handlerMethod, SaCheckRole.class);
+        if (saCheckRole != null) {
+            roleKeys.addAll(toSet(saCheckRole.value()));
+        }
+        if (perms.isEmpty() && roleKeys.isEmpty()) {
+            return DataPermissionAccess.EMPTY;
+        }
+        return new DataPermissionAccess(Set.copyOf(perms), Set.copyOf(roleKeys));
     }
 
     private <A extends Annotation> A findAnnotation(HandlerMethod handlerMethod, Class<A> annotationType) {

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -100,7 +101,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
     @Override
     public List<SysDictDataVo> selectDictDataByType(String dictType) {
         List<SysDictDataVo> dictDatas = dictDataMapper.selectDictDataByType(dictType);
-        return CollUtil.isNotEmpty(dictDatas) ? dictDatas : null;
+        return CollUtil.isNotEmpty(dictDatas) ? dictDatas : Collections.emptyList();
     }
 
     /**
