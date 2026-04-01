@@ -3,8 +3,9 @@ package org.dromara.gen.util;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.RegExUtils;
+import org.dromara.common.core.utils.SpringUtils;
 import org.dromara.common.core.utils.StringUtils;
-import org.dromara.gen.config.GenConfig;
+import org.dromara.gen.config.properties.GenProperties;
 import org.dromara.gen.constant.GenConstants;
 import org.dromara.gen.domain.GenTable;
 import org.dromara.gen.domain.GenTableColumn;
@@ -19,22 +20,29 @@ import java.util.Arrays;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GenUtils {
 
+    private final static GenProperties PROPERTIES = SpringUtils.getBean(GenProperties.class);
+
     /**
      * 初始化表信息
+     *
+     * @param genTable 待初始化的业务表对象
      */
     public static void initTable(GenTable genTable) {
         genTable.setClassName(convertClassName(genTable.getTableName()));
-        genTable.setPackageName(GenConfig.getPackageName());
-        genTable.setModuleName(getModuleName(GenConfig.getPackageName()));
+        genTable.setPackageName(PROPERTIES.getPackageName());
+        genTable.setModuleName(getModuleName(PROPERTIES.getPackageName()));
         genTable.setBusinessName(getBusinessName(genTable.getTableName()));
         genTable.setFunctionName(replaceText(genTable.getTableComment()));
-        genTable.setFunctionAuthor(GenConfig.getAuthor());
+        genTable.setFunctionAuthor(PROPERTIES.getAuthor());
         genTable.setCreateTime(null);
         genTable.setUpdateTime(null);
     }
 
     /**
      * 初始化列属性字段
+     *
+     * @param column 待初始化的列对象
+     * @param table  所属业务表对象
      */
     public static void initColumnField(GenTableColumn column, GenTable table) {
         String dataType = getDbType(column.getColumnType());
@@ -152,8 +160,8 @@ public class GenUtils {
      * @return 类名
      */
     public static String convertClassName(String tableName) {
-        boolean autoRemovePre = GenConfig.getAutoRemovePre();
-        String tablePrefix = GenConfig.getTablePrefix();
+        boolean autoRemovePre = PROPERTIES.isAutoRemovePre();
+        String tablePrefix = PROPERTIES.getTablePrefix();
         if (autoRemovePre && StringUtils.isNotEmpty(tablePrefix)) {
             String[] searchList = StringUtils.split(tablePrefix, StringUtils.SEPARATOR);
             tableName = replaceFirst(tableName, searchList);
@@ -166,12 +174,13 @@ public class GenUtils {
      *
      * @param replacementm 替换值
      * @param searchList   替换列表
+     * @return 去除命中前缀后的字符串
      */
     public static String replaceFirst(String replacementm, String[] searchList) {
         String text = replacementm;
         for (String searchString : searchList) {
             if (replacementm.startsWith(searchString)) {
-                text = replacementm.replaceFirst(searchString, StringUtils.EMPTY);
+                text = StringUtils.removeStart(replacementm, searchString);
                 break;
             }
         }
@@ -206,11 +215,15 @@ public class GenUtils {
      * 获取字段长度
      *
      * @param columnType 列类型
-     * @return 截取后的列类型
+     * @return 字段长度，未声明长度时返回 0
      */
     public static Integer getColumnLength(String columnType) {
         if (StringUtils.indexOf(columnType, "(") > 0) {
             String length = StringUtils.substringBetween(columnType, "(", ")");
+            // 处理 decimal(10,2) 这类带精度的类型，只取长度部分
+            if (length.contains(",")) {
+                length = StringUtils.substringBefore(length, ",");
+            }
             return Integer.valueOf(length);
         } else {
             return 0;

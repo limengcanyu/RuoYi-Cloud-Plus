@@ -15,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.Column;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
-import org.dromara.common.core.constant.Constants;
+import org.dromara.common.core.domain.PageResult;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.SpringUtils;
 import org.dromara.common.core.utils.StreamUtils;
@@ -26,7 +23,6 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.core.utils.file.FileUtils;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.mybatis.core.page.PageQuery;
-import org.dromara.common.core.domain.PageResult;
 import org.dromara.common.mybatis.utils.IdGeneratorUtil;
 import org.dromara.gen.constant.GenConstants;
 import org.dromara.gen.domain.GenTable;
@@ -34,15 +30,14 @@ import org.dromara.gen.domain.GenTableColumn;
 import org.dromara.gen.mapper.GenTableColumnMapper;
 import org.dromara.gen.mapper.GenTableMapper;
 import org.dromara.gen.util.GenUtils;
-import org.dromara.gen.util.VelocityInitializer;
-import org.dromara.gen.util.VelocityUtils;
+import org.dromara.gen.util.TemplateEngineUtils;
+import org.dromara.gen.util.template.PathNamedTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -61,7 +56,7 @@ public class GenTableServiceImpl implements IGenTableService {
     private final GenTableMapper baseMapper;
     private final GenTableColumnMapper genTableColumnMapper;
 
-    private static final String[] TABLE_IGNORE = new String[]{"sj_", "act_", "flw_", "gen_"};
+    private static final String[] TABLE_IGNORE = new String[]{"sj_", "flow_", "gen_"};
 
     /**
      * 查询业务字段列表
@@ -89,12 +84,25 @@ public class GenTableServiceImpl implements IGenTableService {
         return genTable;
     }
 
+    /**
+     * 分页查询已导入的代码生成业务表。
+     *
+     * @param genTable  业务表筛选条件
+     * @param pageQuery 分页参数
+     * @return 业务表分页结果
+     */
     @Override
     public PageResult<GenTable> selectPageGenTableList(GenTable genTable, PageQuery pageQuery) {
         Page<GenTable> page = baseMapper.selectPage(pageQuery.build(), this.buildGenTableQueryWrapper(genTable));
         return PageResult.build(page.getRecords(), page.getTotal());
     }
 
+    /**
+     * 构造代码生成业务表查询条件。
+     *
+     * @param genTable 业务表筛选条件
+     * @return 包含数据源、表名、表注释和时间区间的查询包装器
+     */
     private QueryWrapper<GenTable> buildGenTableQueryWrapper(GenTable genTable) {
         Map<String, Object> params = genTable.getParams();
         QueryWrapper<GenTable> wrapper = Wrappers.query();
@@ -113,7 +121,7 @@ public class GenTableServiceImpl implements IGenTableService {
      *
      * @param genTable  包含查询条件的GenTable对象
      * @param pageQuery 包含分页信息的PageQuery对象
-     * @return 包含分页结果的 PageResult 对象
+     * @return 包含分页结果的TableDataInfo对象
      */
     @DS("#genTable.dataName")
     @Override
@@ -166,6 +174,10 @@ public class GenTableServiceImpl implements IGenTableService {
                 return gen;
             }).sorted(Comparator.comparing(GenTable::getCreateTime).reversed())
             .toList();
+        // 根据原始数据列表和分页参数，构建表格分页数据对象（用于假分页）
+        if (CollUtil.isEmpty(tables)) {
+            return PageResult.build();
+        }
         Page<Object> page = pageQuery.build();
         List<GenTable> pageList = CollUtil.page((int) page.getCurrent() - 1, (int) page.getSize(), tables);
         return PageResult.build(pageList, tables.size());
@@ -229,9 +241,7 @@ public class GenTableServiceImpl implements IGenTableService {
         genTable.setOptions(options);
         int row = baseMapper.updateById(genTable);
         if (row > 0) {
-            for (GenTableColumn cenTableColumn : genTable.getColumns()) {
-                genTableColumnMapper.updateById(cenTableColumn);
-            }
+            genTableColumnMapper.updateBatchById(genTable.getColumns());
         }
     }
 
@@ -277,6 +287,7 @@ public class GenTableServiceImpl implements IGenTableService {
                 }
             }
         } catch (Exception e) {
+            log.error("导入失败", e);
             throw new ServiceException("导入失败：" + e.getMessage());
         }
     }
@@ -320,27 +331,9 @@ public class GenTableServiceImpl implements IGenTableService {
     @Override
     public Map<String, String> previewCode(Long tableId) {
         Map<String, String> dataMap = new LinkedHashMap<>();
-        // 查询表信息
-        GenTable table = getGenTable(tableId);
-        List<Long> menuIds = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            menuIds.add(IdGeneratorUtil.nextLongId());
-        }
-        table.setMenuIds(menuIds);
-        // 设置主键列信息
-        setPkColumn(table);
-        VelocityInitializer.initVelocity();
-
-        VelocityContext context = VelocityUtils.prepareContext(table);
-
-        // 获取模板列表
-        List<String> templates = VelocityUtils.getTemplateList(table.getTplCategory());
-        for (String template : templates) {
-            // 渲染模板
-            StringWriter sw = new StringWriter();
-            Template tpl = Velocity.getTemplate(template, Constants.UTF8);
-            tpl.merge(context, sw);
-            dataMap.put(template, sw.toString());
+        RenderContext rc = buildRenderContext(tableId);
+        for (PathNamedTemplate template : rc.templates()) {
+            dataMap.put(template.getPathName(), template.render(rc.context()));
         }
         return dataMap;
     }
@@ -372,21 +365,18 @@ public class GenTableServiceImpl implements IGenTableService {
         // 设置主键列信息
         setPkColumn(table);
 
-        VelocityInitializer.initVelocity();
-
-        VelocityContext context = VelocityUtils.prepareContext(table);
-
+        Dict context = TemplateEngineUtils.buildContext(table);
         // 获取模板列表
-        List<String> templates = VelocityUtils.getTemplateList(table.getTplCategory());
-        for (String template : templates) {
-            if (!StringUtils.containsAny(template, "sql.vm", "api.ts.vm", "types.ts.vm", "index.vue.vm", "index-tree.vue.vm")) {
+        List<PathNamedTemplate> templates = TemplateEngineUtils.getTemplateList(table.getTplCategory());
+        for (PathNamedTemplate template : templates) {
+            String pathName = template.getPathName();
+            // 渲染模板
+            if (!StringUtils.containsAny(pathName, "sql.vm", "api.ts.vm", "types.ts.vm", "index.vue.vm", "index-tree.vue.vm")) {
                 // 渲染模板
-                StringWriter sw = new StringWriter();
-                Template tpl = Velocity.getTemplate(template, Constants.UTF8);
-                tpl.merge(context, sw);
                 try {
-                    String path = getGenPath(table, template);
-                    FileUtils.writeUtf8String(sw.toString(), path);
+                    String render = template.render(context);
+                    String path = getGenPath(table, pathName);
+                    FileUtils.writeUtf8String(render, path);
                 } catch (Exception e) {
                     throw new ServiceException("渲染模板失败，表名：" + table.getTableName());
                 }
@@ -464,40 +454,47 @@ public class GenTableServiceImpl implements IGenTableService {
 
     /**
      * 查询表信息并生成代码
+     *
+     * @param tableId 业务表主键
+     * @param zip     代码压缩输出流
      */
     private void generatorCode(Long tableId, ZipOutputStream zip) {
-        // 查询表信息
+        RenderContext rc = buildRenderContext(tableId);
+        GenTable table = rc.table();
+        for (PathNamedTemplate template : rc.templates()) {
+            String pathName = template.getPathName();
+            try {
+                String render = template.render(rc.context());
+                zip.putNextEntry(new ZipEntry(TemplateEngineUtils.getFileName(pathName, table)));
+                IoUtil.write(zip, StandardCharsets.UTF_8, false, render);
+                zip.flush();
+                zip.closeEntry();
+            } catch (IOException e) {
+                log.error("渲染模板失败，表名：{}", table.getTableName(), e);
+            }
+        }
+    }
+
+    /**
+     * 构建代码渲染上下文（含表信息、菜单ID、主键列、模板列表）
+     *
+     * @param tableId 业务表主键
+     * @return 渲染上下文
+     */
+    private RenderContext buildRenderContext(Long tableId) {
         GenTable table = getGenTable(tableId);
         List<Long> menuIds = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             menuIds.add(IdGeneratorUtil.nextLongId());
         }
         table.setMenuIds(menuIds);
-        // 设置主键列信息
         setPkColumn(table);
+        Dict context = TemplateEngineUtils.buildContext(table);
+        List<PathNamedTemplate> templates = TemplateEngineUtils.getTemplateList(table.getTplCategory());
+        return new RenderContext(table, context, templates);
+    }
 
-        VelocityInitializer.initVelocity();
-
-        VelocityContext context = VelocityUtils.prepareContext(table);
-
-        // 获取模板列表
-        List<String> templates = VelocityUtils.getTemplateList(table.getTplCategory());
-        for (String template : templates) {
-            // 渲染模板
-            StringWriter sw = new StringWriter();
-            Template tpl = Velocity.getTemplate(template, Constants.UTF8);
-            tpl.merge(context, sw);
-            try {
-                // 添加到zip
-                zip.putNextEntry(new ZipEntry(VelocityUtils.getFileName(template, table)));
-                IoUtil.write(zip, StandardCharsets.UTF_8, false, sw.toString());
-                IoUtil.close(sw);
-                zip.flush();
-                zip.closeEntry();
-            } catch (IOException e) {
-                log.error("渲染模板失败，表名：" + table.getTableName(), e);
-            }
-        }
+    private record RenderContext(GenTable table, Dict context, List<PathNamedTemplate> templates) {
     }
 
     /**
@@ -520,6 +517,12 @@ public class GenTableServiceImpl implements IGenTableService {
         }
     }
 
+    /**
+     * 查询业务表并补齐其列信息。
+     *
+     * @param tableId 业务表主键
+     * @return 包含字段集合的业务表实体
+     */
     private GenTable getGenTable(Long tableId) {
         GenTable table = baseMapper.selectById(tableId);
         if (ObjectUtil.isNull(table)) {
@@ -529,6 +532,12 @@ public class GenTableServiceImpl implements IGenTableService {
         return table;
     }
 
+    /**
+     * 批量填充业务表对应的字段列表。
+     *
+     * @param tables 业务表集合
+     * @return 已填充字段信息的业务表集合
+     */
     private List<GenTable> fillTableColumns(List<GenTable> tables) {
         if (CollUtil.isEmpty(tables)) {
             return tables;
@@ -596,9 +605,9 @@ public class GenTableServiceImpl implements IGenTableService {
     public static String getGenPath(GenTable table, String template) {
         String genPath = table.getGenPath();
         if (StringUtils.equals(genPath, "/")) {
-            return System.getProperty("user.dir") + File.separator + "src" + File.separator + VelocityUtils.getFileName(template, table);
+            return System.getProperty("user.dir") + File.separator + "src" + File.separator + TemplateEngineUtils.getFileName(template, table);
         }
-        return genPath + File.separator + VelocityUtils.getFileName(template, table);
+        return genPath + File.separator + TemplateEngineUtils.getFileName(template, table);
     }
 }
 

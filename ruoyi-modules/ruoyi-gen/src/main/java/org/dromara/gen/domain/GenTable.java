@@ -12,7 +12,9 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.domain.BaseEntity;
 import org.dromara.gen.constant.GenConstants;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 业务表 gen_table
@@ -152,7 +154,7 @@ public class GenTable extends BaseEntity {
     @TableField(exist = false)
     private String treeName;
 
-    /*
+    /**
      * 菜单id列表
      */
     @TableField(exist = false)
@@ -170,26 +172,67 @@ public class GenTable extends BaseEntity {
     @TableField(exist = false)
     private String parentMenuName;
 
+    /**
+     * 请求参数
+     */
+    @TableField(exist = false)
+    private Map<String, Object> params = new HashMap<>();
+
+    /**
+     * 判断当前业务表是否采用树表模板。
+     *
+     * @return 树表模板返回 {@code true}
+     */
     public boolean isTree() {
         return isTree(this.tplCategory);
     }
 
+    /**
+     * 根据模板分类判断是否为树表模板。
+     *
+     * @param tplCategory 模板分类
+     * @return 树表模板返回 {@code true}
+     */
     public static boolean isTree(String tplCategory) {
         return tplCategory != null && StringUtils.equals(GenConstants.TPL_TREE, tplCategory);
     }
 
+    /**
+     * 判断当前业务表是否采用普通 CRUD 模板。
+     *
+     * @return 普通 CRUD 模板返回 {@code true}
+     */
     public boolean isCrud() {
         return isCrud(this.tplCategory);
     }
 
+    /**
+     * 根据模板分类判断是否为普通 CRUD 模板。
+     *
+     * @param tplCategory 模板分类
+     * @return 普通 CRUD 模板返回 {@code true}
+     */
     public static boolean isCrud(String tplCategory) {
         return tplCategory != null && StringUtils.equals(GenConstants.TPL_CRUD, tplCategory);
     }
 
+    /**
+     * 判断指定 Java 字段是否属于基类公共字段。
+     *
+     * @param javaField Java 字段名
+     * @return 基类公共字段返回 {@code true}
+     */
     public boolean isSuperColumn(String javaField) {
         return isSuperColumn(this.tplCategory, javaField);
     }
 
+    /**
+     * 根据模板分类与字段名判断是否属于基类公共字段。
+     *
+     * @param tplCategory 模板分类
+     * @param javaField   Java 字段名
+     * @return 基类公共字段返回 {@code true}
+     */
     public static boolean isSuperColumn(String tplCategory, String javaField) {
         return StringUtils.equalsAnyIgnoreCase(javaField, GenConstants.BASE_ENTITY);
     }
