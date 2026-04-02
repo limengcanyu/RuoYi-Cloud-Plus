@@ -26,8 +26,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 流程分类Service业务层处理
@@ -76,6 +75,23 @@ public class FlwCategoryServiceImpl implements IFlwCategoryService, CategoryServ
             .select(FlowCategory::getCategoryName).eq(FlowCategory::getCategoryId, categoryId));
         return ObjectUtils.notNullGetter(category, FlowCategory::getCategoryName);
     }
+
+    /**
+     * 根据流程分类ID查询流程分类名称
+     *
+     * @param categoryIds 流程分类ID
+     * @return 流程分类名称
+     */
+    @Override
+    public Map<Long, String> selectCategoryNameByIds(Set<Long> categoryIds) {
+        if (CollUtil.isEmpty(categoryIds)) {
+            return Collections.emptyMap();
+        }
+        List<FlowCategory> list = baseMapper.selectList(new LambdaQueryWrapper<FlowCategory>()
+            .select(FlowCategory::getCategoryName).in(FlowCategory::getCategoryId, categoryIds));
+        return StreamUtils.toMap(list, FlowCategory::getCategoryId, FlowCategory::getCategoryName);
+    }
+
 
     /**
      * 查询符合条件的流程分类列表
