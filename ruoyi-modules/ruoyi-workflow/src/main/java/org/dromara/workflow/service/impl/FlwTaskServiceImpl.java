@@ -453,7 +453,7 @@ public class FlwTaskServiceImpl implements IFlwTaskService {
      */
     @Override
     public PageResult<FlowTaskVo> pageByTaskCopy(FlowTaskBo flowTaskBo, PageQuery pageQuery) {
-        Page<FlowTaskVo> page = flwUserMapper.getTaskCopyByPage(pageQuery.build(), flowTaskBo, categoryIds(flowTaskBo), LoginHelper.getUserIdStr());
+        Page<FlowTaskVo> page = flwTaskMapper.getTaskCopyByPage(pageQuery.build(), flowTaskBo, categoryIds(flowTaskBo), LoginHelper.getUserIdStr());
         return PageResult.build(page.getRecords(), page.getTotal());
     }
 

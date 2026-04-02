@@ -25,49 +25,4 @@ import static org.dromara.workflow.common.constant.FlowConstant.NOT_DELETED;
  */
 public interface FlwUserMapper extends BaseMapperPlus<FlowUser, FlowUser>, MPJBaseMapper<FlowUser> {
 
-    default Page<FlowTaskVo> getTaskCopyByPage(Page<FlowTaskVo> page,
-                                               FlowTaskBo bo,
-                                               List<String> categoryIds,
-                                               String userId) {
-        Map<String, Object> params = bo.getParams();
-        MPJLambdaWrapper<FlowUser> wrapper = JoinWrappers.lambda("a", FlowUser.class)
-            .selectAs("b", FlowHisTask::getId, FlowTaskVo::getId)
-            .selectAs("b", FlowHisTask::getUpdateTime, FlowTaskVo::getUpdateTime)
-            .selectAs("c", FlowInstance::getBusinessId, FlowTaskVo::getBusinessId)
-            .selectAs("c", FlowInstance::getFlowStatus, FlowTaskVo::getFlowStatus)
-            .selectAs("c", FlowInstance::getCreateBy, FlowTaskVo::getCreateBy)
-            .selectAs(FlowUser::getProcessedBy, FlowTaskVo::getProcessedBy)
-            .selectAs(FlowUser::getCreateTime, FlowTaskVo::getCreateTime)
-            .selectAs("b", FlowHisTask::getFormCustom, FlowTaskVo::getFormCustom)
-            .selectAs("b", FlowHisTask::getFormPath, FlowTaskVo::getFormPath)
-            .selectAs("b", FlowHisTask::getNodeName, FlowTaskVo::getNodeName)
-            .selectAs("b", FlowHisTask::getNodeCode, FlowTaskVo::getNodeCode)
-            .selectAs("d", FlowDefinition::getFlowName, FlowTaskVo::getFlowName)
-            .selectAs("d", FlowDefinition::getFlowCode, FlowTaskVo::getFlowCode)
-            .selectAs("d", FlowDefinition::getCategory, FlowTaskVo::getCategory)
-            .selectAs("d", FlowDefinition::getVersion, FlowTaskVo::getVersion)
-            .selectAs("biz", FlowInstanceBizExt::getBusinessCode, FlowTaskVo::getBusinessCode)
-            .selectAs("biz", FlowInstanceBizExt::getBusinessTitle, FlowTaskVo::getBusinessTitle)
-            .leftJoin(FlowHisTask.class, "b", FlowHisTask::getTaskId, FlowUser::getAssociated)
-            .leftJoin(FlowInstance.class, "c", FlowInstance::getId, FlowHisTask::getInstanceId)
-            .leftJoin(FlowDefinition.class, "d", FlowDefinition::getId, FlowInstance::getDefinitionId)
-            .leftJoin(FlowInstanceBizExt.class, "biz", FlowInstanceBizExt::getInstanceId, FlowInstance::getId)
-            .eq("a", FlowUser::getType, "4")
-            .eq("a", FlowUser::getDelFlag, NOT_DELETED)
-            .eq("b", FlowHisTask::getDelFlag, NOT_DELETED)
-            .eq("d", FlowDefinition::getDelFlag, NOT_DELETED)
-            .like(StringUtils.isNotBlank(bo.getNodeName()), "b", FlowHisTask::getNodeName, bo.getNodeName())
-            .like(StringUtils.isNotBlank(bo.getFlowName()), "d", FlowDefinition::getFlowName, bo.getFlowName())
-            .like(StringUtils.isNotBlank(bo.getFlowCode()), "d", FlowDefinition::getFlowCode, bo.getFlowCode())
-            .like(StringUtils.isNotBlank(bo.getFlowStatus()), "c", FlowInstance::getFlowStatus, bo.getFlowStatus())
-            .in(CollUtil.isNotEmpty(bo.getCreateByIds()), "c", FlowInstance::getCreateBy, bo.getCreateByIds())
-            .in(CollUtil.isNotEmpty(categoryIds), "d", FlowDefinition::getCategory, categoryIds)
-            .between(params.get("beginTime") != null && params.get("endTime") != null,
-                "a", FlowUser::getCreateTime, params.get("beginTime"), params.get("endTime"))
-            .eq(StringUtils.isNotBlank(userId), "a", FlowUser::getProcessedBy, userId)
-            .orderByDesc("a", FlowUser::getCreateTime)
-            .orderByDesc("b", FlowHisTask::getUpdateTime);
-        return wrapper.page(page, FlowTaskVo.class);
-    }
-
 }
