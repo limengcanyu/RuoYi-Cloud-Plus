@@ -20,10 +20,9 @@ import org.dromara.resource.mapper.SysMessageMapper;
 import org.dromara.resource.service.ISysMessageService;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 消息记录服务实现
@@ -134,7 +133,7 @@ public class SysMessageServiceImpl implements ISysMessageService {
     private List<SysMessageVo> selectMessageList(String category, Long userId) {
         LambdaQueryWrapper<SysMessage> lqw = Wrappers.lambdaQuery();
         lqw.eq(SysMessage::getCategory, category);
-        lqw.ge(SysMessage::getCreateTime, new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(BOX_DAYS)));
+        lqw.ge(SysMessage::getCreateTime, LocalDateTime.now().minusDays(BOX_DAYS));
         lqw.and(wrapper -> wrapper.eq(SysMessage::getSendUserIds, GLOBAL_USER_IDS)
             .or()
             .apply(DataBaseHelper.findInSet(userId, "send_user_ids")));

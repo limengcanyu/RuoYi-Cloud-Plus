@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 @SuppressWarnings("unchecked")
 public class DataPermissionHelper {
 
-    private static final String DATA_PERMISSION_KEY = "data:permission";
+    public static final String DATA_PERMISSION_KEY = "data:permission";
     private static final String ACCESS_KEY = "data:permission:access";
 
     private static final ThreadLocal<Deque<Integer>> REENTRANT_IGNORE = ThreadLocal.withInitial(ArrayDeque::new);

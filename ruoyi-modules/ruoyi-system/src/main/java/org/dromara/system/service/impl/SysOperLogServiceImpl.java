@@ -16,7 +16,7 @@ import org.dromara.system.service.ISysOperLogService;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -75,7 +75,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService {
     @Override
     public void insertOperlog(SysOperLogBo bo) {
         SysOperLog operLog = MapstructUtils.convert(bo, SysOperLog.class);
-        operLog.setOperTime(new Date());
+        operLog.setOperTime(LocalDateTime.now());
         baseMapper.insert(operLog);
     }
 

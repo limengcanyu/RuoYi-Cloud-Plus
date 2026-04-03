@@ -16,7 +16,7 @@ import org.dromara.system.service.ISysLoginInfoService;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +63,7 @@ public class SysLoginInfoServiceImpl implements ISysLoginInfoService {
     @Override
     public void insertLoginInfo(SysLoginInfoBo bo) {
         SysLoginInfo loginInfo = MapstructUtils.convert(bo, SysLoginInfo.class);
-        loginInfo.setLoginTime(new Date());
+        loginInfo.setLoginTime(LocalDateTime.now());
         baseMapper.insert(loginInfo);
     }
 

@@ -4,7 +4,7 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 消息记录视图对象
@@ -35,5 +35,5 @@ public class SysMessageVo implements Serializable {
 
     private String path;
 
-    private Date createTime;
+    private LocalDateTime createTime;
 }

@@ -1,6 +1,7 @@
 package org.dromara.common.core.utils;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
 import cn.hutool.http.HttpStatus;
 import jakarta.servlet.ServletRequest;
@@ -264,6 +265,21 @@ public class ServletUtils extends JakartaServletUtil {
      */
     public static String getClientIP() {
         return getClientIP(getRequest());
+    }
+
+    /**
+     * 获取客户端 IP 地址（支持自定义请求头）
+     *
+     * @param request          请求对象
+     * @param otherHeaderNames 其他请求头名称
+     * @return 客户端 IP 地址
+     */
+    public static String getClientIP(HttpServletRequest request, String... otherHeaderNames) {
+        String[] headers = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
+        if (ArrayUtil.isNotEmpty(otherHeaderNames)) {
+            headers = ArrayUtil.addAll(headers, otherHeaderNames);
+        }
+        return JakartaServletUtil.getClientIP(request, headers);
     }
 
     /**

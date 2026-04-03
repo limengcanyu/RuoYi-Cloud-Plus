@@ -34,6 +34,7 @@ import org.dromara.system.mapper.SysUserRoleMapper;
 import org.dromara.system.service.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -281,7 +282,7 @@ public class RemoteUserServiceImpl implements RemoteUserService {
         SysUser sysUser = new SysUser();
         sysUser.setUserId(userId);
         sysUser.setLoginIp(ip);
-        sysUser.setLoginDate(DateUtils.getNowDate());
+        sysUser.setLoginDate(LocalDateTime.now());
         sysUser.setUpdateBy(userId);
         DataPermissionHelper.ignore(() -> userMapper.updateById(sysUser));
     }
