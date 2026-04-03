@@ -3,6 +3,7 @@ package org.dromara.common.json.config;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.json.handler.BigNumberSerializer;
 import org.dromara.common.json.handler.CustomDateDeserializer;
+import org.dromara.common.json.handler.CustomLocalDateTimeDeserializer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
@@ -38,7 +39,7 @@ public class JacksonConfig {
         module.addSerializer(BigDecimal.class, ToStringSerializer.instance);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
-        module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
+        module.addDeserializer(LocalDateTime.class, new CustomLocalDateTimeDeserializer());
         module.addDeserializer(Date.class, new CustomDateDeserializer());
         return module;
     }

@@ -58,8 +58,6 @@ spring:
       date-time: yyyy-MM-dd HH:mm:ss
   #jackson配置
   jackson:
-    # 日期格式化
-    date-format: yyyy-MM-dd HH:mm:ss
     serialization:
       # 格式化输出
       INDENT_OUTPUT: false
