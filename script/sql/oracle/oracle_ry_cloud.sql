@@ -291,6 +291,8 @@ create table sys_menu (
   status            char(1)         default 0,
   perms             varchar2(100)   default null,
   icon              varchar2(100)   default '#',
+  active_menu       varchar2(255)   default '',
+  ext               varchar2(2000)  default '',
   create_dept       number(20)      default null,
   create_by         number(20)      default null,
   create_time       date,
@@ -316,6 +318,8 @@ comment on column sys_menu.visible      is '显示状态（0显示 1隐藏）';
 comment on column sys_menu.status       is '菜单状态（0正常 1停用）';
 comment on column sys_menu.perms        is '权限标识';
 comment on column sys_menu.icon         is '菜单图标';
+comment on column sys_menu.active_menu  is '激活菜单路径';
+comment on column sys_menu.ext          is '扩展字段';
 comment on column sys_menu.create_dept  is '创建部门';
 comment on column sys_menu.create_by    is '创建者';
 comment on column sys_menu.create_time  is '创建时间';
@@ -327,206 +331,206 @@ comment on column sys_menu.remark       is '备注';
 -- 初始化-菜单信息表数据
 -- ----------------------------
 -- 一级菜单
-insert into sys_menu values('1', '系统管理', '0', '1', 'system',           null, '', 'N', 'Y', 'M', '0', '0', '', 'system',   103, 1, sysdate, null, null, '系统管理目录');
-insert into sys_menu values('2', '系统监控', '0', '3', 'monitor',          null, '', 'N', 'Y', 'M', '0', '0', '', 'monitor',  103, 1, sysdate, null, null, '系统监控目录');
-insert into sys_menu values('3', '系统工具', '0', '4', 'tool',             null, '', 'N', 'Y', 'M', '0', '0', '', 'tool',     103, 1, sysdate, null, null, '系统工具目录');
-insert into sys_menu values('4', 'PLUS官网', '0', '5', 'https://gitee.com/dromara/RuoYi-Cloud-Plus', null, '', 'Y', 'Y', 'M', '0', '0', '', 'guide',    103, 1, sysdate, null, null, 'RuoYi-Cloud-Plus官网地址');
-insert into sys_menu values('5', '测试菜单', '0', '5', 'demo',             null, '', 'N', 'Y', 'M', '0', '0', null, 'star', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1', '系统管理', '0', '1', 'system', null, '', 'N', 'Y', 'M', '0', '0', '', 'system', '', '', 103, 1, sysdate, null, null, '系统管理目录');
+insert into sys_menu values('2', '系统监控', '0', '3', 'monitor', null, '', 'N', 'Y', 'M', '0', '0', '', 'monitor', '', '', 103, 1, sysdate, null, null, '系统监控目录');
+insert into sys_menu values('3', '系统工具', '0', '4', 'tool', null, '', 'N', 'Y', 'M', '0', '0', '', 'tool', '', '', 103, 1, sysdate, null, null, '系统工具目录');
+insert into sys_menu values('4', 'PLUS官网', '0', '5', 'https://gitee.com/dromara/RuoYi-Cloud-Plus', null, '', 'Y', 'Y', 'M', '0', '0', '', 'guide', '', '', 103, 1, sysdate, null, null, 'RuoYi-Cloud-Plus官网地址');
+insert into sys_menu values('5', '测试菜单', '0', '5', 'demo', null, '', 'N', 'Y', 'M', '0', '0', null, 'star', '', '', 103, 1, sysdate, null, null, '');
 -- 二级菜单
-insert into sys_menu values('100',  '用户管理',     '1',   '1', 'user',             'system/user/index',            '', 'N', 'Y', 'C', '0', '0', 'system:user:list',            'user',          103, 1, sysdate, null, null, '用户管理菜单');
-insert into sys_menu values('101',  '角色管理',     '1',   '2', 'role',             'system/role/index',            '', 'N', 'Y', 'C', '0', '0', 'system:role:list',            'peoples',       103, 1, sysdate, null, null, '角色管理菜单');
-insert into sys_menu values('102',  '菜单管理',     '1',   '3', 'menu',             'system/menu/index',            '', 'N', 'Y', 'C', '0', '0', 'system:menu:list',            'tree-table',    103, 1, sysdate, null, null, '菜单管理菜单');
-insert into sys_menu values('103',  '部门管理',     '1',   '4', 'dept',             'system/dept/index',            '', 'N', 'Y', 'C', '0', '0', 'system:dept:list',            'tree',          103, 1, sysdate, null, null, '部门管理菜单');
-insert into sys_menu values('104',  '岗位管理',     '1',   '5', 'post',             'system/post/index',            '', 'N', 'Y', 'C', '0', '0', 'system:post:list',            'post',          103, 1, sysdate, null, null, '岗位管理菜单');
-insert into sys_menu values('105',  '字典管理',     '1',   '6', 'dict',             'system/dict/index',            '', 'N', 'Y', 'C', '0', '0', 'system:dict:list',            'dict',          103, 1, sysdate, null, null, '字典管理菜单');
-insert into sys_menu values('106',  '参数设置',     '1',   '7', 'config',           'system/config/index',          '', 'N', 'Y', 'C', '0', '0', 'system:config:list',          'edit',          103, 1, sysdate, null, null, '参数设置菜单');
-insert into sys_menu values('107',  '通知公告',     '1',   '8', 'notice',           'system/notice/index',          '', 'N', 'Y', 'C', '0', '0', 'system:notice:list',          'message',       103, 1, sysdate, null, null, '通知公告菜单');
-insert into sys_menu values('108',  '日志管理',     '1',   '9', 'log',              '',                             '', 'N', 'Y', 'M', '0', '0', '',                            'log',           103, 1, sysdate, null, null, '日志管理菜单');
-insert into sys_menu values('109',  '在线用户',     '2',   '1', 'online',           'monitor/online/index',         '', 'N', 'Y', 'C', '0', '0', 'monitor:online:list',         'online',        103, 1, sysdate, null, null, '在线用户菜单');
-insert into sys_menu values('124',  '缓存监控',     '2',   '1',  'cache',           'monitor/cache/index',          '', 'N', 'Y', 'C', '0', '0', 'monitor:cache:list',          'redis',         103, 1, sysdate, null, null, '缓存监控');
-insert into sys_menu values('110',  'SnailJob控制台', '2', '2', 'http://localhost:8800/snail-job', '',              '', 'Y', 'Y', 'C', '0', '0', 'monitor:job:list',            'job',           103, 1, sysdate, null, null, '定时任务菜单');
-insert into sys_menu values('112',  'Nacos控制台',  '2',   '4', 'http://localhost:8848/nacos',  '',                 '', 'Y', 'Y', 'C', '0', '0', 'monitor:nacos:list',          'nacos',         103, 1, sysdate, null, null, '服务治理菜单');
-insert into sys_menu values('113',  'Admin控制台',  '2',   '5', 'http://localhost:9100/login',  '',                 '', 'Y', 'Y', 'C', '0', '0', 'monitor:server:list',         'server',        103, 1, sysdate, null, null, '服务监控菜单');
-insert into sys_menu values('115',  '代码生成',     '3',   '2', 'gen',              'tool/gen/index',               '', 'N', 'Y', 'C', '0', '0', 'tool:gen:list',               'code',          103, 1, sysdate, null, null, '代码生成菜单');
-insert into sys_menu values('123',  '客户端管理',   '1',   '11', 'client',          'system/client/index',          '', 'N', 'Y', 'C', '0', '0', 'system:client:list',          'international', 103, 1, sysdate, null, null, '客户端管理菜单');
-insert into sys_menu values('116', '修改生成配置',  '3',   '2', 'gen-edit/index/:tableId', 'tool/gen/editTable', '', 'N', 'N', 'C', '1', '0', 'tool:gen:edit',           '#',               103, 1, sysdate, null, null, '/tool/gen');
-insert into sys_menu values('130', '分配用户',     '1',   '2', 'role-auth/user/:roleId', 'system/role/authUser', '', 'N', 'N', 'C', '1', '0', 'system:role:edit',      '#',               103, 1, sysdate, null, null, '/system/role');
-insert into sys_menu values('131', '分配角色',     '1',   '1', 'user-auth/role/:userId', 'system/user/authRole', '', 'N', 'N', 'C', '1', '0', 'system:user:edit',      '#',               103, 1, sysdate, null, null, '/system/user');
-insert into sys_menu values('132', '字典数据',     '1',   '6', 'dict-data/index/:dictId', 'system/dict/data', '', 'N', 'N', 'C', '1', '0', 'system:dict:list',         '#',               103, 1, sysdate, null, null, '/system/dict');
-insert into sys_menu values('133', '文件配置管理',  '1',   '10', 'oss-config/index',              'system/oss/config', '', 'N', 'N', 'C', '1', '0', 'system:ossConfig:list',  '#',                103, 1, sysdate, null, null, '/system/oss');
+insert into sys_menu values('100', '用户管理', '1', '1', 'user', 'system/user/index', '', 'N', 'Y', 'C', '0', '0', 'system:user:list', 'user', '', '', 103, 1, sysdate, null, null, '用户管理菜单');
+insert into sys_menu values('101', '角色管理', '1', '2', 'role', 'system/role/index', '', 'N', 'Y', 'C', '0', '0', 'system:role:list', 'peoples', '', '', 103, 1, sysdate, null, null, '角色管理菜单');
+insert into sys_menu values('102', '菜单管理', '1', '3', 'menu', 'system/menu/index', '', 'N', 'Y', 'C', '0', '0', 'system:menu:list', 'tree-table', '', '', 103, 1, sysdate, null, null, '菜单管理菜单');
+insert into sys_menu values('103', '部门管理', '1', '4', 'dept', 'system/dept/index', '', 'N', 'Y', 'C', '0', '0', 'system:dept:list', 'tree', '', '', 103, 1, sysdate, null, null, '部门管理菜单');
+insert into sys_menu values('104', '岗位管理', '1', '5', 'post', 'system/post/index', '', 'N', 'Y', 'C', '0', '0', 'system:post:list', 'post', '', '', 103, 1, sysdate, null, null, '岗位管理菜单');
+insert into sys_menu values('105', '字典管理', '1', '6', 'dict', 'system/dict/index', '', 'N', 'Y', 'C', '0', '0', 'system:dict:list', 'dict', '', '', 103, 1, sysdate, null, null, '字典管理菜单');
+insert into sys_menu values('106', '参数设置', '1', '7', 'config', 'system/config/index', '', 'N', 'Y', 'C', '0', '0', 'system:config:list', 'edit', '', '', 103, 1, sysdate, null, null, '参数设置菜单');
+insert into sys_menu values('107', '通知公告', '1', '8', 'notice', 'system/notice/index', '', 'N', 'Y', 'C', '0', '0', 'system:notice:list', 'message', '', '', 103, 1, sysdate, null, null, '通知公告菜单');
+insert into sys_menu values('108', '日志管理', '1', '9', 'log', '', '', 'N', 'Y', 'M', '0', '0', '', 'log', '', '', 103, 1, sysdate, null, null, '日志管理菜单');
+insert into sys_menu values('109', '在线用户', '2', '1', 'online', 'monitor/online/index', '', 'N', 'Y', 'C', '0', '0', 'monitor:online:list', 'online', '', '', 103, 1, sysdate, null, null, '在线用户菜单');
+insert into sys_menu values('124', '缓存监控', '2', '1', 'cache', 'monitor/cache/index', '', 'N', 'Y', 'C', '0', '0', 'monitor:cache:list', 'redis', '', '', 103, 1, sysdate, null, null, '缓存监控');
+insert into sys_menu values('110', 'SnailJob控制台', '2', '2', 'http://localhost:8800/snail-job', '', '', 'Y', 'Y', 'C', '0', '0', 'monitor:job:list', 'job', '', '', 103, 1, sysdate, null, null, '定时任务菜单');
+insert into sys_menu values('112', 'Nacos控制台', '2', '4', 'http://localhost:8848/nacos', '', '', 'Y', 'Y', 'C', '0', '0', 'monitor:nacos:list', 'nacos', '', '', 103, 1, sysdate, null, null, '服务治理菜单');
+insert into sys_menu values('113', 'Admin控制台', '2', '5', 'http://localhost:9100/login', '', '', 'Y', 'Y', 'C', '0', '0', 'monitor:server:list', 'server', '', '', 103, 1, sysdate, null, null, '服务监控菜单');
+insert into sys_menu values('115', '代码生成', '3', '2', 'gen', 'tool/gen/index', '', 'N', 'Y', 'C', '0', '0', 'tool:gen:list', 'code', '', '', 103, 1, sysdate, null, null, '代码生成菜单');
+insert into sys_menu values('123', '客户端管理', '1', '11', 'client', 'system/client/index', '', 'N', 'Y', 'C', '0', '0', 'system:client:list', 'international', '', '', 103, 1, sysdate, null, null, '客户端管理菜单');
+insert into sys_menu values('116', '修改生成配置', '3', '2', 'gen-edit/index/:tableId', 'tool/gen/editTable', '', 'N', 'N', 'C', '1', '0', 'tool:gen:edit', '#', '/tool/gen', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('130', '分配用户', '1', '2', 'role-auth/user/:roleId', 'system/role/authUser', '', 'N', 'N', 'C', '1', '0', 'system:role:edit', '#', '/system/role', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('131', '分配角色', '1', '1', 'user-auth/role/:userId', 'system/user/authRole', '', 'N', 'N', 'C', '1', '0', 'system:user:edit', '#', '/system/user', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('132', '字典数据', '1', '6', 'dict-data/index/:dictId', 'system/dict/data', '', 'N', 'N', 'C', '1', '0', 'system:dict:list', '#', '/system/dict', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('133', '文件配置管理', '1', '10', 'oss-config/index', 'system/oss/config', '', 'N', 'N', 'C', '1', '0', 'system:ossConfig:list', '#', '/system/oss', '', 103, 1, sysdate, null, null, '');
 
 -- springboot-admin监控
-insert into sys_menu values('117',  'Admin监控',   '2',    '5', 'Admin',            'monitor/admin/index',         '', 'N', 'Y', 'C', '0', '0', 'monitor:admin:list',          'dashboard',     103, 1, sysdate, null, null, 'Admin监控菜单');
+insert into sys_menu values('117', 'Admin监控', '2', '5', 'Admin', 'monitor/admin/index', '', 'N', 'Y', 'C', '0', '0', 'monitor:admin:list', 'dashboard', '', '', 103, 1, sysdate, null, null, 'Admin监控菜单');
 -- oss菜单
-insert into sys_menu values('118',  '文件管理',     '1',    '10', 'oss',             'system/oss/index',            '', 'N', 'Y', 'C', '0', '0', 'system:oss:list',             'upload',        103, 1, sysdate, null, null, '文件管理菜单');
+insert into sys_menu values('118', '文件管理', '1', '10', 'oss', 'system/oss/index', '', 'N', 'Y', 'C', '0', '0', 'system:oss:list', 'upload', '', '', 103, 1, sysdate, null, null, '文件管理菜单');
 -- 三级菜单
-insert into sys_menu values('500',  '操作日志', '108', '1', 'operlog',    'monitor/operlog/index',    '', 'N', 'Y', 'C', '0', '0', 'monitor:operlog:list',    'form',          103, 1, sysdate, null, null, '操作日志菜单');
-insert into sys_menu values('501',  '登录日志', '108', '2', 'logininfo', 'monitor/logininfo/index', '', 'N', 'Y', 'C', '0', '0', 'monitor:logininfo:list', 'logininfo',    103, 1, sysdate, null, null, '登录日志菜单');
+insert into sys_menu values('500', '操作日志', '108', '1', 'operlog', 'monitor/operlog/index', '', 'N', 'Y', 'C', '0', '0', 'monitor:operlog:list', 'form', '', '', 103, 1, sysdate, null, null, '操作日志菜单');
+insert into sys_menu values('501', '登录日志', '108', '2', 'logininfo', 'monitor/logininfo/index', '', 'N', 'Y', 'C', '0', '0', 'monitor:logininfo:list', 'logininfo', '', '', 103, 1, sysdate, null, null, '登录日志菜单');
 -- 用户管理按钮
-insert into sys_menu values('1001', '用户查询', '100', '1',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:query',          '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1002', '用户新增', '100', '2',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:add',            '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1003', '用户修改', '100', '3',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:edit',           '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1004', '用户删除', '100', '4',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:remove',         '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1005', '用户导出', '100', '5',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:export',         '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1006', '用户导入', '100', '6',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:import',         '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1007', '重置密码', '100', '7',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:resetPwd',       '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1001', '用户查询', '100', '1', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1002', '用户新增', '100', '2', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1003', '用户修改', '100', '3', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1004', '用户删除', '100', '4', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1005', '用户导出', '100', '5', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:export', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1006', '用户导入', '100', '6', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:import', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1007', '重置密码', '100', '7', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:user:resetPwd', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 角色管理按钮
-insert into sys_menu values('1008', '角色查询', '101', '1',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:query',          '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1009', '角色新增', '101', '2',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:add',            '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1010', '角色修改', '101', '3',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:edit',           '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1011', '角色删除', '101', '4',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:remove',         '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1012', '角色导出', '101', '5',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:export',         '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1008', '角色查询', '101', '1', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1009', '角色新增', '101', '2', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1010', '角色修改', '101', '3', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1011', '角色删除', '101', '4', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1012', '角色导出', '101', '5', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:role:export', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 菜单管理按钮
-insert into sys_menu values('1013', '菜单查询', '102', '1',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:menu:query',          '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1014', '菜单新增', '102', '2',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:menu:add',            '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1015', '菜单修改', '102', '3',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:menu:edit',           '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1016', '菜单删除', '102', '4',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:menu:remove',         '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1013', '菜单查询', '102', '1', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:menu:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1014', '菜单新增', '102', '2', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:menu:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1015', '菜单修改', '102', '3', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:menu:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1016', '菜单删除', '102', '4', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:menu:remove', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 部门管理按钮
-insert into sys_menu values('1017', '部门查询', '103', '1',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:dept:query',          '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1018', '部门新增', '103', '2',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:dept:add',            '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1019', '部门修改', '103', '3',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:dept:edit',           '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1020', '部门删除', '103', '4',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:dept:remove',         '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1017', '部门查询', '103', '1', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:dept:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1018', '部门新增', '103', '2', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:dept:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1019', '部门修改', '103', '3', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:dept:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1020', '部门删除', '103', '4', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:dept:remove', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 岗位管理按钮
-insert into sys_menu values('1021', '岗位查询', '104', '1',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:query',          '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1022', '岗位新增', '104', '2',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:add',            '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1023', '岗位修改', '104', '3',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:edit',           '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1024', '岗位删除', '104', '4',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:remove',         '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1025', '岗位导出', '104', '5',  '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:export',         '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1021', '岗位查询', '104', '1', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1022', '岗位新增', '104', '2', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1023', '岗位修改', '104', '3', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1024', '岗位删除', '104', '4', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1025', '岗位导出', '104', '5', '', '', '', 'N', 'Y', 'F', '0', '0', 'system:post:export', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 字典管理按钮
-insert into sys_menu values('1026', '字典查询', '105', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:query',          '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1027', '字典新增', '105', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:add',            '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1028', '字典修改', '105', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:edit',           '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1029', '字典删除', '105', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:remove',         '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1030', '字典导出', '105', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:export',         '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1026', '字典查询', '105', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1027', '字典新增', '105', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1028', '字典修改', '105', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1029', '字典删除', '105', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1030', '字典导出', '105', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:dict:export', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 参数设置按钮
-insert into sys_menu values('1031', '参数查询', '106', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:query',        '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1032', '参数新增', '106', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:add',          '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1033', '参数修改', '106', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:edit',         '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1034', '参数删除', '106', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:remove',       '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1035', '参数导出', '106', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:export',       '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1031', '参数查询', '106', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1032', '参数新增', '106', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1033', '参数修改', '106', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1034', '参数删除', '106', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1035', '参数导出', '106', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:config:export', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 通知公告按钮
-insert into sys_menu values('1036', '公告查询', '107', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:notice:query',        '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1037', '公告新增', '107', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:notice:add',          '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1038', '公告修改', '107', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:notice:edit',         '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1039', '公告删除', '107', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:notice:remove',       '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1036', '公告查询', '107', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:notice:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1037', '公告新增', '107', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:notice:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1038', '公告修改', '107', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:notice:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1039', '公告删除', '107', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:notice:remove', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 操作日志按钮
-insert into sys_menu values('1040', '操作查询', '500', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:operlog:query',      '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1041', '操作删除', '500', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:operlog:remove',     '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1042', '日志导出', '500', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:operlog:export',     '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1040', '操作查询', '500', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:operlog:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1041', '操作删除', '500', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:operlog:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1042', '日志导出', '500', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:operlog:export', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 登录日志按钮
-insert into sys_menu values('1043', '登录查询', '501', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:logininfo:query',   '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1044', '登录删除', '501', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:logininfo:remove',  '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1045', '日志导出', '501', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:logininfo:export',  '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1050', '账户解锁', '501', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:logininfo:unlock',  '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1043', '登录查询', '501', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:logininfo:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1044', '登录删除', '501', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:logininfo:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1045', '日志导出', '501', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:logininfo:export', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1050', '账户解锁', '501', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:logininfo:unlock', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 在线用户按钮
-insert into sys_menu values('1046', '在线查询', '109', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:online:query',       '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1047', '批量强退', '109', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:online:batchLogout', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1048', '单条强退', '109', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:online:forceLogout', '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1046', '在线查询', '109', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:online:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1047', '批量强退', '109', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:online:batchLogout', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1048', '单条强退', '109', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'monitor:online:forceLogout', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 代码生成按钮
-insert into sys_menu values('1055', '生成查询', '115', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:query',             '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1056', '生成修改', '115', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:edit',              '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1057', '生成删除', '115', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:remove',            '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1058', '导入代码', '115', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:import',            '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1059', '预览代码', '115', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:preview',           '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1060', '生成代码', '115', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:code',              '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1055', '生成查询', '115', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1056', '生成修改', '115', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1057', '生成删除', '115', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1058', '导入代码', '115', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:import', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1059', '预览代码', '115', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:preview', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1060', '生成代码', '115', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'tool:gen:code', '#', '', '', 103, 1, sysdate, null, null, '');
 -- oss相关按钮
-insert into sys_menu values('1600', '文件查询', '118', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:oss:query',        '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1601', '文件上传', '118', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:oss:upload',       '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1602', '文件下载', '118', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:oss:download',     '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1603', '文件删除', '118', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:oss:remove',       '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1620', '配置列表', '118', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:ossConfig:list',   '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1621', '配置添加', '118', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:ossConfig:add',    '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1622', '配置编辑', '118', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:ossConfig:edit',   '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1623', '配置删除', '118', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:ossConfig:remove', '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1600', '文件查询', '118', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:oss:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1601', '文件上传', '118', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:oss:upload', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1602', '文件下载', '118', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:oss:download', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1603', '文件删除', '118', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:oss:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1620', '配置列表', '118', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:ossConfig:list', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1621', '配置添加', '118', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:ossConfig:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1622', '配置编辑', '118', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:ossConfig:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1623', '配置删除', '118', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:ossConfig:remove', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 客户端管理按钮
-insert into sys_menu values('1061', '客户端管理查询', '123', '1',  '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:query',        '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1062', '客户端管理新增', '123', '2',  '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:add',          '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1063', '客户端管理修改', '123', '3',  '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:edit',         '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1064', '客户端管理删除', '123', '4',  '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:remove',       '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1065', '客户端管理导出', '123', '5',  '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:export',       '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1061', '客户端管理查询', '123', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1062', '客户端管理新增', '123', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1063', '客户端管理修改', '123', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1064', '客户端管理删除', '123', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1065', '客户端管理导出', '123', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'system:client:export', '#', '', '', 103, 1, sysdate, null, null, '');
 -- 测试菜单
-insert into sys_menu values('1500', '测试单表',     '5',   '1', 'demo', 'demo/demo/index', '', 'N', 'Y', 'C', '0', '0', 'demo:demo:list', '#', 103, 1, sysdate, null, null, '测试单表菜单');
-insert into sys_menu values('1501', '测试单表查询', '1500', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:query', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1502', '测试单表新增', '1500', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:add', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1503', '测试单表修改', '1500', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:edit', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1504', '测试单表删除', '1500', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:remove', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1505', '测试单表导出', '1500', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:export', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1506', '测试树表',     '5',   '1', 'tree', 'demo/tree/index', '', 'N', 'Y', 'C', '0', '0', 'demo:tree:list', '#', 103, 1, sysdate, null, null, '测试树表菜单');
-insert into sys_menu values('1507', '测试树表查询', '1506', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:query', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1508', '测试树表新增', '1506', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:add', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1509', '测试树表修改', '1506', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:edit', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1510', '测试树表删除', '1506', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:remove', '#', 103, 1, sysdate, null, null, '');
-insert into sys_menu values('1511', '测试树表导出', '1506', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:export', '#', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1500', '测试单表', '5', '1', 'demo', 'demo/demo/index', '', 'N', 'Y', 'C', '0', '0', 'demo:demo:list', '#', '', '', 103, 1, sysdate, null, null, '测试单表菜单');
+insert into sys_menu values('1501', '测试单表查询', '1500', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1502', '测试单表新增', '1500', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1503', '测试单表修改', '1500', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1504', '测试单表删除', '1500', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1505', '测试单表导出', '1500', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:demo:export', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1506', '测试树表', '5', '1', 'tree', 'demo/tree/index', '', 'N', 'Y', 'C', '0', '0', 'demo:tree:list', '#', '', '', 103, 1, sysdate, null, null, '测试树表菜单');
+insert into sys_menu values('1507', '测试树表查询', '1506', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:query', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1508', '测试树表新增', '1506', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:add', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1509', '测试树表修改', '1506', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:edit', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1510', '测试树表删除', '1506', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:remove', '#', '', '', 103, 1, sysdate, null, null, '');
+insert into sys_menu values('1511', '测试树表导出', '1506', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'demo:tree:export', '#', '', '', 103, 1, sysdate, null, null, '');
 --工作流相关
-INSERT INTO sys_menu VALUES ('11616', '工作流', '0', '6', 'workflow', '', '', 'N', 'Y', 'M', '0', '0', '', 'workflow', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11618', '我的任务', '0', '7', 'task', '', '', 'N', 'Y', 'M', '0', '0', '', 'my-task', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11619', '我的待办', '11618', '2', 'taskWaiting', 'workflow/task/taskWaiting', '', 'N', 'N', 'C', '0', '0', '', 'waiting', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11632', '我的已办', '11618', '3', 'taskFinish', 'workflow/task/taskFinish', '', 'N', 'N', 'C', '0', '0', '', 'finish', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11633', '我的抄送', '11618', '4', 'taskCopyList', 'workflow/task/taskCopyList', '', 'N', 'N', 'C', '0', '0', '', 'my-copy', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11620', '流程定义', '11616', '3', 'processDefinition', 'workflow/processDefinition/index', '', 'N', 'N', 'C', '0', '0', 'workflow:definition:list', 'process-definition', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11621', '流程实例', '11630', '1', 'processInstance', 'workflow/processInstance/index', '', 'N', 'N', 'C', '0', '0', 'workflow:instance:list', 'tree-table', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11622', '流程分类', '11616', '1', 'category', 'workflow/category/index', '', 'N', 'Y', 'C', '0', '0', 'workflow:category:list', 'category', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11629', '我发起的', '11618', '1', 'myDocument', 'workflow/task/myDocument', '', 'N', 'N', 'C', '0', '0', 'workflow:instance:currentList', 'guide', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11630', '流程监控', '11616', '4', 'processMonitor', '', '', 'N', 'Y', 'M', '0', '0', '', 'monitor', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11631', '待办任务', '11630', '2', 'allTaskWaiting', 'workflow/task/allTaskWaiting', '', 'N', 'N', 'C', '0', '0', '', 'waiting', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11700', '流程设计', '11616', '5', 'design/index',   'workflow/processDefinition/design', '', 'N', 'N', 'C', '1', '0', 'workflow:leave:edit', '#', 103, 1, SYSDATE, NULL, NULL, '/workflow/processDefinition');
-INSERT INTO sys_menu VALUES ('11701', '请假申请', '11616', '6', 'leaveEdit/index', 'workflow/leave/leaveEdit', '', 'N', 'N', 'C', '1', '0', 'workflow:leave:edit', '#', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11616', '工作流', '0', '6', 'workflow', '', '', 'N', 'Y', 'M', '0', '0', '', 'workflow', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11618', '我的任务', '0', '7', 'task', '', '', 'N', 'Y', 'M', '0', '0', '', 'my-task', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11619', '我的待办', '11618', '2', 'taskWaiting', 'workflow/task/taskWaiting', '', 'N', 'N', 'C', '0', '0', '', 'waiting', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11632', '我的已办', '11618', '3', 'taskFinish', 'workflow/task/taskFinish', '', 'N', 'N', 'C', '0', '0', '', 'finish', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11633', '我的抄送', '11618', '4', 'taskCopyList', 'workflow/task/taskCopyList', '', 'N', 'N', 'C', '0', '0', '', 'my-copy', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11620', '流程定义', '11616', '3', 'processDefinition', 'workflow/processDefinition/index', '', 'N', 'N', 'C', '0', '0', 'workflow:definition:list', 'process-definition', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11621', '流程实例', '11630', '1', 'processInstance', 'workflow/processInstance/index', '', 'N', 'N', 'C', '0', '0', 'workflow:instance:list', 'tree-table', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11622', '流程分类', '11616', '1', 'category', 'workflow/category/index', '', 'N', 'Y', 'C', '0', '0', 'workflow:category:list', 'category', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11629', '我发起的', '11618', '1', 'myDocument', 'workflow/task/myDocument', '', 'N', 'N', 'C', '0', '0', 'workflow:instance:currentList', 'guide', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11630', '流程监控', '11616', '4', 'processMonitor', '', '', 'N', 'Y', 'M', '0', '0', '', 'monitor', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11631', '待办任务', '11630', '2', 'allTaskWaiting', 'workflow/task/allTaskWaiting', '', 'N', 'N', 'C', '0', '0', '', 'waiting', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11700', '流程设计', '11616', '5', 'design/index', 'workflow/processDefinition/design', '', 'N', 'N', 'C', '1', '0', 'workflow:leave:edit', '#', '/workflow/processDefinition', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11701', '请假申请', '11616', '6', 'leaveEdit/index', 'workflow/leave/leaveEdit', '', 'N', 'N', 'C', '1', '0', 'workflow:leave:edit', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
 
-INSERT INTO sys_menu VALUES ('11623', '流程分类查询', '11622', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:query', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11624', '流程分类新增', '11622', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:add', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11625', '流程分类修改', '11622', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:edit', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11626', '流程分类删除', '11622', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:remove', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11627', '流程分类导出', '11622', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:export', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11653', '流程实例查询', '11621', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:query', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11654', '流程变量查询', '11621', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:variableQuery', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11655', '流程变量修改', '11621', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:variable', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11656', '流程实例激活/挂起', '11621', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:active', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11657', '流程实例删除', '11621', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:remove', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11658', '流程实例作废', '11621', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:invalid', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11659', '流程实例撤销', '11621', '7', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:cancel', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11644', '流程定义查询', '11620', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:query', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11645', '流程定义新增', '11620', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:add', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11646', '流程定义修改', '11620', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:edit', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11647', '流程定义删除', '11620', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:remove', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11648', '流程定义导出', '11620', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:export', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11649', '流程定义导入', '11620', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:import', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11650', '流程定义发布/取消发布', '11620', '7', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:publish', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11651', '流程定义复制', '11620', '8', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:copy', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11652', '流程定义激活/挂起', '11620', '9', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:active', '#', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11623', '流程分类查询', '11622', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:query', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11624', '流程分类新增', '11622', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:add', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11625', '流程分类修改', '11622', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:edit', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11626', '流程分类删除', '11622', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:remove', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11627', '流程分类导出', '11622', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:category:export', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11653', '流程实例查询', '11621', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:query', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11654', '流程变量查询', '11621', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:variableQuery', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11655', '流程变量修改', '11621', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:variable', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11656', '流程实例激活/挂起', '11621', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:active', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11657', '流程实例删除', '11621', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:remove', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11658', '流程实例作废', '11621', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:invalid', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11659', '流程实例撤销', '11621', '7', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:cancel', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11644', '流程定义查询', '11620', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:query', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11645', '流程定义新增', '11620', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:add', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11646', '流程定义修改', '11620', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:edit', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11647', '流程定义删除', '11620', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:remove', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11648', '流程定义导出', '11620', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:export', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11649', '流程定义导入', '11620', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:import', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11650', '流程定义发布/取消发布', '11620', '7', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:publish', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11651', '流程定义复制', '11620', '8', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:copy', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11652', '流程定义激活/挂起', '11620', '9', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:active', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
 
-INSERT INTO sys_menu VALUES ('11638', '请假申请', '5', '1', 'leave', 'workflow/leave/index', '', 'N', 'Y', 'C', '0', '0', 'workflow:leave:list', '#', 103, 1, SYSDATE, NULL, NULL, '请假申请菜单');
-INSERT INTO sys_menu VALUES ('11639', '请假申请查询', '11638', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:query', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11640', '请假申请新增', '11638', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:add', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11641', '请假申请修改', '11638', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:edit', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11642', '请假申请删除', '11638', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:remove', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11643', '请假申请导出', '11638', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:export', '#', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11638', '请假申请', '5', '1', 'leave', 'workflow/leave/index', '', 'N', 'Y', 'C', '0', '0', 'workflow:leave:list', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '请假申请菜单');
+INSERT INTO sys_menu VALUES ('11639', '请假申请查询', '11638', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:query', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11640', '请假申请新增', '11638', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:add', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11641', '请假申请修改', '11638', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:edit', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11642', '请假申请删除', '11638', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:remove', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11643', '请假申请导出', '11638', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:leave:export', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
 
 -- 流程实例管理相关按钮
-INSERT INTO sys_menu VALUES ('11653', '流程实例查询', '11621', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:query', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11654', '流程变量查询', '11621', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:variableQuery', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11655', '流程变量修改', '11621', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:variable', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11656', '流程实例激活/挂起', '11621', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:active', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11657', '流程实例删除', '11621', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:remove', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11658', '流程实例作废', '11621', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:invalid', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11659', '流程实例撤销', '11621', '7', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:cancel', '#', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11653', '流程实例查询', '11621', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:query', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11654', '流程变量查询', '11621', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:variableQuery', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11655', '流程变量修改', '11621', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:variable', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11656', '流程实例激活/挂起', '11621', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:active', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11657', '流程实例删除', '11621', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:remove', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11658', '流程实例作废', '11621', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:invalid', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11659', '流程实例撤销', '11621', '7', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:instance:cancel', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
 
 -- 流程定义管理相关按钮
-INSERT INTO sys_menu VALUES ('11644', '流程定义查询', '11620', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:query', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11645', '流程定义新增', '11620', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:add', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11646', '流程定义修改', '11620', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:edit', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11647', '流程定义删除', '11620', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:remove', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11648', '流程定义导出', '11620', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:export', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11649', '流程定义导入', '11620', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:import', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11650', '流程定义发布/取消发布', '11620', '7', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:publish', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11651', '流程定义复制', '11620', '8', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:copy', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11652', '流程定义激活/挂起', '11620', '9', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:active', '#', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11644', '流程定义查询', '11620', '1', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:query', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11645', '流程定义新增', '11620', '2', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:add', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11646', '流程定义修改', '11620', '3', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:edit', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11647', '流程定义删除', '11620', '4', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:remove', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11648', '流程定义导出', '11620', '5', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:export', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11649', '流程定义导入', '11620', '6', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:import', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11650', '流程定义发布/取消发布', '11620', '7', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:publish', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11651', '流程定义复制', '11620', '8', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:copy', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11652', '流程定义激活/挂起', '11620', '9', '#', '', '', 'N', 'Y', 'F', '0', '0', 'workflow:definition:active', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
 
-INSERT INTO sys_menu VALUES ('11801', '流程表达式', '11616', 2, 'spel', 'workflow/spel/index', '', 'N', 'Y', 'C', '0', '0', 'workflow:spel:list', 'input', 103, 1, SYSDATE, 1, SYSDATE, '流程达式定义菜单');
-INSERT INTO sys_menu VALUES ('11802', '流程spel表达式定义查询', '11801', 1, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:query', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11803', '流程spel表达式定义新增', '11801', 2, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:add', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11804', '流程spel表达式定义修改', '11801', 3, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:edit', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11805', '流程spel表达式定义删除', '11801', 4, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:remove', '#', 103, 1, SYSDATE, NULL, NULL, '');
-INSERT INTO sys_menu VALUES ('11806', '流程spel表达式定义导出', '11801', 5, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:export', '#', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11801', '流程表达式', '11616', 2, 'spel', 'workflow/spel/index', '', 'N', 'Y', 'C', '0', '0', 'workflow:spel:list', 'input', '', '', 103, 1, SYSDATE, 1, SYSDATE, '流程达式定义菜单');
+INSERT INTO sys_menu VALUES ('11802', '流程spel表达式定义查询', '11801', 1, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:query', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11803', '流程spel表达式定义新增', '11801', 2, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:add', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11804', '流程spel表达式定义修改', '11801', 3, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:edit', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11805', '流程spel表达式定义删除', '11801', 4, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:remove', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
+INSERT INTO sys_menu VALUES ('11806', '流程spel表达式定义导出', '11801', 5, '#', '', NULL, 'N', 'Y', 'F', '0', '0', 'workflow:spel:export', '#', '', '', 103, 1, SYSDATE, NULL, NULL, '');
 
 -- ----------------------------
 -- 6、用户和角色关联表  用户N-1角色
@@ -1433,3 +1437,4 @@ after logon on database
 begin
 execute immediate 'alter session set nls_date_format=''YYYY-MM-DD HH24:MI:SS''';
 end;
+
