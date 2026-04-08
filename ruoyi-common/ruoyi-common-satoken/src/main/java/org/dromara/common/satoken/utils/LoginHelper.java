@@ -5,10 +5,16 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.http.useragent.UserAgent;
+import cn.hutool.http.useragent.UserAgentUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.core.enums.UserType;
+import org.dromara.common.core.utils.ServletUtils;
+import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.core.utils.ip.AddressUtils;
 import org.dromara.system.api.model.LoginUser;
 
 /**
@@ -43,6 +49,7 @@ public class LoginHelper {
      */
     public static void login(LoginUser loginUser, SaLoginParameter model) {
         model = ObjectUtil.defaultIfNull(model, new SaLoginParameter());
+        fillRequestContext(loginUser, model);
         StpUtil.login(loginUser.getLoginId(),
             model.setExtra(USER_KEY, loginUser.getUserId())
                 .setExtra(USER_NAME_KEY, loginUser.getUsername())
@@ -51,6 +58,36 @@ public class LoginHelper {
                 .setExtra(DEPT_CATEGORY_KEY, loginUser.getDeptCategory())
         );
         StpUtil.getTokenSession().set(LOGIN_USER_KEY, loginUser);
+    }
+
+    /**
+     * 在登录时补充当前请求上下文，避免登录态中的终端信息缺失。
+     *
+     * @param loginUser 登录用户
+     * @param model 登录参数
+     */
+    private static void fillRequestContext(LoginUser loginUser, SaLoginParameter model) {
+        HttpServletRequest request = ServletUtils.getRequest();
+        if (ObjectUtil.isNull(request)) {
+            return;
+        }
+        String ip = ServletUtils.getClientIP(request);
+        if (StringUtils.isBlank(loginUser.getIpaddr())) {
+            loginUser.setIpaddr(ip);
+        }
+        if (StringUtils.isBlank(loginUser.getLoginLocation()) && StringUtils.isNotBlank(ip)) {
+            loginUser.setLoginLocation(AddressUtils.getRealAddressByIP(ip));
+        }
+        UserAgent userAgent = UserAgentUtil.parse(request.getHeader("User-Agent"));
+        if (StringUtils.isBlank(loginUser.getBrowser())) {
+            loginUser.setBrowser(userAgent.getBrowser().getName());
+        }
+        if (StringUtils.isBlank(loginUser.getOs())) {
+            loginUser.setOs(userAgent.getOs().getName());
+        }
+        if (StringUtils.isBlank(loginUser.getDeviceType()) && StringUtils.isNotBlank(model.getDeviceType())) {
+            loginUser.setDeviceType(model.getDeviceType());
+        }
     }
 
     /**
