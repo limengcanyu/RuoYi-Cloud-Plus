@@ -130,7 +130,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IOException.class)
     public void handleIoException(IOException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
-        if (requestURI.contains("sse")) {
+        if (requestURI.contains("/resource/message")) {
             // sse 经常性连接中断 例如关闭浏览器 直接屏蔽
             return;
         }
