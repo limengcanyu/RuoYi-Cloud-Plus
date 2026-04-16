@@ -2,8 +2,8 @@
 dubbo:
   application:
     logger: slf4j
-    # 元数据中心 local 本地 (一般情况使用 local 即可 服务互相从本地文件获取)
-    metadataType: local
+    # 元数据中心 这里使用远程便于其他服务获取
+    metadataType: remote
     # 可选值 interface、instance、all，默认是 all，即接口级地址、应用级地址都注册
     register-mode: instance
   # 注册中心配置
@@ -14,10 +14,19 @@ dubbo:
     password: ${spring.cloud.nacos.password}
     parameters:
       namespace: ${spring.cloud.nacos.discovery.namespace:public}
-    # 远程元数据中心 true 开启 false 关闭 (一般情况不用开启)
-    use-as-metadata-center: false
     # 远程配置中心 true 开启 false 关闭 (一般情况不用开启)
     use-as-config-center: false
+  # 已经采用框架内 Redisson 实现元数据中心
+  # 以下配置不用管占位用 不然 dubbo 会直接用 nacos 当注册中心 直接配好框架自带的 Redisson 即可
+  metadata-report:
+    address: redis://${spring.data.redis.host:localhost}:${spring.data.redis.port:6379}
+    group: DUBBO_GROUP
+    username: ${spring.data.redis.username:default}
+    password: ${spring.data.redis.password}
+    parameters:
+      namespace: ${spring.profiles.active}
+      database: ${spring.data.redis.database}
+      timeout: ${spring.data.redis.timeout}
   # 消费者相关配置
   consumer:
     # 结果缓存(LRU算法)
