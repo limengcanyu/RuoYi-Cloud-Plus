@@ -53,6 +53,16 @@ public class RemoteClientVo implements Serializable {
     private String deviceType;
 
     /**
+     * 允许访问路径
+     */
+    private String accessPath;
+
+    /**
+     * IP白名单
+     */
+    private String ipWhitelist;
+
+    /**
      * token活跃超时时间
      */
     private Long activeTimeout;

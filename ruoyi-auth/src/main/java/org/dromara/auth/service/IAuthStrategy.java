@@ -1,9 +1,14 @@
 package org.dromara.auth.service;
 
+import cn.dev33.satoken.stp.parameter.SaLoginParameter;
+import cn.hutool.core.util.ObjectUtil;
 import org.dromara.auth.domain.vo.LoginVo;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.SpringUtils;
+import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.system.api.domain.vo.RemoteClientVo;
+
+import java.util.function.Consumer;
 
 /**
  * 授权策略
@@ -30,6 +35,30 @@ public interface IAuthStrategy {
         }
         IAuthStrategy instance = SpringUtils.getBean(beanName);
         return instance.login(body, client);
+    }
+
+    /**
+     * 按客户端配置构建统一登录参数。
+     */
+    static SaLoginParameter buildLoginParameter(RemoteClientVo client) {
+        return buildLoginParameter(client, null);
+    }
+
+    /**
+     * 按客户端配置构建统一登录参数，并预留自定义扩展入口。
+     */
+    static SaLoginParameter buildLoginParameter(RemoteClientVo client, Consumer<SaLoginParameter> customizer) {
+        SaLoginParameter model = new SaLoginParameter();
+        model.setDeviceType(client.getDeviceType());
+        model.setTimeout(client.getTimeout());
+        model.setActiveTimeout(client.getActiveTimeout());
+        model.setExtra(LoginHelper.CLIENT_KEY, client.getClientId());
+        model.setExtra(LoginHelper.CLIENT_ACCESS_PATH_KEY, client.getAccessPath());
+        model.setExtra(LoginHelper.CLIENT_IP_WHITELIST_KEY, client.getIpWhitelist());
+        if (ObjectUtil.isNotNull(customizer)) {
+            customizer.accept(model);
+        }
+        return model;
     }
 
     /**

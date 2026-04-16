@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 /**
  * 客户端管理Service业务层处理
@@ -36,6 +37,8 @@ import java.util.List;
 @Service
 public class SysClientServiceImpl implements ISysClientService {
 
+    private static final String CLIENT_RULE_SEPARATOR_REGEX = "[,;\\r\\n]+";
+
     private final SysClientMapper baseMapper;
 
     /**
@@ -44,7 +47,7 @@ public class SysClientServiceImpl implements ISysClientService {
     @Override
     public SysClientVo queryById(Long id) {
         SysClientVo vo = baseMapper.selectVoById(id);
-        vo.setGrantTypeList(StringUtils.splitList(vo.getGrantType()));
+        fillClientRuleFields(vo);
         return vo;
     }
 
@@ -54,7 +57,9 @@ public class SysClientServiceImpl implements ISysClientService {
     @Cacheable(cacheNames = CacheNames.SYS_CLIENT, key = "#clientId")
     @Override
     public SysClientVo queryByClientId(String clientId) {
-        return baseMapper.selectVoOne(new LambdaQueryWrapper<SysClient>().eq(SysClient::getClientId, clientId));
+        SysClientVo vo = baseMapper.selectVoOne(new LambdaQueryWrapper<SysClient>().eq(SysClient::getClientId, clientId));
+        fillClientRuleFields(vo);
+        return vo;
     }
 
     /**
@@ -64,7 +69,7 @@ public class SysClientServiceImpl implements ISysClientService {
     public PageResult<SysClientVo> queryPageList(SysClientBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<SysClient> lqw = buildQueryWrapper(bo);
         Page<SysClientVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
-        result.getRecords().forEach(r -> r.setGrantTypeList(StringUtils.splitList(r.getGrantType())));
+        result.getRecords().forEach(this::fillClientRuleFields);
         return PageResult.build(result.getRecords(), result.getTotal());
     }
 
@@ -74,7 +79,9 @@ public class SysClientServiceImpl implements ISysClientService {
     @Override
     public List<SysClientVo> queryList(SysClientBo bo) {
         LambdaQueryWrapper<SysClient> lqw = buildQueryWrapper(bo);
-        return baseMapper.selectVoList(lqw);
+        List<SysClientVo> list = baseMapper.selectVoList(lqw);
+        list.forEach(this::fillClientRuleFields);
+        return list;
     }
 
     private LambdaQueryWrapper<SysClient> buildQueryWrapper(SysClientBo bo) {
@@ -94,6 +101,8 @@ public class SysClientServiceImpl implements ISysClientService {
     public Boolean insertByBo(SysClientBo bo) {
         SysClient add = MapstructUtils.convert(bo, SysClient.class);
         add.setGrantType(CollUtil.join(bo.getGrantTypeList(), StringUtils.SEPARATOR));
+        add.setAccessPath(resolveRuleValue(bo.getAccessPath(), bo.getAccessPathList(), this::normalizeAccessPath));
+        add.setIpWhitelist(resolveRuleValue(bo.getIpWhitelist(), bo.getIpWhitelistList(), UnaryOperator.identity()));
         // 生成clientId
         String clientKey = bo.getClientKey();
         String clientSecret = bo.getClientSecret();
@@ -113,6 +122,8 @@ public class SysClientServiceImpl implements ISysClientService {
     public Boolean updateByBo(SysClientBo bo) {
         SysClient update = MapstructUtils.convert(bo, SysClient.class);
         update.setGrantType(StringUtils.joinComma(bo.getGrantTypeList()));
+        update.setAccessPath(resolveRuleValue(bo.getAccessPath(), bo.getAccessPathList(), this::normalizeAccessPath));
+        update.setIpWhitelist(resolveRuleValue(bo.getIpWhitelist(), bo.getIpWhitelistList(), UnaryOperator.identity()));
         return baseMapper.updateById(update) > 0;
     }
 
@@ -149,6 +160,61 @@ public class SysClientServiceImpl implements ISysClientService {
             .eq(SysClient::getClientKey, client.getClientKey())
             .ne(ObjectUtil.isNotNull(client.getId()), SysClient::getId, client.getId()));
         return !exist;
+    }
+
+    /**
+     * 回填客户端扩展规则字段，便于前端直接展示和编辑。
+     */
+    private void fillClientRuleFields(SysClientVo vo) {
+        if (ObjectUtil.isNull(vo)) {
+            return;
+        }
+        vo.setGrantTypeList(StringUtils.splitList(vo.getGrantType()));
+        vo.setAccessPathList(parseRuleList(vo.getAccessPath(), this::normalizeAccessPath));
+        vo.setIpWhitelistList(parseRuleList(vo.getIpWhitelist(), UnaryOperator.identity()));
+    }
+
+    /**
+     * 统一处理白名单与路径规则的入库格式。
+     */
+    private String resolveRuleValue(String rawValue, List<String> listValue, UnaryOperator<String> normalizer) {
+        List<String> rules = CollUtil.isNotEmpty(listValue)
+            ? listValue
+            : StringUtils.str2List(rawValue, CLIENT_RULE_SEPARATOR_REGEX, true, true);
+        if (CollUtil.isEmpty(rules)) {
+            return listValue != null || rawValue != null ? "" : null;
+        }
+        return CollUtil.join(rules.stream()
+            .map(normalizer)
+            .filter(StringUtils::isNotBlank)
+            .toList(), StringUtils.SEPARATOR);
+    }
+
+    /**
+     * 将规则串转换为列表。
+     */
+    private List<String> parseRuleList(String value, UnaryOperator<String> normalizer) {
+        return StringUtils.str2List(value, CLIENT_RULE_SEPARATOR_REGEX, true, true).stream()
+            .map(normalizer)
+            .filter(StringUtils::isNotBlank)
+            .toList();
+    }
+
+    /**
+     * 统一补齐路径前导斜杠，避免配置成 app/** 时无法命中。
+     */
+    private String normalizeAccessPath(String path) {
+        if (StringUtils.isBlank(path)) {
+            return null;
+        }
+        String accessPath = StringUtils.trim(path);
+        if (StringUtils.isBlank(accessPath)) {
+            return null;
+        }
+        if (StringUtils.equals(accessPath, "*") || StringUtils.equals(accessPath, "/**")) {
+            return "/**";
+        }
+        return accessPath.startsWith(StringUtils.SLASH) ? accessPath : StringUtils.SLASH + accessPath;
     }
 
 }
