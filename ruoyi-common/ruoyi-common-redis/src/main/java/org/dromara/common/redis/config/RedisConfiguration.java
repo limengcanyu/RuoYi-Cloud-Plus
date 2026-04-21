@@ -72,9 +72,10 @@ public class RedisConfiguration {
                 //设置redis key前缀
                 .setNameMapper(new KeyPrefixHandler(redissonProperties.getKeyPrefix()))
                 .setCodec(codec);
-            if (SpringUtils.isVirtual()) {
-                config.setNettyExecutor(new VirtualThreadTaskExecutor("redisson-"));
-            }
+            // netty 对虚拟线程适配有问题 暂时禁止使用
+            //if (SpringUtils.isVirtual()) {
+            //    config.setNettyExecutor(new VirtualThreadTaskExecutor("redisson-"));
+            //}
             RedissonProperties.SingleServerConfig singleServerConfig = redissonProperties.getSingleServerConfig();
             if (ObjectUtil.isNotNull(singleServerConfig)) {
                 // 使用单机模式
