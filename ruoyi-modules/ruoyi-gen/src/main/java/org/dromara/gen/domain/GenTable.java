@@ -93,17 +93,6 @@ public class GenTable extends BaseEntity {
     private String functionAuthor;
 
     /**
-     * 生成代码方式（0zip压缩包 1自定义路径）
-     */
-    private String genType;
-
-    /**
-     * 生成路径（不填默认项目路径）
-     */
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
-    private String genPath;
-
-    /**
      * 主键信息
      */
     @TableField(exist = false)

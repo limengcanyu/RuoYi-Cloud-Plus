@@ -341,37 +341,9 @@ public class GenTableServiceImpl implements IGenTableService {
     public byte[] downloadCode(Long tableId) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ZipOutputStream zip = new ZipOutputStream(outputStream);
-        generatorCode(tableId, zip);
+        writeCodeToZip(tableId, zip);
         IoUtil.close(zip);
         return outputStream.toByteArray();
-    }
-
-    /**
-     * 生成代码（自定义路径）
-     *
-     * @param tableId 表名称
-     */
-    @Override
-    public void generatorCode(Long tableId) {
-        // 查询表信息
-        GenTable table = getGenTable(tableId);
-        // 设置主键列信息
-        setPkColumn(table);
-
-        Dict context = TemplateEngineUtils.buildContext(table);
-        // 获取模板列表
-        List<PathNamedTemplate> templates = TemplateEngineUtils.getTemplateList(table.getTplCategory(), table.getDataName());
-        for (PathNamedTemplate template : templates) {
-            String pathName = template.getPathName();
-            try {
-                String render = template.render(context);
-                String path = getGenPath(table, pathName);
-                FileUtils.writeUtf8String(render, path);
-            } catch (Exception e) {
-                log.error("渲染模板失败，表名：{}，模板：{}", table.getTableName(), pathName, e);
-                throw new ServiceException("渲染模板失败，表名：" + table.getTableName() + "，模板：" + pathName);
-            }
-        }
     }
 
     /**
@@ -437,7 +409,7 @@ public class GenTableServiceImpl implements IGenTableService {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ZipOutputStream zip = new ZipOutputStream(outputStream);
         for (String tableId : tableIds) {
-            generatorCode(Long.parseLong(tableId), zip);
+            writeCodeToZip(Long.parseLong(tableId), zip);
         }
         IoUtil.close(zip);
         return outputStream.toByteArray();
@@ -449,7 +421,7 @@ public class GenTableServiceImpl implements IGenTableService {
      * @param tableId 业务表主键
      * @param zip     代码压缩输出流
      */
-    private void generatorCode(Long tableId, ZipOutputStream zip) {
+    private void writeCodeToZip(Long tableId, ZipOutputStream zip) {
         RenderContext rc = buildRenderContext(tableId);
         GenTable table = rc.table();
         for (PathNamedTemplate template : rc.templates()) {
