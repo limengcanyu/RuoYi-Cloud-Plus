@@ -17,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 @Data
 @Component
 @ConfigurationProperties(prefix = "gen")
-@PropertySource(value = "classpath:generator.yml", factory = YmlPropertySourceFactory.class)
 public class GenProperties {
 
     /**
