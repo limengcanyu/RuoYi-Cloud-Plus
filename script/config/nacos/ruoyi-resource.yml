@@ -30,7 +30,7 @@ message:
   # sse / websocket
   transport: sse
   # 统一访问路径
-  path: /resource/message
+  path: /message
   # websocket 允许的跨域来源
   allowedOrigins: '*'
 
