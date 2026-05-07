@@ -44,10 +44,6 @@ public class AuthFilter implements WebMvcConfigurer {
             .notMatch(ignoreWhite.getWhites())
             .check(() -> {
                 HttpServletRequest request = ServletUtils.getRequest();
-                HttpServletResponse response = ServletUtils.getResponse();
-                if (response != null) {
-                    response.setContentType(SaTokenConsts.CONTENT_TYPE_APPLICATION_JSON);
-                }
 
                 StpUtil.checkLogin();
 
