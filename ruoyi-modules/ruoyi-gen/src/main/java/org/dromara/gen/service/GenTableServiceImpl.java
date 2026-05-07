@@ -625,20 +625,5 @@ public class GenTableServiceImpl implements IGenTableService {
         }
     }
 
-    /**
-     * 获取代码生成地址
-     *
-     * @param table    业务表信息
-     * @param template 模板文件路径
-     * @return 生成地址
-     */
-    public static String getGenPath(GenTable table, String template) {
-        String relativePath = StringUtils.replace(TemplateEngineUtils.getFileName(template, table), "/", File.separator);
-        String genPath = table.getGenPath();
-        if (StringUtils.equals(genPath, "/")) {
-            return System.getProperty("user.dir") + File.separator + "src" + File.separator + relativePath;
-        }
-        return genPath + File.separator + relativePath;
-    }
 }
 
