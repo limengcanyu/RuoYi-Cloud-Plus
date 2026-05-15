@@ -31,7 +31,7 @@
         <therapi-javadoc.version>0.15.0</therapi-javadoc.version>
         <fesod.version>2.0.1-incubating</fesod.version>
         <hutool.version>5.8.43</hutool.version>
-        <redisson.version>4.3.0</redisson.version>
+        <redisson.version>4.4.0</redisson.version>
         <lock4j.version>2.2.7</lock4j.version>
         <snailjob.version>1.9.0</snailjob.version>
         <satoken.version>1.45.0</satoken.version>
