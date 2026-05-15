@@ -55,7 +55,7 @@ import java.util.zip.ZipOutputStream;
 @Service
 public class GenTableServiceImpl implements IGenTableService {
 
-    private final GenTableMapper baseMapper;
+    private final GenTableMapper genTableMapper;
     private final GenTableColumnMapper genTableColumnMapper;
 
     private static final String[] TABLE_IGNORE = new String[]{"sj_", "flow_", "gen_"};
@@ -95,7 +95,7 @@ public class GenTableServiceImpl implements IGenTableService {
      */
     @Override
     public PageResult<GenTable> selectPageGenTableList(GenTable genTable, PageQuery pageQuery) {
-        Page<GenTable> page = baseMapper.selectPage(pageQuery.build(), this.buildGenTableQueryWrapper(genTable));
+        Page<GenTable> page = genTableMapper.selectPage(pageQuery.build(), this.buildGenTableQueryWrapper(genTable));
         return PageResult.build(page.getRecords(), page.getTotal());
     }
 
@@ -136,7 +136,7 @@ public class GenTableServiceImpl implements IGenTableService {
         if (CollUtil.isEmpty(tablesMap)) {
             return PageResult.build();
         }
-        List<String> tableNames = baseMapper.selectTableNameList(genTable.getDataName());
+        List<String> tableNames = genTableMapper.selectTableNameList(genTable.getDataName());
         String[] tableArrays;
         if (CollUtil.isNotEmpty(tableNames)) {
             tableArrays = tableNames.toArray(new String[0]);
@@ -232,7 +232,7 @@ public class GenTableServiceImpl implements IGenTableService {
         normalizeColumnOptions(genTable.getColumns());
         String options = JsonUtils.toJsonString(genTable.getParams());
         genTable.setOptions(options);
-        int row = baseMapper.updateById(genTable);
+        int row = genTableMapper.updateById(genTable);
         if (row > 0) {
             genTableColumnMapper.updateBatchById(genTable.getColumns());
         }
@@ -247,7 +247,7 @@ public class GenTableServiceImpl implements IGenTableService {
     @Override
     public void deleteGenTableByIds(Long[] tableIds) {
         List<Long> ids = Arrays.asList(tableIds);
-        baseMapper.deleteByIds(ids);
+        genTableMapper.deleteByIds(ids);
         genTableColumnMapper.delete(new LambdaQueryWrapper<GenTableColumn>().in(GenTableColumn::getTableId, ids));
     }
 
@@ -265,7 +265,7 @@ public class GenTableServiceImpl implements IGenTableService {
                 String tableName = table.getTableName();
                 GenUtils.initTable(table);
                 table.setDataName(dataName);
-                int row = baseMapper.insert(table);
+                int row = genTableMapper.insert(table);
                 if (row > 0) {
                     // 保存列信息
                     List<GenTableColumn> genTableColumns = SpringUtils.getAopProxy(this).selectDbTableColumnsByName(tableName, dataName);
@@ -534,7 +534,7 @@ public class GenTableServiceImpl implements IGenTableService {
      * @return 包含字段集合的业务表实体
      */
     private GenTable getGenTable(Long tableId) {
-        GenTable table = baseMapper.selectById(tableId);
+        GenTable table = genTableMapper.selectById(tableId);
         if (ObjectUtil.isNull(table)) {
             throw new ServiceException("业务表不存在");
         }

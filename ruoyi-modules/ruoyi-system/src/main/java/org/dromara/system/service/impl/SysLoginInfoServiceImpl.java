@@ -30,7 +30,7 @@ import java.util.Map;
 @Service
 public class SysLoginInfoServiceImpl implements ISysLoginInfoService {
 
-    private final SysLoginInfoMapper baseMapper;
+    private final SysLoginInfoMapper loginInfoMapper;
 
     /**
      * 分页查询登录日志列表
@@ -51,7 +51,7 @@ public class SysLoginInfoServiceImpl implements ISysLoginInfoService {
         if (StringUtils.isBlank(pageQuery.getOrderByColumn())) {
             lqw.orderByDesc(SysLoginInfo::getInfoId);
         }
-        Page<SysLoginInfoVo> page = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        Page<SysLoginInfoVo> page = loginInfoMapper.selectVoPage(pageQuery.build(), lqw);
         return PageResult.build(page.getRecords(), page.getTotal());
     }
 
@@ -64,7 +64,7 @@ public class SysLoginInfoServiceImpl implements ISysLoginInfoService {
     public void insertLoginInfo(SysLoginInfoBo bo) {
         SysLoginInfo loginInfo = MapstructUtils.convert(bo, SysLoginInfo.class);
         loginInfo.setLoginTime(LocalDateTime.now());
-        baseMapper.insert(loginInfo);
+        loginInfoMapper.insert(loginInfo);
     }
 
     /**
@@ -76,7 +76,7 @@ public class SysLoginInfoServiceImpl implements ISysLoginInfoService {
     @Override
     public List<SysLoginInfoVo> selectLoginInfoList(SysLoginInfoBo loginInfo) {
         Map<String, Object> params = loginInfo.getParams();
-        return baseMapper.selectVoList(new LambdaQueryWrapper<SysLoginInfo>()
+        return loginInfoMapper.selectVoList(new LambdaQueryWrapper<SysLoginInfo>()
             .like(StringUtils.isNotBlank(loginInfo.getIpaddr()), SysLoginInfo::getIpaddr, loginInfo.getIpaddr())
             .eq(StringUtils.isNotBlank(loginInfo.getStatus()), SysLoginInfo::getStatus, loginInfo.getStatus())
             .like(StringUtils.isNotBlank(loginInfo.getUserName()), SysLoginInfo::getUserName, loginInfo.getUserName())
@@ -93,7 +93,7 @@ public class SysLoginInfoServiceImpl implements ISysLoginInfoService {
      */
     @Override
     public int deleteLoginInfoByIds(Long[] infoIds) {
-        return baseMapper.deleteByIds(Arrays.asList(infoIds));
+        return loginInfoMapper.deleteByIds(Arrays.asList(infoIds));
     }
 
     /**
@@ -101,6 +101,6 @@ public class SysLoginInfoServiceImpl implements ISysLoginInfoService {
      */
     @Override
     public void cleanLoginInfo() {
-        baseMapper.delete(new LambdaQueryWrapper<>());
+        loginInfoMapper.delete(new LambdaQueryWrapper<>());
     }
 }

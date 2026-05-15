@@ -54,7 +54,7 @@ import java.util.Map;
 @Service
 public class SysOssServiceImpl implements ISysOssService {
 
-    private final SysOssMapper baseMapper;
+    private final SysOssMapper ossMapper;
 
     /**
      * 查询OSS对象存储列表
@@ -66,7 +66,7 @@ public class SysOssServiceImpl implements ISysOssService {
     @Override
     public PageResult<SysOssVo> queryPageList(SysOssBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<SysOss> lqw = buildQueryWrapper(bo);
-        Page<SysOssVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        Page<SysOssVo> result = ossMapper.selectVoPage(pageQuery.build(), lqw);
         List<SysOssVo> filterResult = StreamUtils.toList(result.getRecords(), this::matchingUrl);
         result.setRecords(filterResult);
         return PageResult.build(result.getRecords(), result.getTotal());
@@ -150,7 +150,7 @@ public class SysOssServiceImpl implements ISysOssService {
     @Cacheable(cacheNames = CacheNames.SYS_OSS, key = "#ossId")
     @Override
     public SysOssVo getById(Long ossId) {
-        return baseMapper.selectVoById(ossId);
+        return ossMapper.selectVoById(ossId);
     }
 
     /**
@@ -249,7 +249,7 @@ public class SysOssServiceImpl implements ISysOssService {
         oss.setOriginalName(originalfileName);
         oss.setService(configKey);
         oss.setExt1(JsonUtils.toJsonString(ext1));
-        baseMapper.insert(oss);
+        ossMapper.insert(oss);
         SysOssVo sysOssVo = MapstructUtils.convert(oss, SysOssVo.class);
         return this.matchingUrl(sysOssVo);
     }
@@ -263,7 +263,7 @@ public class SysOssServiceImpl implements ISysOssService {
     @Override
     public Boolean insertByBo(SysOssBo bo) {
         SysOss oss = BeanUtil.toBean(bo, SysOss.class);
-        boolean flag = baseMapper.insert(oss) > 0;
+        boolean flag = ossMapper.insert(oss) > 0;
         if (flag) {
             bo.setOssId(oss.getOssId());
         }
@@ -282,11 +282,11 @@ public class SysOssServiceImpl implements ISysOssService {
         if (isValid) {
             // 做一些业务上的校验,判断是否需要校验
         }
-        List<SysOss> list = baseMapper.selectByIds(ids);
+        List<SysOss> list = ossMapper.selectByIds(ids);
         for (SysOss sysOss : list) {
             OssFactory.instance(sysOss.getService()).delete(sysOss.getFileName());
         }
-        return baseMapper.deleteByIds(ids) > 0;
+        return ossMapper.deleteByIds(ids) > 0;
     }
 
     /**

@@ -36,7 +36,7 @@ import java.util.Map;
 @Service
 public class SysConfigServiceImpl implements ISysConfigService {
 
-    private final SysConfigMapper baseMapper;
+    private final SysConfigMapper configMapper;
 
     /**
      * 分页查询参数配置列表
@@ -48,7 +48,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
     @Override
     public PageResult<SysConfigVo> selectPageConfigList(SysConfigBo config, PageQuery pageQuery) {
         LambdaQueryWrapper<SysConfig> lqw = buildQueryWrapper(config);
-        Page<SysConfigVo> page = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        Page<SysConfigVo> page = configMapper.selectVoPage(pageQuery.build(), lqw);
         return PageResult.build(page.getRecords(), page.getTotal());
     }
 
@@ -60,7 +60,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
      */
     @Override
     public SysConfigVo selectConfigById(Long configId) {
-        return baseMapper.selectVoById(configId);
+        return configMapper.selectVoById(configId);
     }
 
     /**
@@ -72,7 +72,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
     @Cacheable(cacheNames = CacheNames.SYS_CONFIG, key = "#configKey")
     @Override
     public String selectConfigByKey(String configKey) {
-        SysConfig retConfig = baseMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
+        SysConfig retConfig = configMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
             .eq(SysConfig::getConfigKey, configKey));
         return ObjectUtils.notNullGetter(retConfig, SysConfig::getConfigValue, StringUtils.EMPTY);
     }
@@ -97,7 +97,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
     @Override
     public List<SysConfigVo> selectConfigList(SysConfigBo config) {
         LambdaQueryWrapper<SysConfig> lqw = buildQueryWrapper(config);
-        return baseMapper.selectVoList(lqw);
+        return configMapper.selectVoList(lqw);
     }
 
     private LambdaQueryWrapper<SysConfig> buildQueryWrapper(SysConfigBo bo) {
@@ -122,7 +122,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
     @Override
     public String insertConfig(SysConfigBo bo) {
         SysConfig config = MapstructUtils.convert(bo, SysConfig.class);
-        int row = baseMapper.insert(config);
+        int row = configMapper.insert(config);
         if (row > 0) {
             return config.getConfigValue();
         }
@@ -141,14 +141,14 @@ public class SysConfigServiceImpl implements ISysConfigService {
         int row = 0;
         SysConfig config = MapstructUtils.convert(bo, SysConfig.class);
         if (config.getConfigId() != null) {
-            SysConfig temp = baseMapper.selectById(config.getConfigId());
+            SysConfig temp = configMapper.selectById(config.getConfigId());
             if (ObjectUtil.isNotNull(temp) && !StringUtils.equals(temp.getConfigKey(), config.getConfigKey())) {
                 CacheUtils.evict(CacheNames.SYS_CONFIG, temp.getConfigKey());
             }
-            row = baseMapper.updateById(config);
+            row = configMapper.updateById(config);
         } else {
             CacheUtils.evict(CacheNames.SYS_CONFIG, config.getConfigKey());
-            row = baseMapper.update(config, new LambdaQueryWrapper<SysConfig>()
+            row = configMapper.update(config, new LambdaQueryWrapper<SysConfig>()
                 .eq(SysConfig::getConfigKey, config.getConfigKey()));
         }
         if (row > 0) {
@@ -164,14 +164,14 @@ public class SysConfigServiceImpl implements ISysConfigService {
      */
     @Override
     public void deleteConfigByIds(List<Long> configIds) {
-        List<SysConfig> list = baseMapper.selectByIds(configIds);
+        List<SysConfig> list = configMapper.selectByIds(configIds);
         list.forEach(config -> {
             if (StringUtils.equals(SystemConstants.YES, config.getConfigType())) {
                 throw new ServiceException("内置参数【{}】不能删除", config.getConfigKey());
             }
             CacheUtils.evict(CacheNames.SYS_CONFIG, config.getConfigKey());
         });
-        baseMapper.deleteByIds(configIds);
+        configMapper.deleteByIds(configIds);
     }
 
     /**
@@ -190,7 +190,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
      */
     @Override
     public boolean checkConfigKeyUnique(SysConfigBo config) {
-        boolean exist = baseMapper.exists(new LambdaQueryWrapper<SysConfig>()
+        boolean exist = configMapper.exists(new LambdaQueryWrapper<SysConfig>()
             .eq(SysConfig::getConfigKey, config.getConfigKey())
             .ne(ObjectUtil.isNotNull(config.getConfigId()), SysConfig::getConfigId, config.getConfigId()));
         return !exist;

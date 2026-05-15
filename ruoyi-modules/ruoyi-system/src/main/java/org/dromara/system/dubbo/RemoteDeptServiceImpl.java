@@ -3,7 +3,6 @@ package org.dromara.system.dubbo;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.dromara.common.core.constant.SystemConstants;
@@ -64,9 +63,10 @@ public class RemoteDeptServiceImpl implements RemoteDeptService {
      */
     @Override
     public List<RemoteDeptVo> selectDeptsByList() {
-        List<SysDeptVo> list = deptMapper.selectDeptList(new LambdaQueryWrapper<SysDept>()
+        List<SysDeptVo> list = deptMapper.lambda()
             .select(SysDept::getDeptId, SysDept::getDeptName, SysDept::getParentId)
-            .eq(SysDept::getStatus, SystemConstants.NORMAL));
+            .eq(SysDept::getStatus, SystemConstants.NORMAL)
+            .voList();
         return BeanUtil.copyToList(list, RemoteDeptVo.class);
     }
 
@@ -81,11 +81,10 @@ public class RemoteDeptServiceImpl implements RemoteDeptService {
         if (CollUtil.isEmpty(deptIds)) {
             return Collections.emptyMap();
         }
-        List<SysDept> list = deptMapper.selectList(
-            new LambdaQueryWrapper<SysDept>()
-                .select(SysDept::getDeptId, SysDept::getDeptName)
-                .in(SysDept::getDeptId, deptIds)
-        );
+        List<SysDept> list = deptMapper.lambda()
+            .select(SysDept::getDeptId, SysDept::getDeptName)
+            .in(SysDept::getDeptId, deptIds)
+            .list();
         return StreamUtils.toMap(list, SysDept::getDeptId, SysDept::getDeptName);
     }
 

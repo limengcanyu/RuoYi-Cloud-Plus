@@ -45,7 +45,7 @@ import java.util.*;
 @Service
 public class SysUserServiceImpl implements ISysUserService {
 
-    private final SysUserMapper baseMapper;
+    private final SysUserMapper userMapper;
     private final SysDeptMapper deptMapper;
     private final SysRoleMapper roleMapper;
     private final SysPostMapper postMapper;
@@ -54,7 +54,7 @@ public class SysUserServiceImpl implements ISysUserService {
 
     @Override
     public PageResult<SysUserVo> selectPageUserList(SysUserBo user, PageQuery pageQuery) {
-        Page<SysUserVo> page = baseMapper.selectPageUserList(pageQuery.build(), this.buildQueryWrapper(user));
+        Page<SysUserVo> page = userMapper.selectPageUserList(pageQuery.build(), this.buildQueryWrapper(user));
         return PageResult.build(page.getRecords(), page.getTotal());
     }
 
@@ -67,7 +67,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public List<SysUserExportVo> selectUserExportList(SysUserBo user) {
         List<Long> deptIds = ObjectUtil.isNotNull(user.getDeptId()) ? deptMapper.selectDeptAndChildById(user.getDeptId()) : null;
-        return baseMapper.selectUserExportList(user, deptIds);
+        return userMapper.selectUserExportList(user, deptIds);
     }
 
     private Wrapper<SysUser> buildQueryWrapper(SysUserBo user) {
@@ -100,7 +100,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public PageResult<SysUserVo> selectAllocatedList(SysUserBo user, PageQuery pageQuery) {
-        Page<SysUserVo> page = baseMapper.selectAllocatedList(pageQuery.build(), user);
+        Page<SysUserVo> page = userMapper.selectAllocatedList(pageQuery.build(), user);
         return PageResult.build(page.getRecords(), page.getTotal());
     }
 
@@ -113,7 +113,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public PageResult<SysUserVo> selectUnallocatedList(SysUserBo user, PageQuery pageQuery) {
         List<Long> userIds = userRoleMapper.selectUserIdsByRoleId(user.getRoleId());
-        Page<SysUserVo> page = baseMapper.selectUnallocatedList(pageQuery.build(), user, userIds);
+        Page<SysUserVo> page = userMapper.selectUnallocatedList(pageQuery.build(), user, userIds);
         return PageResult.build(page.getRecords(), page.getTotal());
     }
 
@@ -125,7 +125,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public SysUserVo selectUserByUserName(String userName) {
-        return baseMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUserName, userName));
+        return userMapper.lambda().eq(SysUser::getUserName, userName).voOne();
     }
 
     /**
@@ -136,7 +136,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public SysUserVo selectUserByPhoneNumber(String phoneNumber) {
-        return baseMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhoneNumber, phoneNumber));
+        return userMapper.lambda().eq(SysUser::getPhoneNumber, phoneNumber).voOne();
     }
 
     /**
@@ -147,7 +147,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public SysUserVo selectUserById(Long userId) {
-        SysUserVo user = baseMapper.selectVoById(userId);
+        SysUserVo user = userMapper.selectVoById(userId);
         if (ObjectUtil.isNull(user)) {
             return user;
         }
@@ -164,7 +164,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public List<SysUserVo> selectUserByIds(List<Long> userIds, Long deptId) {
-        return baseMapper.selectUserList(new LambdaQueryWrapper<SysUser>()
+        return userMapper.selectUserList(new LambdaQueryWrapper<SysUser>()
             .select(SysUser::getUserId, SysUser::getUserName, SysUser::getNickName, SysUser::getEmail, SysUser::getPhoneNumber)
             .eq(SysUser::getStatus, SystemConstants.NORMAL)
             .eq(ObjectUtil.isNotNull(deptId), SysUser::getDeptId, deptId)
@@ -209,7 +209,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public boolean checkUserNameUnique(SysUserBo user) {
-        boolean exist = baseMapper.exists(new LambdaQueryWrapper<SysUser>()
+        boolean exist = userMapper.exists(new LambdaQueryWrapper<SysUser>()
             .eq(SysUser::getUserName, user.getUserName())
             .ne(ObjectUtil.isNotNull(user.getUserId()), SysUser::getUserId, user.getUserId()));
         return !exist;
@@ -222,7 +222,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public boolean checkPhoneUnique(SysUserBo user) {
-        boolean exist = baseMapper.exists(new LambdaQueryWrapper<SysUser>()
+        boolean exist = userMapper.exists(new LambdaQueryWrapper<SysUser>()
             .eq(SysUser::getPhoneNumber, user.getPhoneNumber())
             .ne(ObjectUtil.isNotNull(user.getUserId()), SysUser::getUserId, user.getUserId()));
         return !exist;
@@ -235,7 +235,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public boolean checkEmailUnique(SysUserBo user) {
-        boolean exist = baseMapper.exists(new LambdaQueryWrapper<SysUser>()
+        boolean exist = userMapper.exists(new LambdaQueryWrapper<SysUser>()
             .eq(SysUser::getEmail, user.getEmail())
             .ne(ObjectUtil.isNotNull(user.getUserId()), SysUser::getUserId, user.getUserId()));
         return !exist;
@@ -266,7 +266,7 @@ public class SysUserServiceImpl implements ISysUserService {
         if (LoginHelper.isSuperAdmin()) {
             return;
         }
-        if (baseMapper.countUserById(userId) == 0) {
+        if (userMapper.countUserById(userId) == 0) {
             throw new ServiceException("没有权限访问用户数据！");
         }
     }
@@ -282,7 +282,7 @@ public class SysUserServiceImpl implements ISysUserService {
     public int insertUser(SysUserBo user) {
         SysUser sysUser = MapstructUtils.convert(user, SysUser.class);
         // 新增用户信息
-        int rows = baseMapper.insert(sysUser);
+        int rows = userMapper.insert(sysUser);
         user.setUserId(sysUser.getUserId());
         // 新增用户岗位关联
         insertUserPost(user, false);
@@ -302,7 +302,7 @@ public class SysUserServiceImpl implements ISysUserService {
         user.setCreateBy(0L);
         user.setUpdateBy(0L);
         SysUser sysUser = MapstructUtils.convert(user, SysUser.class);
-        return baseMapper.insert(sysUser) > 0;
+        return userMapper.insert(sysUser) > 0;
     }
 
     /**
@@ -321,7 +321,7 @@ public class SysUserServiceImpl implements ISysUserService {
         insertUserPost(user, true);
         SysUser sysUser = MapstructUtils.convert(user, SysUser.class);
         // 防止错误更新后导致的数据误删除
-        int flag = baseMapper.updateById(sysUser);
+        int flag = userMapper.updateById(sysUser);
         if (flag < 1) {
             throw new ServiceException("修改用户{}信息失败", user.getUserName());
         }
@@ -349,7 +349,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public int updateUserStatus(Long userId, String status) {
-        return baseMapper.update(null,
+        return userMapper.update(null,
             new LambdaUpdateWrapper<SysUser>()
                 .set(SysUser::getStatus, status)
                 .eq(SysUser::getUserId, userId));
@@ -364,7 +364,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @CacheEvict(cacheNames = CacheNames.SYS_NICKNAME, key = "#user.userId")
     @Override
     public int updateUserProfile(SysUserBo user) {
-        return baseMapper.update(null,
+        return userMapper.update(null,
             new LambdaUpdateWrapper<SysUser>()
                 .set(ObjectUtil.isNotNull(user.getNickName()), SysUser::getNickName, user.getNickName())
                 .set(SysUser::getPhoneNumber, user.getPhoneNumber())
@@ -382,7 +382,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public boolean updateUserAvatar(Long userId, Long avatar) {
-        return baseMapper.update(null,
+        return userMapper.update(null,
             new LambdaUpdateWrapper<SysUser>()
                 .set(SysUser::getAvatar, avatar)
                 .eq(SysUser::getUserId, userId)) > 0;
@@ -397,7 +397,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public int resetUserPwd(Long userId, String password) {
-        return baseMapper.update(null,
+        return userMapper.update(null,
             new LambdaUpdateWrapper<SysUser>()
                 .set(SysUser::getPassword, password)
                 .eq(SysUser::getUserId, userId));
@@ -433,7 +433,7 @@ public class SysUserServiceImpl implements ISysUserService {
 
         // 是否清除旧的用户岗位绑定
         if (clear) {
-            userPostMapper.delete(new LambdaQueryWrapper<SysUserPost>().eq(SysUserPost::getUserId, user.getUserId()));
+            userPostMapper.lambda().eq(SysUserPost::getUserId, user.getUserId()).deleteCount();
         }
 
         // 构建用户岗位关联列表并批量插入
@@ -478,7 +478,7 @@ public class SysUserServiceImpl implements ISysUserService {
 
         // 是否清除原有绑定
         if (clear) {
-            userRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, userId));
+            userRoleMapper.lambda().eq(SysUserRole::getUserId, userId).deleteCount();
         }
 
         // 批量插入用户-角色关联
@@ -502,11 +502,11 @@ public class SysUserServiceImpl implements ISysUserService {
     @Transactional(rollbackFor = Exception.class)
     public int deleteUserById(Long userId) {
         // 删除用户与角色关联
-        userRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, userId));
+        userRoleMapper.lambda().eq(SysUserRole::getUserId, userId).deleteCount();
         // 删除用户与岗位表
-        userPostMapper.delete(new LambdaQueryWrapper<SysUserPost>().eq(SysUserPost::getUserId, userId));
+        userPostMapper.lambda().eq(SysUserPost::getUserId, userId).deleteCount();
         // 防止更新失败导致的数据删除
-        int flag = baseMapper.deleteById(userId);
+        int flag = userMapper.deleteById(userId);
         if (flag < 1) {
             throw new ServiceException("删除用户失败!");
         }
@@ -532,7 +532,7 @@ public class SysUserServiceImpl implements ISysUserService {
         // 删除用户与岗位表
         userPostMapper.delete(new LambdaQueryWrapper<SysUserPost>().in(SysUserPost::getUserId, ids));
         // 防止更新失败导致的数据删除
-        int flag = baseMapper.deleteByIds(ids);
+        int flag = userMapper.deleteByIds(ids);
         if (flag < 1) {
             throw new ServiceException("删除用户失败!");
         }
@@ -550,7 +550,7 @@ public class SysUserServiceImpl implements ISysUserService {
         LambdaQueryWrapper<SysUser> lqw = Wrappers.lambdaQuery();
         lqw.eq(SysUser::getDeptId, deptId);
         lqw.orderByAsc(SysUser::getUserId);
-        return baseMapper.selectVoList(lqw);
+        return userMapper.selectVoList(lqw);
     }
 
     @Override
@@ -569,7 +569,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Cacheable(cacheNames = CacheNames.SYS_USER_NAME, key = "#userId")
     @Override
     public String selectUserNameById(Long userId) {
-        SysUser sysUser = baseMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+        SysUser sysUser = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
             .select(SysUser::getUserName).eq(SysUser::getUserId, userId));
         return ObjectUtils.notNullGetter(sysUser, SysUser::getUserName);
     }
@@ -583,7 +583,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     @Cacheable(cacheNames = CacheNames.SYS_NICKNAME, key = "#userId")
     public String selectNicknameById(Long userId) {
-        SysUser sysUser = baseMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+        SysUser sysUser = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
             .select(SysUser::getNickName).eq(SysUser::getUserId, userId));
         return ObjectUtils.notNullGetter(sysUser, SysUser::getNickName);
     }
@@ -608,7 +608,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public String selectPhonenumberById(Long userId) {
-        SysUser sysUser = baseMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+        SysUser sysUser = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
             .select(SysUser::getPhoneNumber).eq(SysUser::getUserId, userId));
         return ObjectUtils.notNullGetter(sysUser, SysUser::getPhoneNumber);
     }
@@ -621,7 +621,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public String selectEmailById(Long userId) {
-        SysUser sysUser = baseMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+        SysUser sysUser = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
             .select(SysUser::getEmail).eq(SysUser::getUserId, userId));
         return ObjectUtils.notNullGetter(sysUser, SysUser::getEmail);
     }

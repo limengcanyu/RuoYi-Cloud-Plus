@@ -1,11 +1,10 @@
 package org.dromara.demo.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.web.core.BaseController;
 import org.dromara.demo.domain.TestDemo;
-import org.dromara.demo.mapper.TestDemoMapper;
 import lombok.RequiredArgsConstructor;
+import org.dromara.demo.mapper.TestDemoMapper;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,7 +62,8 @@ public class TestBatchController extends BaseController {
             testDemo.setOrderNum(-1);
             testDemo.setTestKey("批量新增");
             testDemo.setValue("测试新增");
-            list.add(testDemo);        }
+            list.add(testDemo);
+        }
         testDemoMapper.insertBatch(list);
         for (int i = 0; i < list.size(); i++) {
             TestDemo testDemo = list.get(i);
@@ -82,8 +82,9 @@ public class TestBatchController extends BaseController {
     @DeleteMapping()
 //    @DS("slave")
     public R<Void> remove() {
-        return toAjax(testDemoMapper.delete(new LambdaQueryWrapper<TestDemo>()
-            .eq(TestDemo::getOrderNum, -1L)));
+        return toAjax(testDemoMapper.lambda()
+            .eq(TestDemo::getOrderNum, -1L)
+            .deleteCount());
     }
 
 }

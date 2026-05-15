@@ -39,14 +39,14 @@ public class SysClientServiceImpl implements ISysClientService {
 
     private static final String CLIENT_RULE_SEPARATOR_REGEX = "[,;\\r\\n]+";
 
-    private final SysClientMapper baseMapper;
+    private final SysClientMapper clientMapper;
 
     /**
      * 查询客户端管理
      */
     @Override
     public SysClientVo queryById(Long id) {
-        SysClientVo vo = baseMapper.selectVoById(id);
+        SysClientVo vo = clientMapper.selectVoById(id);
         fillClientRuleFields(vo);
         return vo;
     }
@@ -57,7 +57,7 @@ public class SysClientServiceImpl implements ISysClientService {
     @Cacheable(cacheNames = CacheNames.SYS_CLIENT, key = "#clientId")
     @Override
     public SysClientVo queryByClientId(String clientId) {
-        SysClientVo vo = baseMapper.selectVoOne(new LambdaQueryWrapper<SysClient>().eq(SysClient::getClientId, clientId));
+        SysClientVo vo = clientMapper.lambda().eq(SysClient::getClientId, clientId).voOne();
         fillClientRuleFields(vo);
         return vo;
     }
@@ -68,7 +68,7 @@ public class SysClientServiceImpl implements ISysClientService {
     @Override
     public PageResult<SysClientVo> queryPageList(SysClientBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<SysClient> lqw = buildQueryWrapper(bo);
-        Page<SysClientVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        Page<SysClientVo> result = clientMapper.selectVoPage(pageQuery.build(), lqw);
         result.getRecords().forEach(this::fillClientRuleFields);
         return PageResult.build(result.getRecords(), result.getTotal());
     }
@@ -79,7 +79,7 @@ public class SysClientServiceImpl implements ISysClientService {
     @Override
     public List<SysClientVo> queryList(SysClientBo bo) {
         LambdaQueryWrapper<SysClient> lqw = buildQueryWrapper(bo);
-        List<SysClientVo> list = baseMapper.selectVoList(lqw);
+        List<SysClientVo> list = clientMapper.selectVoList(lqw);
         list.forEach(this::fillClientRuleFields);
         return list;
     }
@@ -107,7 +107,7 @@ public class SysClientServiceImpl implements ISysClientService {
         String clientKey = bo.getClientKey();
         String clientSecret = bo.getClientSecret();
         add.setClientId(SecureUtil.md5(clientKey + clientSecret));
-        boolean flag = baseMapper.insert(add) > 0;
+        boolean flag = clientMapper.insert(add) > 0;
         if (flag) {
             bo.setId(add.getId());
         }
@@ -124,7 +124,7 @@ public class SysClientServiceImpl implements ISysClientService {
         update.setGrantType(StringUtils.joinComma(bo.getGrantTypeList()));
         update.setAccessPath(resolveRuleValue(bo.getAccessPath(), bo.getAccessPathList(), this::normalizeAccessPath));
         update.setIpWhitelist(resolveRuleValue(bo.getIpWhitelist(), bo.getIpWhitelistList(), UnaryOperator.identity()));
-        return baseMapper.updateById(update) > 0;
+        return clientMapper.updateById(update) > 0;
     }
 
     /**
@@ -133,7 +133,7 @@ public class SysClientServiceImpl implements ISysClientService {
     @CacheEvict(cacheNames = CacheNames.SYS_CLIENT, key = "#clientId")
     @Override
     public int updateClientStatus(String clientId, String status) {
-        return baseMapper.update(null,
+        return clientMapper.update(null,
             new LambdaUpdateWrapper<SysClient>()
                 .set(SysClient::getStatus, status)
                 .eq(SysClient::getClientId, clientId));
@@ -145,7 +145,7 @@ public class SysClientServiceImpl implements ISysClientService {
     @CacheEvict(cacheNames = CacheNames.SYS_CLIENT, allEntries = true)
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
-        return baseMapper.deleteByIds(ids) > 0;
+        return clientMapper.deleteByIds(ids) > 0;
     }
 
     /**
@@ -156,7 +156,7 @@ public class SysClientServiceImpl implements ISysClientService {
      */
     @Override
     public boolean checkClickKeyUnique(SysClientBo client) {
-        boolean exist = baseMapper.exists(new LambdaQueryWrapper<SysClient>()
+        boolean exist = clientMapper.exists(new LambdaQueryWrapper<SysClient>()
             .eq(SysClient::getClientKey, client.getClientKey())
             .ne(ObjectUtil.isNotNull(client.getId()), SysClient::getId, client.getId()));
         return !exist;

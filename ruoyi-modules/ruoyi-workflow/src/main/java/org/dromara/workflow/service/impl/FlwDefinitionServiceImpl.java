@@ -15,6 +15,7 @@ import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.query.QueryBuilder;
 import org.dromara.common.core.domain.PageResult;
 import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.enums.NodeType;
@@ -116,7 +117,8 @@ public class FlwDefinitionServiceImpl implements IFlwDefinitionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean publish(Long id) {
-        List<FlowNode> flowNodes = flowNodeMapper.selectList(new LambdaQueryWrapper<FlowNode>().eq(FlowNode::getDefinitionId, id));
+        List<FlowNode> flowNodes = flowNodeMapper.selectList(
+            QueryBuilder.lambda(FlowNode.class).eq(FlowNode::getDefinitionId, id).build());
         List<String> errorMsg = new ArrayList<>();
         if (CollUtil.isNotEmpty(flowNodes)) {
             String applyNodeCode = flwCommonService.applyNodeCode(id);

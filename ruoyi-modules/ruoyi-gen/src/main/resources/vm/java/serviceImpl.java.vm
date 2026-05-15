@@ -8,11 +8,11 @@ import org.dromara.common.core.domain.PageResult;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 #end
-#if($enableStatus || $enableSort)
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-#end
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+#if($enableUnique)
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+#end
+import org.dromara.common.mybatis.core.query.QueryBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,7 +41,7 @@ import java.util.Collection;
 @Service
 public class ${ClassName}ServiceImpl implements I${ClassName}Service {
 
-    private final ${ClassName}Mapper baseMapper;
+    private final ${ClassName}Mapper ${className}Mapper;
 
 #set($TreeParentCap = "")
 #if("" != $treeParentCode)
@@ -64,7 +64,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
      */
     @Override
     public ${ClassName}Vo queryById(${pkColumn.javaType} ${pkColumn.javaField}) {
-        return baseMapper.selectVoById(${pkColumn.javaField});
+        return ${className}Mapper.selectVoById(${pkColumn.javaField});
     }
 
 #if($table.crud)
@@ -78,7 +78,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
     @Override
     public PageResult<${ClassName}Vo> queryPageList(${ClassName}Bo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<${ClassName}> lqw = buildQueryWrapper(bo);
-        Page<${ClassName}Vo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        Page<${ClassName}Vo> result = ${className}Mapper.selectVoPage(pageQuery.build(), lqw);
         return PageResult.build(result.getRecords(), result.getTotal());
     }
 #end
@@ -92,7 +92,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
     @Override
     public List<${ClassName}Vo> queryList(${ClassName}Bo bo) {
         LambdaQueryWrapper<${ClassName}> lqw = buildQueryWrapper(bo);
-        return baseMapper.selectVoList(lqw);
+        return ${className}Mapper.selectVoList(lqw);
     }
 
 #if($enableUnique)
@@ -120,7 +120,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
         lqw.eq(${ClassName}::get${column.capJavaField}, bo.get${column.capJavaField}());
 #end
         lqw.ne(bo.get${pkColumn.capJavaField}() != null, ${ClassName}::get${pkColumn.capJavaField}, bo.get${pkColumn.capJavaField}());
-        return !baseMapper.exists(lqw);
+        return !${className}Mapper.exists(lqw);
     }
 #end
 
@@ -182,7 +182,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
         fillTreeMetaBeforeSave(add, false);
 #end
         validEntityBeforeSave(add);
-        boolean flag = baseMapper.insert(add) > 0;
+        boolean flag = ${className}Mapper.insert(add) > 0;
         if (flag) {
             bo.set${pkColumn.capJavaField}(add.get${pkColumn.capJavaField}());
         }
@@ -202,7 +202,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
         fillTreeMetaBeforeSave(update, true);
 #end
         validEntityBeforeSave(update);
-        return baseMapper.updateById(update) > 0;
+        return ${className}Mapper.updateById(update) > 0;
     }
 
 #if($enableStatus)
@@ -215,9 +215,10 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
      */
     @Override
     public Boolean updateStatus(${pkColumn.javaType} ${pkColumn.javaField}, ${statusColumn.javaType} status) {
-        return baseMapper.update(null, new LambdaUpdateWrapper<${ClassName}>()
+        return ${className}Mapper.lambda()
             .set(${ClassName}::get${statusColumn.capJavaField}, status)
-            .eq(${ClassName}::get${pkColumn.capJavaField}, ${pkColumn.javaField})) > 0;
+            .eq(${ClassName}::get${pkColumn.capJavaField}, ${pkColumn.javaField})
+            .update();
     }
 #end
 
@@ -231,9 +232,10 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
      */
     @Override
     public Boolean updateSort(${pkColumn.javaType} ${pkColumn.javaField}, ${sortColumn.javaType} sortValue) {
-        return baseMapper.update(null, new LambdaUpdateWrapper<${ClassName}>()
+        return ${className}Mapper.lambda()
             .set(${ClassName}::get${sortColumn.capJavaField}, sortValue)
-            .eq(${ClassName}::get${pkColumn.capJavaField}, ${pkColumn.javaField})) > 0;
+            .eq(${ClassName}::get${pkColumn.capJavaField}, ${pkColumn.javaField})
+            .update();
     }
 #end
 
@@ -256,7 +258,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
 #if("" != $treeAncestorsField)
         ${ClassName} parent = null;
         if (!ObjectUtil.equal(entity.get${TreeParentCap}(), ${treeRootValueJavaLiteral})) {
-            parent = baseMapper.selectById(entity.get${TreeParentCap}());
+            parent = ${className}Mapper.selectById(entity.get${TreeParentCap}());
             if (ObjectUtil.isNull(parent)) {
                 throw new ServiceException("${functionName}父节点不存在");
             }
@@ -267,7 +269,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
         }
         String newAncestors = resolveAncestors(entity.get${TreeParentCap}(), parent);
         if (updateMode && entity.get${pkColumn.capJavaField}() != null) {
-            ${ClassName} oldEntity = baseMapper.selectById(entity.get${pkColumn.capJavaField}());
+            ${ClassName} oldEntity = ${className}Mapper.selectById(entity.get${pkColumn.capJavaField}());
             if (ObjectUtil.isNull(oldEntity)) {
                 throw new ServiceException("${functionName}不存在，无法修改");
             }
@@ -296,12 +298,14 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
     }
 
     private void updateChildrenAncestors(${pkColumn.javaType} currentId, String newAncestors, String oldAncestors) {
-        List<${ClassName}> children = baseMapper.selectList(new LambdaQueryWrapper<${ClassName}>()
-            .select(${ClassName}::get${pkColumn.capJavaField}, ${ClassName}::get${TreeAncestorsCap}()));
+        List<${ClassName}> children = ${className}Mapper.lambda()
+            .select(${ClassName}::get${pkColumn.capJavaField}, ${ClassName}::get${TreeAncestorsCap})
+            .findInSet(currentId, ${ClassName}::get${TreeAncestorsCap})
+            .list();
         List<${ClassName}> updateList = new ArrayList<>();
         for (${ClassName} child : children) {
             String ancestors = child.get${TreeAncestorsCap}();
-            if (StringUtils.isBlank(ancestors) || !containsAncestor(ancestors, currentId)) {
+            if (StringUtils.isBlank(ancestors)) {
                 continue;
             }
             ${ClassName} update = new ${ClassName}();
@@ -310,7 +314,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
             updateList.add(update);
         }
         if (!updateList.isEmpty()) {
-            baseMapper.updateBatchById(updateList);
+            ${className}Mapper.updateBatchById(updateList);
         }
     }
 
@@ -337,6 +341,6 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service {
         if (isValid) {
             // 可在此扩展删除前业务校验
         }
-        return baseMapper.deleteByIds(ids) > 0;
+        return ${className}Mapper.deleteByIds(ids) > 0;
     }
 }

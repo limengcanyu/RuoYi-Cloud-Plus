@@ -30,17 +30,17 @@ import java.util.Map;
 @Service
 public class TestDemoServiceImpl implements ITestDemoService {
 
-    private final TestDemoMapper baseMapper;
+    private final TestDemoMapper demoMapper;
 
     @Override
     public TestDemoVo queryById(Long id) {
-        return baseMapper.selectVoById(id);
+        return demoMapper.selectVoById(id);
     }
 
     @Override
     public PageResult<TestDemoVo> queryPageList(TestDemoBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<TestDemo> lqw = buildQueryWrapper(bo);
-        Page<TestDemoVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        Page<TestDemoVo> result = demoMapper.selectVoPage(pageQuery.build(), lqw);
         return PageResult.build(result.getRecords(), result.getTotal());
     }
 
@@ -50,13 +50,13 @@ public class TestDemoServiceImpl implements ITestDemoService {
     @Override
     public PageResult<TestDemoVo> customPageList(TestDemoBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<TestDemo> lqw = buildQueryWrapper(bo);
-        Page<TestDemoVo> result = baseMapper.customPageList(pageQuery.build(), lqw);
+        Page<TestDemoVo> result = demoMapper.customPageList(pageQuery.build(), lqw);
         return PageResult.build(result.getRecords(), result.getTotal());
     }
 
     @Override
     public List<TestDemoVo> queryList(TestDemoBo bo) {
-        return baseMapper.selectVoList(buildQueryWrapper(bo));
+        return demoMapper.selectVoList(buildQueryWrapper(bo));
     }
 
     private LambdaQueryWrapper<TestDemo> buildQueryWrapper(TestDemoBo bo) {
@@ -76,7 +76,7 @@ public class TestDemoServiceImpl implements ITestDemoService {
     public Boolean insertByBo(TestDemoBo bo) {
         TestDemo add = BeanUtil.toBean(bo, TestDemo.class);
         validEntityBeforeSave(add);
-        boolean flag = baseMapper.insert(add) > 0;
+        boolean flag = demoMapper.insert(add) > 0;
         if (flag) {
             bo.setId(add.getId());
         }
@@ -87,7 +87,7 @@ public class TestDemoServiceImpl implements ITestDemoService {
     public Boolean updateByBo(TestDemoBo bo) {
         TestDemo update = BeanUtil.toBean(bo, TestDemo.class);
         validEntityBeforeSave(update);
-        return baseMapper.updateById(update) > 0;
+        return demoMapper.updateById(update) > 0;
     }
 
     /**
@@ -103,16 +103,16 @@ public class TestDemoServiceImpl implements ITestDemoService {
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
         if (isValid) {
             // 做一些业务上的校验,判断是否需要校验
-            List<TestDemo> list = baseMapper.selectByIds(ids);
+            List<TestDemo> list = demoMapper.selectByIds(ids);
             if (list.size() != ids.size()) {
                 throw new ServiceException("您没有删除权限!");
             }
         }
-        return baseMapper.deleteByIds(ids) > 0;
+        return demoMapper.deleteByIds(ids) > 0;
     }
 
     @Override
     public Boolean saveBatch(List<TestDemo> list) {
-        return baseMapper.insertBatch(list);
+        return demoMapper.insertBatch(list);
     }
 }

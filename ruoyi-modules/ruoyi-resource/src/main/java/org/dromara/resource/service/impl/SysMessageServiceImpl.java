@@ -63,7 +63,7 @@ public class SysMessageServiceImpl implements ISysMessageService {
      */
     private static final long BOX_DAYS = 30L;
 
-    private final SysMessageMapper baseMapper;
+    private final SysMessageMapper messageMapper;
 
     /**
      * 查询当前用户消息盒子数据
@@ -117,7 +117,7 @@ public class SysMessageServiceImpl implements ISysMessageService {
             return payload;
         }
         SysMessage message = buildMessage(userIds, payload);
-        baseMapper.insert(message);
+        messageMapper.insert(message);
         payload.setMessageId(message.getMessageId());
         return payload;
     }
@@ -138,7 +138,7 @@ public class SysMessageServiceImpl implements ISysMessageService {
             .or()
             .apply(DataBaseHelper.findInSet(userId, "send_user_ids")));
         lqw.orderByDesc(SysMessage::getCreateTime, SysMessage::getMessageId);
-        List<SysMessage> list = baseMapper.selectList(new Page<>(1, BOX_LIMIT, false), lqw);
+        List<SysMessage> list = messageMapper.selectList(new Page<>(1, BOX_LIMIT, false), lqw);
         return list.stream().map(this::buildVo).toList();
     }
 
