@@ -3,10 +3,10 @@ package org.dromara.common.excel.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import lombok.SneakyThrows;
 import org.apache.fesod.sheet.annotation.ExcelIgnore;
 import org.apache.fesod.sheet.annotation.ExcelIgnoreUnannotated;
 import org.apache.fesod.sheet.annotation.ExcelProperty;
+import lombok.SneakyThrows;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.dromara.common.core.utils.reflect.ReflectUtils;
 import org.dromara.common.excel.annotation.CellMerge;
@@ -33,6 +33,13 @@ public class CellMergeHandler {
         this.hasTitle = hasTitle;
         this.rowIndex = hasTitle ? rowIndex : 0;
     }
+
+    /**
+     * 计算需要合并的单元格区域。
+     *
+     * @param rows 数据行
+     * @return 单元格合并区域列表
+     */
     @SneakyThrows
     public List<CellRangeAddress> handle(List<?> rows) {
         // 如果入参为空集合则返回空集

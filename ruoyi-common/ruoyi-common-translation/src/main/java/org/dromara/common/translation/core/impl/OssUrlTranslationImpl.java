@@ -27,11 +27,25 @@ public class OssUrlTranslationImpl implements TranslationInterface<String> {
     @DubboReference(mock = "true")
     private RemoteFileService remoteFileService;
 
+    /**
+     * 将 OSS ID 或 ID 集合翻译为访问地址。
+     *
+     * @param key OSS ID 或逗号分隔的 ID 字符串
+     * @param other 额外参数
+     * @return 访问地址
+     */
     @Override
     public String translation(Object key, String other) {
         return remoteFileService.selectUrlByIds(key.toString());
     }
 
+    /**
+     * 批量将 OSS ID 翻译为访问地址。
+     *
+     * @param keys OSS ID 集合
+     * @param other 额外参数
+     * @return OSS ID 与访问地址映射
+     */
     @Override
     public Map<Object, String> translationBatch(Set<Object> keys, String other) {
         Set<Long> ossIds = collectLongIds(keys);
@@ -47,6 +61,13 @@ public class OssUrlTranslationImpl implements TranslationInterface<String> {
         return result;
     }
 
+    /**
+     * 根据原始键构建 OSS 地址翻译值。
+     *
+     * @param source 原始键
+     * @param ossUrls OSS ID 与访问地址映射
+     * @return OSS 访问地址
+     */
     private String buildValue(Object source, Map<Long, String> ossUrls) {
         if (source instanceof String ids) {
             return joinMappedValues(ids, ossUrls::get);

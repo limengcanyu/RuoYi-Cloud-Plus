@@ -148,5 +148,4 @@ public class SysSocialBo implements Serializable {
     private Map<String, Object> params = new HashMap<>();
 
 
-
 }

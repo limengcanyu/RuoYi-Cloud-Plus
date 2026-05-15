@@ -29,6 +29,13 @@ public class UserNameTranslationImpl implements TranslationInterface<String> {
     @DubboReference
     private RemoteUserService remoteUserService;
 
+    /**
+     * 将用户 ID 翻译为用户名。
+     *
+     * @param key 用户 ID
+     * @param other 额外参数
+     * @return 用户名
+     */
     @Override
     public String translation(Object key, String other) {
         Long userId = Convert.toLong(key);
@@ -39,6 +46,13 @@ public class UserNameTranslationImpl implements TranslationInterface<String> {
         return remoteUserService.selectUserNameById(userId);
     }
 
+    /**
+     * 批量将用户 ID 翻译为用户名。
+     *
+     * @param keys 用户 ID 集合
+     * @param other 额外参数
+     * @return 用户 ID 与用户名映射
+     */
     @Override
     public Map<Object, String> translationBatch(Set<Object> keys, String other) {
         Set<Long> userIds = collectLongIds(keys);
@@ -53,6 +67,13 @@ public class UserNameTranslationImpl implements TranslationInterface<String> {
         return result;
     }
 
+    /**
+     * 根据原始键构建用户名翻译值。
+     *
+     * @param source 原始键
+     * @param userNames 用户 ID 与用户名映射
+     * @return 用户名
+     */
     private String buildValue(Object source, Map<Long, String> userNames) {
         if (source instanceof String ids) {
             return joinMappedValues(ids, userNames::get);

@@ -52,6 +52,7 @@ public final class SpringUtils extends SpringUtil {
         return (T) getBean(invoker.getClass());
     }
 
+
     /**
      * 获取spring上下文
      */
@@ -59,6 +60,11 @@ public final class SpringUtils extends SpringUtil {
         return getApplicationContext();
     }
 
+    /**
+     * 当前是否启用虚拟线程。
+     *
+     * @return true 启用 false 未启用
+     */
     public static boolean isVirtual() {
         return Threading.VIRTUAL.isActive(getBean(Environment.class));
     }

@@ -89,16 +89,17 @@ public class SysRoleBo implements Serializable {
     private Long[] deptIds;
 
     /**
-     * 请求参数
+     * 判断当前角色是否为超级管理员角色。
+     *
+     * @return true 是超级管理员角色 false 不是超级管理员角色
      */
-    private Map<String, Object> params = new HashMap<>();
-
-    public SysRoleBo(Long roleId) {
-        this.roleId = roleId;
-    }
-
     public boolean isSuperAdmin() {
         return SystemConstants.SUPER_ADMIN_ROLE_ID.equals(this.roleId);
     }
+
+    /**
+     * 请求参数
+     */
+    private Map<String, Object> params = new HashMap<>();
 
 }

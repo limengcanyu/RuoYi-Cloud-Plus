@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.core.utils.sql.SqlUtil;
@@ -22,7 +21,6 @@ import java.util.List;
  * @author Lion Li
  */
 @Data
-@NoArgsConstructor
 public class PageQuery implements Serializable {
 
     @Serial
@@ -116,11 +114,22 @@ public class PageQuery implements Serializable {
         return list;
     }
 
+    /**
+     * 获取当前页起始行号。
+     *
+     * @return 起始行号
+     */
     @JsonIgnore
     public Integer getFirstNum() {
         return (pageNum - 1) * pageSize;
     }
 
+    /**
+     * 构造分页查询对象。
+     *
+     * @param pageSize 分页大小
+     * @param pageNum  当前页码
+     */
     public PageQuery(Integer pageSize, Integer pageNum) {
         this.pageSize = pageSize;
         this.pageNum = pageNum;

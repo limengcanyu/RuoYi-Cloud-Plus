@@ -24,6 +24,13 @@ public class DictTypeTranslationImpl implements TranslationInterface<String> {
 
     private final DictService dictService;
 
+    /**
+     * 根据字典类型和字典值翻译显示标签。
+     *
+     * @param key 字典值
+     * @param other 字典类型
+     * @return 字典标签
+     */
     @Override
     public String translation(Object key, String other) {
         if (key instanceof String && StringUtils.isNotBlank(other)) {
@@ -32,6 +39,13 @@ public class DictTypeTranslationImpl implements TranslationInterface<String> {
         return null;
     }
 
+    /**
+     * 批量根据字典类型和字典值翻译显示标签。
+     *
+     * @param keys 字典值集合
+     * @param other 字典类型
+     * @return 字典值与字典标签映射
+     */
     @Override
     public Map<Object, String> translationBatch(Set<Object> keys, String other) {
         if (keys.isEmpty() || StringUtils.isBlank(other)) {

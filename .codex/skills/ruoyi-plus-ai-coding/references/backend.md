@@ -18,76 +18,6 @@
 
 如果规则冲突，优先相信当前仓库真实代码。
 
-## 微服务总览
-
-当前仓库的微服务相关真实约定不是 Feign 风格，而是：
-
-- 服务注册与配置中心使用 Nacos。
-- 对外入口使用 `ruoyi-gateway`。
-- 服务间 RPC 默认使用 Dubbo。
-- 跨服务契约放在 `ruoyi-api/*`。
-- 跨服务写操作按需使用 Seata，不是所有写接口都默认上全局事务。
-
-写代码前先判断任务属于下面哪类：
-
-1. 纯服务内 CRUD 或模块增强。
-2. 需要给其他服务复用能力，必须新增或修改 `ruoyi-api` 契约。
-3. 只是网关入口、跨域、过滤、日志、鉴权相关，应该改 `ruoyi-gateway` 或配置。
-4. 涉及跨服务写入一致性，才评估 `@GlobalTransactional`。
-
-## 微服务模块边界
-
-- `ruoyi-auth`：认证授权中心，本身也通过 `@DubboReference` 依赖 system/resource 等远程能力。
-- `ruoyi-gateway`：统一入口，负责过滤器、异常处理、跨域、日志、语言解析等，不写业务 CRUD。
-- `ruoyi-modules/ruoyi-system|resource|workflow|job|gen`：具体微服务业务实现。
-- `ruoyi-api/ruoyi-api-system|resource|workflow`：服务间共享契约，放 `Remote*Service`、远程 BO/VO/model、mock/stub。
-- `ruoyi-common/*`：跨服务都会复用的基础能力，不要在业务模块里重复造轮子。
-
-## 应用入口与基础配置规则
-
-- 每个微服务应用入口默认使用 `@EnableDubbo` + `@SpringBootApplication`。
-- 每个服务的 `application.yml` 只保留本服务端口、服务名、激活环境、Nacos 导入入口。
-- 配置导入继续沿用 `spring.config.import` + `optional:nacos:*` 结构。
-- 业务服务通常额外导入 `datasource.yml`；像 `ruoyi-auth`、`ruoyi-gateway` 这类服务不一定导入数据源配置，先以当前模块现状为准。
-- 不要因为新增一个接口就改动服务名、端口、Nacos group/namespace、配置加载方式。
-
-## 跨服务契约规则
-
-需要被其他服务调用的能力，按下面顺序落代码：
-
-1. 在 `ruoyi-api` 下新增或扩展 `Remote*Service` 接口。
-2. 如需跨服务传参或返回展示字段，在 `ruoyi-api` 下补充专用 `domain.bo`、`domain.vo` 或 `model`。
-3. 在服务提供方模块的 `dubbo/` 包下新增 `@DubboService` 实现。
-4. 在服务消费方用 `@DubboReference` 注入。
-
-### 契约放置原则
-
-- `Remote*Service` 放到能力归属服务对应的 `ruoyi-api-*` 模块。
-- 远程 DTO 只放跨服务真正需要的字段，不直接暴露服务内 Entity。
-- 不要把 controller 的 BO/VO 直接搬去做远程 DTO，除非该对象本身已经是跨服务语义。
-- 远程接口命名延续当前仓库风格：`RemoteUserService`、`RemoteFileService`、`RemoteWorkflowService`。
-
-### provider 实现规则
-
-- provider 一般放在 `src/main/java/.../dubbo/RemoteXxxServiceImpl.java`。
-- 类上保留 `@DubboService`，通常同时保留 Spring `@Service` 或使用构造注入风格与当前模块一致。
-- provider 内优先复用本服务已有 `service`、`mapper`、`convert`、工具类，不重新实现一套业务。
-- provider 返回远程 VO / model，不把本服务内部实体直接外泄。
-
-### consumer 调用规则
-
-- 跨服务调用使用 `@DubboReference`，不要新写服务间 HTTP/Feign 调用。
-- 只有真正跨服务时才新增 `@DubboReference`；同服务内调用继续直接注入本地 service。
-- controller 中允许少量直接 `@DubboReference`，但仅限当前模块已有这种写法的场景；新逻辑优先看附近代码风格保持一致。
-- 消费方如果附近已有 `stub = "true"`、`mock = "true"` 等容错写法，继续沿用。
-
-### mock / stub 规则
-
-- 可选能力或允许降级的远程服务，优先复用 `ruoyi-api` 中现有 `Mock` / `Stub` 风格。
-- `Mock` 适合返回空对象、空列表、空字符串等兜底值。
-- `Stub` 适合包一层 try/catch 做调用保护和告警日志。
-- 不要在业务代码里散落重复的远程降级逻辑，优先收敛到 API 契约侧。
-
 ## 分层结构
 
 标准 CRUD 代码应优先遵循下面这套结构：
@@ -134,6 +64,8 @@
 - 模块已经使用 `@DataPermission` 时，在重写方法和自定义查询上继续保留。
 - 复杂模块里 mapper 可能同时继承 `MPJBaseMapper<Entity>` 并使用 `JoinWrappers.lambda(...)`，遇到这种风格要延续，不要换一种写法。
 - 只有在 `selectVoList/selectVoPage` 不够用时，才补 XML 或自定义 mapper 方法。
+- Mapper 默认方法可以承载短小的 wrapper 查询；涉及复杂业务编排、缓存、事务或跨 mapper 写入时放到 service。
+- `ruoyi-system` 的用户、角色、菜单、部门等模块常带数据权限、MPJ 联表、角色状态过滤，修改前先读对应 mapper/service。
 
 ### Mapper 建议结构
 
@@ -170,8 +102,6 @@
 - 多表写操作使用 `@Transactional(rollbackFor = Exception.class)`。
 - 明确的业务失败，尤其是权限、数据完整性、删除校验，使用 `ServiceException`。
 - 不要绕过模块现有的数据权限、角色校验、删除前校验。
-- 如果写操作只发生在单服务内，优先本地 `@Transactional`，不要无故提升成分布式事务。
-- 如果像 `SysProfileController` 这类场景同时写本服务数据并调用远程文件服务，再参考附近代码决定是否使用 `@GlobalTransactional`。
 
 ### Service 建议结构
 
@@ -211,8 +141,6 @@
 - 附近接口已有防重时，写接口继续使用 `@RepeatSubmit`。
 - 适合分组校验时，使用 `@Validated(AddGroup.class)` 和 `@Validated(EditGroup.class)`。
 - 特殊接口直接复用模块内现成做法，例如导入导出、`@ApiEncrypt`、multipart 上传、数据权限检查、写入前唯一性校验。
-- controller 默认是对前端开放的 HTTP 接口，不要把跨服务契约直接建在 controller 上。
-- 新增给其他服务复用的能力时，优先补 `Remote*Service`，不是补一个“内部专用 controller”。
 
 ### Controller 建议结构
 
@@ -239,27 +167,52 @@
 - 数组转列表按附近代码习惯使用 `List.of(ids)` 或 `Arrays.asList(ids)`。
 - 日期范围查询通常从 `bo.getParams()` 中读取 `beginTime`、`endTime` 或 `beginFieldName`、`endFieldName`。
 
+## common-mybatis 规则
+
+- 链式查询能力优先沿用 `BaseMapperPlus#lambda()`、`LambdaCrudChainWrapper`、`LambdaQueryBuilder`、`LambdaQueryCondition`。
+- 条件辅助方法使用项目已有命名：`eqIfPresent`、`eqIfText`、`likeIfText`、`betweenIfPresent`、`inIfNotEmpty`、`findInSetIfPresent`。
+- 新增 wrapper 方法时保持链式返回 `this` / `typedThis`，不要返回底层 `LambdaQueryWrapper` 破坏调用链。
+- `LambdaCrudChainWrapper` 既承担查询又承担更新 set 片段，新增能力时要同时考虑 `getSqlSelect`、`getSqlSet`、`clear`、`instance` 的状态复制和清理。
+- MPJ 联表查询沿用别名风格，例如 `JoinWrappers.lambda("u", SysUser.class)`、`.leftJoin(..., "d", ...)`、`.eq("u", Entity::getField, value)`。
+- 数据权限注解使用 `@DataPermission` + `@DataColumn`，列名需和实际 SQL 别名一致，例如 `d.dept_id`、`u.create_by`。
+
+## translation / JSON 增强规则
+
+- 翻译实现类实现 `TranslationInterface<T>` 并标注 `@TranslationType(type = ...)`。
+- 使用方在 VO 字段上通过 `@Translation(type = ..., mapper = "...", other = "...")` 指定翻译来源。
+- 批量翻译必须优先实现 `translationBatch(Set<Object> keys, String other)`，避免默认逐条查询。
+- 支持逗号分隔 ID 的翻译实现应复用 `collectLongIds`、`parseLongIds`、`joinMappedValues`。
+- `TranslationJsonFieldProcessor` 遵循三阶段：`collect` 收集待翻译值，`prepare` 批量查询，`process` 写入翻译结果；新增处理器也应优先套这个模型。
+- 翻译失败时保持降级返回原值或 `null` 的现有语义，不要让响应增强中断主流程。
+
+## 缓存与异步/监听规则
+
+- 已有 service 使用 `@Cacheable`、`@CacheEvict`、`@Caching` 时，新增写操作要同步考虑缓存失效。
+- 部门、字典、OSS 配置等模块已有缓存初始化或失效逻辑，不要只改数据库不处理缓存。
+- Excel 导入监听器实现 `ExcelListener` 时，保留 `getExcelResult()` 的回执语义和错误聚合方式。
+- 定时任务、MQTT、SSE、异步回调等框架方法一般按接口覆写语义实现，除非业务不直观，不要添加冗长注释。
+
+## 工作流模块规则
+
+- `ruoyi-workflow` 通常带 `@ConditionalOnEnable`，新增 workflow bean、controller、service 时检查同包是否需要该条件。
+- 流程分类、任务、实例等查询常带分类权限或用户维度过滤，先读同类 mapper/service 再改。
+- 工作流的翻译实现可以放在 workflow 模块内，例如流程分类 ID 到名称，仍应遵守 `TranslationInterface` 批量翻译规则。
+
+## JavaDoc 注释规则
+
+- 公共 API、接口、VO/BO/Entity 字段、Mapper 默认方法、Service/Controller 方法应有简洁 JavaDoc。
+- 注释描述“做什么”和关键参数语义，不复述显而易见的实现细节。
+- `void` 方法不要写 `@return`；返回布尔值时说明 `true/false` 含义。
+- 私有方法只有在业务规则、算法、映射关系不直观时补注释。
+- 框架覆写方法如果只是标准回调，可不重复注释；但当前文件已有统一注释风格时保持一致。
+- 只改注释时，不重排 import、不格式化全文件、不修改代码行为。
+
 ## 前后端联动规则
 
 - 新增后端接口时，路径和权限前缀尽量保持 generator 约定，方便前端目录和 API 命名同步。
 - 新增日期范围查询时，记得保留 `bo.params` 结构，避免前端 `addDateRange` 无法对接。
 - 导出接口通常保持 `POST /export` 风格，便于前端直接复用现有下载逻辑。
 - 批量删除接口通常使用 `DELETE /{ids}`，便于前端直接传数组或逗号串。
-- 前端访问路径保持面向 gateway 的稳定 HTTP 路由，不把 Dubbo 远程接口暴露给前端设计。
-
-## Gateway 规则
-
-- `ruoyi-gateway` 主要承载入口、过滤器、异常处理、跨域、日志、国际化等横切能力。
-- 不在 gateway 中新增业务 service、mapper、领域对象 CRUD。
-- 如果问题只与请求头、跨域、过滤链、日志、安全入口有关，优先检查 gateway。
-- 如果问题属于业务数据查询、写入、校验，优先改对应业务服务，不要误改 gateway。
-
-## Seata 与事务边界规则
-
-- 本地单服务写操作优先 `@Transactional(rollbackFor = Exception.class)`。
-- 只有一个业务动作明确跨越多个微服务资源写入时，才考虑 `@GlobalTransactional(rollbackFor = Exception.class)`。
-- 不要把纯查询接口、纯远程读取接口或可容忍最终一致的场景都包进全局事务。
-- 是否需要 Seata，以当前模块已有实现和业务一致性要求为准，不做想当然扩张。
 
 ## 生成器优先模式
 
@@ -300,11 +253,6 @@
 - 没有明确必要时，不要从 `BaseMapperPlus` 风格退回手工映射。
 - 前端查询页用了日期范围时，不要删掉后端 `params` 相关处理。
 - 不要把 `ruoyi-system` 这类复杂逻辑强行简化成生成器式单表 CRUD。
-- 不要把当前仓库默认的 Dubbo 远程协作改写成 Feign 风格。
-- 不要把 `ruoyi-api` 变成业务实现模块；它只承载契约、远程 DTO、mock/stub。
-- 不要为跨服务复用去直接依赖对方 controller 路由。
-- 不要在 gateway 里堆业务逻辑。
-- 不要无故扩大全局事务边界。
 
 ## 交付前自检
 
@@ -315,6 +263,3 @@
 - 分页、查询、删除校验是否与前端对得上。
 - 权限、日志、防重、事务是否遗漏。
 - 是否只是 generator 裸产物，如果是，需要继续补齐同模块已有增强。
-- 如果改了跨服务能力，`ruoyi-api`、provider、consumer 三处是否同步。
-- 如果改了微服务入口或配置，是否仍保持当前 Nacos 导入结构。
-- 如果改了事务，是否能说明为什么需要本地事务或全局事务。

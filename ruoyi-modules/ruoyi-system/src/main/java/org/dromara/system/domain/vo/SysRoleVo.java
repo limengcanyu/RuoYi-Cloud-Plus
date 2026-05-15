@@ -1,9 +1,9 @@
 package org.dromara.system.domain.vo;
 
-import org.apache.fesod.sheet.annotation.ExcelIgnoreUnannotated;
-import org.apache.fesod.sheet.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
+import org.apache.fesod.sheet.annotation.ExcelIgnoreUnannotated;
+import org.apache.fesod.sheet.annotation.ExcelProperty;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.excel.annotation.ExcelDictFormat;
 import org.dromara.common.excel.convert.ExcelDictConvert;
@@ -93,6 +93,11 @@ public class SysRoleVo implements Serializable {
      */
     private boolean flag = false;
 
+    /**
+     * 判断当前角色是否为超级管理员角色。
+     *
+     * @return true 是超级管理员角色 false 不是超级管理员角色
+     */
     public boolean isSuperAdmin() {
         return SystemConstants.SUPER_ADMIN_ROLE_ID.equals(this.roleId);
     }
