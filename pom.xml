@@ -30,10 +30,10 @@
         <springdoc.version>3.0.2</springdoc.version>
         <therapi-javadoc.version>0.15.0</therapi-javadoc.version>
         <fesod.version>2.0.1-incubating</fesod.version>
-        <hutool.version>5.8.43</hutool.version>
+        <hutool.version>5.8.44</hutool.version>
         <redisson.version>4.4.0</redisson.version>
         <lock4j.version>2.2.7</lock4j.version>
-        <snailjob.version>1.9.0</snailjob.version>
+        <snailjob.version>2.0.0</snailjob.version>
         <satoken.version>1.45.0</satoken.version>
         <lombok.version>1.18.42</lombok.version>
         <logstash.version>7.4</logstash.version>
@@ -254,6 +254,11 @@
             <dependency>
                 <groupId>com.aizuda</groupId>
                 <artifactId>snail-job-client-starter</artifactId>
+                <version>${snailjob.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-client-retry-core</artifactId>
                 <version>${snailjob.version}</version>
             </dependency>
             <dependency>

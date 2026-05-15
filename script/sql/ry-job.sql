@@ -280,6 +280,7 @@ CREATE TABLE `sj_job`
 (
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `namespace_id`     varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `biz_id`           varchar(64)         NOT NULL COMMENT '业务ID',
     `group_name`       varchar(64)         NOT NULL COMMENT '组名称',
     `job_name`         varchar(64)         NOT NULL COMMENT '名称',
     `args_str`         text                         DEFAULT NULL COMMENT '执行方法参数',
@@ -308,6 +309,7 @@ CREATE TABLE `sj_job`
     `create_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_sj_job_01` (`namespace_id`, `biz_id`),
     KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`),
     KEY `idx_job_status_bucket_index` (`job_status`, `bucket_index`),
     KEY `idx_create_dt` (`create_dt`)
@@ -315,7 +317,7 @@ CREATE TABLE `sj_job`
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务信息';
 
-INSERT INTO `sj_job` VALUES (1, 'dev', 'ruoyi_group', 'demo-job', null, 1, 1710344035622, 1, 1, 4, 1, 'testJobExecutor', 2, '60', 1, 60, 3, 1, 1, 116, 0, '', 1, '','', '', 0 , now(), now());
+INSERT INTO `sj_job` VALUES (1, 'dev', 'demo-job', 'ruoyi_group', 'demo-job', null, 1, 1710344035622, 1, 1, 4, 1, 'testJobExecutor', 2, '60', 1, 60, 3, 1, 1, 116, 0, '', 1, '','', '', 0 , now(), now());
 
 CREATE TABLE `sj_job_log_message`
 (
@@ -443,6 +445,7 @@ CREATE TABLE `sj_workflow`
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `workflow_name`    varchar(64)         NOT NULL COMMENT '工作流名称',
     `namespace_id`     varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `biz_id`           varchar(64)         NOT NULL COMMENT '业务ID',
     `group_name`       varchar(64)         NOT NULL COMMENT '组名称',
     `workflow_status`  tinyint(4)          NOT NULL DEFAULT 1 COMMENT '工作流状态 0、关闭、1、开启',
     `trigger_type`     tinyint(4)          NOT NULL COMMENT '触发类型 1.CRON 表达式 2. 固定时间',
@@ -462,6 +465,7 @@ CREATE TABLE `sj_workflow`
     `create_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_sj_workflow_01` (`namespace_id`, `biz_id`),
     KEY `idx_create_dt` (`create_dt`),
     KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
 ) ENGINE = InnoDB
